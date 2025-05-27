@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { FiMenu, FiX, FiSearch, FiMapPin, FiCamera } from 'react-icons/fi';
 import dynamic from 'next/dynamic';
-import Image from 'next/image'; // ✅ Use Image for optimization (optional)
+import Image from 'next/image';
 
 const MapModal = dynamic(() => import('./MapModal'), { ssr: false });
 
@@ -38,26 +38,25 @@ export default function Header() {
     <header className="w-full border-b shadow-sm bg-white sticky top-0 z-50">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
-          {/* ✅ Fixed Image path */}
           <div className="text-orange-500 font-bold text-xl flex items-center gap-2">
             <Image src="/LOGO.png" alt="Logo" width={195} height={78} />
           </div>
 
           <nav className="hidden md:flex space-x-6 text-sm font-medium text-gray-700">
-            <a href="#">Fashion</a>
-            <a href="#">Accessories</a>
-            <a href="#">Sport</a>
-            <a href="#">Beauty</a>
-            <a href="#">Book</a>
-            <a href="#">All Categories</a>
+            <Link href="#">Fashion</Link>
+            <Link href="#">Accessories</Link>
+            <Link href="#">Sport</Link>
+            <Link href="#">Beauty</Link>
+            <Link href="#">Book</Link>
+            <Link href="#">All Categories</Link>
           </nav>
 
           <div className="hidden md:flex items-center space-x-3">
-            <Link href="/register">
-              <button className="text-sm text-gray-700 hover:underline">Register</button>
+            <Link href="/auth/register">
+              <span className="text-sm text-gray-700 hover:underline">Register</span>
             </Link>
-            <Link href="/login">
-              <button className="text-sm text-gray-700 hover:underline">Log in</button>
+            <Link href="/auth/login">
+              <span className="text-sm text-gray-700 hover:underline">Log in</span>
             </Link>
             <Link href="/sell">
               <button className="bg-orange-500 text-white text-sm px-4 py-2 rounded-full hover:bg-orange-600">
@@ -77,13 +76,17 @@ export default function Header() {
       {menuOpen && (
         <div className="md:hidden bg-white px-4 pb-4 space-y-2 border-t">
           {['Fashion', 'Accessories', 'Sport', 'Beauty', 'Book', 'All Categories'].map((item) => (
-            <a key={item} href="#" className="block text-sm text-gray-700">
-              {item}
-            </a>
+            <Link key={item} href="#">
+              <span className="block text-sm text-gray-700">{item}</span>
+            </Link>
           ))}
           <hr />
-          <Link href="/register"><span className="block text-sm text-gray-700">Register</span></Link>
-          <Link href="/login"><span className="block text-sm text-gray-700">Log in</span></Link>
+          <Link href="/auth/register">
+            <span className="block text-sm text-gray-700">Register</span>
+          </Link>
+          <Link href="/auth/login">
+            <span className="block text-sm text-gray-700">Log in</span>
+          </Link>
           <Link href="/sell">
             <button className="w-full bg-orange-500 text-white text-sm px-4 py-2 rounded-full mt-2">
               Sell

@@ -111,7 +111,7 @@ export default function LoginForm() {
             {/* Forgot password link */}
             <div className="text-right">
               <a
-                href="/forgotpassword"
+                href="/auth/forgotpassword"
                 className="text-sm text-orange-500 font-medium hover:underline"
               >
                 Forgot Password?
@@ -129,7 +129,7 @@ export default function LoginForm() {
             {/* Link to register */}
             <p className="text-center text-sm mt-4">
               Don’t have an account?{' '}
-              <a href="/register" className="text-orange-500 font-semibold">
+              <a href="/auth/register" className="text-orange-500 font-semibold">
                 Register
               </a>
             </p>
