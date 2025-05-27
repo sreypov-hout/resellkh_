@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 
 export default function ResetPassword() {
@@ -9,6 +10,7 @@ export default function ResetPassword() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,8 +23,11 @@ export default function ResetPassword() {
     }
 
     try {
+      // Simulate API call
       await new Promise((r) => setTimeout(r, 1000));
-      setMessage("✅ Password updated successfully!");
+
+      // ✅ Redirect to reset-success page
+      router.push("/auth/reset-success");
     } catch (err) {
       setError("Something went wrong.");
     }
@@ -37,7 +42,6 @@ export default function ResetPassword() {
 
       {/* Right Form */}
       <div className="w-full md:w-1/2 max-w-md space-y-6">
-        {/* Logo */}
         <div className="flex justify-center mb-4">
           <img src="/logo.png" alt="Logo" width={195} height={50} />
         </div>
@@ -48,7 +52,7 @@ export default function ResetPassword() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Reset Password */}
+          {/* New Password */}
           <div className="relative">
             <label className="text-sm font-medium block mb-1 text-left">Reset Password</label>
             <input
@@ -95,7 +99,7 @@ export default function ResetPassword() {
           </button>
         </form>
 
-        {/* Messages */}
+        {/* Error Message */}
         {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         {message && <p className="text-green-500 text-sm mt-2">{message}</p>}
       </div>

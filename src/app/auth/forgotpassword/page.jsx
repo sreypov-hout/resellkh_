@@ -1,10 +1,12 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // ✅ Import router for navigation
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const router = useRouter(); // ✅ Initialize router
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,8 +16,11 @@ export default function ForgotPassword() {
     try {
       // Simulate API call
       await new Promise((res) => setTimeout(res, 1000));
+
       setMessage("✅ OTP has been sent to your email.");
-      // You can redirect to: `/verify?email=${email}`
+
+      // ✅ Redirect to verification page with email in query string
+      router.push(`/auth/verify-forgotpassword?email=${encodeURIComponent(email)}`);
     } catch (err) {
       setMessage("❌ Failed to send OTP.");
     } finally {
@@ -33,9 +38,7 @@ export default function ForgotPassword() {
       {/* Right Form */}
       <div className="w-full md:w-1/2 max-w-md space-y-6 text-center">
         <div className="flex justify-center items-center space-x-2">
-          <img src="/logo.png" alt="Logo" className="" 
-            width={195}
-            height={50} />
+          <img src="/logo.png" alt="Logo" width={195} height={50} />
         </div>
 
         <div className="w-full max-w-md mx-auto px-4 md:px-0">
@@ -43,10 +46,9 @@ export default function ForgotPassword() {
             Forgot Password
           </h2>
           <p className="text-gray-500 text-left">
-            Enter your email for the verification process, we will send a 4 digit code to your email.
+            Enter your email for the verification process. We will send a 4-digit code to your email.
           </p>
         </div>
-
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -70,7 +72,7 @@ export default function ForgotPassword() {
 
         <p className="text-sm">
           Didn’t you remember your password?{" "}
-          <a href="/login" className="text-orange-500 font-medium">Log in</a>
+          <a href="/auth/login" className="text-orange-500 font-medium">Log in</a>
         </p>
       </div>
     </div>

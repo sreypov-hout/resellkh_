@@ -1,9 +1,10 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function VerifyForgotOTP() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const email = searchParams.get("email");
 
   const [otp, setOtp] = useState(["", "", "", ""]);
@@ -31,15 +32,22 @@ export default function VerifyForgotOTP() {
 
   const handleVerify = async () => {
     const code = otp.join("");
+
+    if (code.length !== 4) {
+      setMessage("❌ Please enter the complete 4-digit OTP.");
+      return;
+    }
+
     await new Promise((res) => setTimeout(res, 1000));
-    alert(`Verified ${email} with OTP ${code}`);
-    // window.location.href = `/reset-password?email=${email}`;
+
+    // ✅ Redirect to reset-password with email
+    router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`);
   };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row items-center justify-center bg-white px-6 py-10">
       <div className="hidden md:flex w-1/2 justify-center">
-        <img src="/verify.png" alt="OTP Illustration" className="w-3/4"/>
+        <img src="/verify.png" alt="OTP Illustration" className="w-3/4" />
       </div>
       <div className="w-full md:w-1/2 max-w-md space-y-6 text-center">
         <div className="text-orange-500 text-4xl flex justify-center">✅</div>
@@ -51,7 +59,6 @@ export default function VerifyForgotOTP() {
           <span className="text-orange-600 font-semibold">{email}</span>
         </p>
 
-        {/* OTP Inputs */}
         <div className="flex justify-center gap-4">
           {otp.map((digit, idx) => (
             <input
@@ -67,10 +74,8 @@ export default function VerifyForgotOTP() {
           ))}
         </div>
 
-        {/* Countdown */}
         <p className="text-orange-500 font-medium text-sm">{`00:${String(timer).padStart(2, "0")}`}</p>
 
-        {/* Verify Button */}
         <button
           onClick={handleVerify}
           className="w-full bg-orange-500 text-white py-3 rounded-full font-semibold hover:bg-orange-600 transition"
@@ -78,7 +83,7 @@ export default function VerifyForgotOTP() {
           Verify
         </button>
 
-        {message && <p className="text-sm mt-2">{message}</p>}
+        {message && <p className="text-sm text-red-500 mt-2">{message}</p>}
 
         <p className="text-sm">
           Didn’t receive the OTP?{" "}
