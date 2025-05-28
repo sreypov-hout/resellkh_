@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import Header from '@/component/Header';
-import Hero from '@/component/Hero';
-import ProductList from '@/component/ProductList';
+import Header from '@/components/Header';
+import Hero from '@/components/Hero';
+import ProductList from '@/components/ProductList';
 import dynamic from 'next/dynamic';
 
 // 💡 Dynamically import the modal so it's only rendered on the client
-const MapModal = dynamic(() => import('@/component/MapModal'), { ssr: false });
+const MapModal = dynamic(() => import('@/components/MapModal'), { ssr: false });
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);

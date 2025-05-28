@@ -1,6 +1,6 @@
 'use client';
-import Header from '@/component/Header';
-import Footer from '@/component/Footer';
+// import Header from '@/component/Header';
+// import Footer from '@/component/Footer';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FiChevronRight } from 'react-icons/fi';
@@ -14,7 +14,7 @@ const product = {
   description:
     "I wore it just once for a chill outing, and it looked amazing. Super soft and lightweight – perfect for layering or wearing on its own. Honestly, I love it, but I have way too many similar tops, so I’m ...",
   images: [
-    "/images/img1.png",
+    "/images/image 5.png",
     "/images/img2.png",
     "/images/img3.png",
     "/images/video-thumb.png",
@@ -59,7 +59,8 @@ const otherProducts = [
 
 export default function ProductDetail() {
   return (
-   
+    <>
+    {/* <Header></Header> */}
     <div className="p-6 max-w-screen-xl mx-auto bg-white text-black">
       <div className="text-sm text-gray-500 mb-2 flex items-center">
         <Link href="/">Home</Link>
@@ -161,45 +162,8 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* Footer */}
-      {/* <footer className="mt-20 pt-10 border-t text-sm text-gray-600">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-screen-xl mx-auto px-6">
-          <div>
-            <h3 className="font-bold text-lg text-black mb-2">ReSellKH</h3>
-            <p>We provide high-quality services and products to meet your needs. Thank you for supporting us!</p>
-            <div className="flex gap-3 mt-2">
-              <span>📘</span>
-              <span>🎵</span>
-              <span>✈️</span>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-semibold text-black mb-2">Categories</h4>
-            <ul className="space-y-1">
-              <li>Fashion</li>
-              <li>Accessory</li>
-              <li>Beauty</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-black mb-2">Categories</h4>
-            <ul className="space-y-1">
-              <li>Electric</li>
-              <li>Furniture</li>
-              <li>Kitchen</li>
-              <li>Book</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-black mb-2">Legal</h4>
-            <ul className="space-y-1">
-              <li>Private & Policy</li>
-              <li>FQA</li>
-              <li>Term & Condition</li>
-            </ul>
-          </div>
-        </div>
-      </footer> */}
+      {/* <Footer></Footer> */}
     </div>
+    </>
   );
 }
