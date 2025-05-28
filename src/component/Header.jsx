@@ -56,7 +56,7 @@ export default function Header() {
             <Link href="/register">
               <button className="text-sm text-gray-700 hover:underline">Register</button>
             </Link>
-            <Link href="/login">
+            <Link href="/auth/login">
               <button className="text-sm text-gray-700 hover:underline">Log in</button>
             </Link>
             <Link href="/sell">
