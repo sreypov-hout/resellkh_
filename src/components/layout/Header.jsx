@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { FiMenu, FiX, FiSearch, FiMapPin, FiCamera } from 'react-icons/fi';
 import dynamic from 'next/dynamic';
-import Image from 'next/image'; // ✅ Use Image for optimization (optional)
+import Image from 'next/image';
 
-const MapModal = dynamic(() => import('../component/MapModal'), { ssr: false });
+// ✅ FIXED: Corrected folder name from 'component' to 'components'
+const MapModal = dynamic(() => import('../MapModal'), { ssr: false });
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -38,7 +39,6 @@ export default function Header() {
     <header className="w-full border-b shadow-sm bg-white sticky top-0 z-50">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
-          {/* ✅ Fixed Image path */}
           <div className="text-orange-500 font-bold text-xl flex items-center gap-2">
             <Image src="/LOGO.png" alt="Logo" width={195} height={78} />
           </div>
@@ -116,6 +116,7 @@ export default function Header() {
         </div>
       </div>
 
+      {/* ✅ Make sure MapModal.jsx exists in `src/components` */}
       <MapModal isOpen={mapOpen} onClose={() => setMapOpen(false)} location={userLocation} />
     </header>
   );

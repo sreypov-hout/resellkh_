@@ -129,7 +129,7 @@ export default function LoginForm() {
             {/* Link to register */}
             <p className="text-center text-sm mt-4">
               Don’t have an account?{' '}
-              <a href="/auth/register" className="text-orange-500 font-semibold">
+              <a href="/register" className="text-orange-500 font-semibold">
                 Register
               </a>
             </p>
