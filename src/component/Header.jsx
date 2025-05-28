@@ -6,6 +6,7 @@ import { FiMenu, FiX, FiSearch, FiMapPin, FiCamera } from 'react-icons/fi';
 import dynamic from 'next/dynamic';
 import Image from 'next/image'; // ✅ Use Image for optimization (optional)
 
+
 const MapModal = dynamic(() => import('./MapModal'), { ssr: false });
 
 export default function Header() {
@@ -40,7 +41,7 @@ export default function Header() {
         <div className="flex justify-between items-center py-4">
           {/* ✅ Fixed Image path */}
           <div className="text-orange-500 font-bold text-xl flex items-center gap-2">
-            <Image src="/LOGO.png" alt="Logo" width={195} height={78} />
+            <Image src="/LOGO.png" alt="Logo" width={195} height={70} />
           </div>
 
           <nav className="hidden md:flex space-x-6 text-sm font-medium text-gray-700">
