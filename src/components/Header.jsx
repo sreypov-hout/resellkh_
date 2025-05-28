@@ -6,7 +6,7 @@ import { FiMenu, FiX, FiSearch, FiMapPin, FiCamera } from 'react-icons/fi';
 import dynamic from 'next/dynamic';
 import Image from 'next/image'; // ✅ Use Image for optimization (optional)
 
-const MapModal = dynamic(() => import('./MapModal'), { ssr: false });
+const MapModal = dynamic(() => import('../component/MapModal'), { ssr: false });
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
