@@ -16,27 +16,23 @@ const defaultCenter = {
 export default function MapModal({ isOpen, onClose, location = null }) {
   const [mapCenter, setMapCenter] = useState(defaultCenter);
 
-  // ✅ Load Google Maps with your API key
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
     libraries: ['places'],
   });
 
-  // ✅ Update center if location is passed
   useEffect(() => {
     if (location?.lat && location?.lng) {
       setMapCenter(location);
     }
   }, [location]);
 
-  // ✅ Return nothing if modal is not open
   if (!isOpen) return null;
 
-  // ✅ Handle loading and error states
   if (loadError) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="bg-white p-6 rounded shadow text-red-500">
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-md text-red-600 shadow-lg">
           Error loading map: {loadError.message}
         </div>
       </div>
@@ -45,29 +41,36 @@ export default function MapModal({ isOpen, onClose, location = null }) {
 
   if (!isLoaded) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="bg-white p-6 rounded shadow text-gray-600">Loading map...</div>
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-md text-gray-600 shadow-lg">
+          Loading map...
+        </div>
       </div>
     );
   }
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-4 sm:px-6"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg w-[90%] max-w-2xl shadow-lg p-4 relative"
-        onClick={(e) => e.stopPropagation()} // ⛔ Prevent modal from closing when clicking inside
+        className="bg-white w-full max-w-2xl rounded-lg shadow-xl p-5 relative"
+        onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside modal
       >
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-lg"
+          className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl"
+          aria-label="Close"
         >
-          ✕
+          &times;
         </button>
-        <h2 className="text-lg font-semibold mb-3">Nearby Listings</h2>
-        <GoogleMap mapContainerStyle={containerStyle} center={mapCenter} zoom={13}>
+        <h2 className="text-lg font-semibold mb-3 text-center">Nearby Listings</h2>
+        <GoogleMap
+          mapContainerStyle={containerStyle}
+          center={mapCenter}
+          zoom={13}
+        >
           <Marker position={mapCenter} />
         </GoogleMap>
       </div>
