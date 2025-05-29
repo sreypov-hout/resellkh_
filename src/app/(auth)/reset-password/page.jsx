@@ -65,7 +65,7 @@ export default function ResetPassword() {
             />
             <span
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-10 transform -translate-y-1/2 cursor-pointer text-gray-500"
+              className="absolute right-4 top-12 transform -translate-y-1/2 cursor-pointer text-gray-500"
             >
               {showPassword ? <HiOutlineEyeOff /> : <HiOutlineEye />}
             </span>
@@ -84,7 +84,7 @@ export default function ResetPassword() {
             />
             <span
               onClick={() => setShowConfirm(!showConfirm)}
-              className="absolute right-4 top-10 transform -translate-y-1/2 cursor-pointer text-gray-500"
+              className="absolute right-4 top-12 transform -translate-y-1/2 cursor-pointer text-gray-500"
             >
               {showConfirm ? <HiOutlineEyeOff /> : <HiOutlineEye />}
             </span>
