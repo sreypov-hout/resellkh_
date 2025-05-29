@@ -27,7 +27,7 @@ export default function ResetPassword() {
       await new Promise((r) => setTimeout(r, 1000));
 
       // ✅ Redirect to reset-success page
-      router.push("/auth/reset-success");
+      router.push("/reset-success");
     } catch (err) {
       setError("Something went wrong.");
     }

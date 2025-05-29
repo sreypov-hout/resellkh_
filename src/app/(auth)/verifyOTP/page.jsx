@@ -1,13 +1,14 @@
-"use client";
+'use client';
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function OTPVerification() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const email = searchParams.get("email");
 
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", ""]);
   const [timer, setTimer] = useState(60);
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export default function OTPVerification() {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
-      if (value && index < 5) {
+      if (value && index < 3) {
         const next = document.getElementById(`otp-${index + 1}`);
         if (next) next.focus();
       }
@@ -33,6 +34,9 @@ export default function OTPVerification() {
     const code = otp.join("");
     await new Promise((r) => setTimeout(r, 500));
     alert(`Verified ${email} with code ${code}`);
+
+    // ✅ Redirect to homepage
+    router.push("/");
   };
 
   return (
