@@ -12,30 +12,34 @@ const Reviews = () => {
       name: "Molly",
       date: "May 8, 2025",
       rating: 5,
-      comment: "Amazing quality! I love the dress I bought was even better than I had expected. It's probably a big greatest thing I own in my closet now. Super happy with my item! 💕"
+      comment: "Amazing quality! I love the dress I bought was even better than I had expected. It's probably a big greatest thing I own in my closet now. Super happy with my item! 💕",
+      userAvatar: "/Product-Detail-Image/Molly.png" // Specific avatar for Molly
     },
     {
       name: "Rofath Nii",
       date: "Mar 22, 2025",
       rating: 4,
-      comment: "great seller & pleasant exp 💗"
+      comment: "great seller & pleasant exp 💗",
+      userAvatar: "/Product-Detail-Image/Rofath.png" // Specific avatar for Rofath Nii
     },
     {
       name: "Engelina",
       date: "Mar 16, 2025",
       rating: 5,
-      comment: "seller was very nice and kind, tho meeting up can be quite troublesome, im thankful she still made the effort to post me the shirt after her work thank you"
+      comment: "seller was very nice and kind, tho meeting up can be quite troublesome, im thankful she still made the effort to post me the shirt after her work thank you",
+      userAvatar: "/Product-Detail-Image/Engelina.png" // Specific avatar for Engelina
     },
     {
       name: "Christa",
       date: "Mar 16, 2025",
       rating: 5,
-      comment: "Adorable stock of great quality and fantastic price! Seller sent out so quickly we received it the very next day in the mailbox! Really really appreciated! Thanks so much! :)"
+      comment: "Adorable stock of great quality and fantastic price! Seller sent out so quickly we received it the very next day in the mailbox! Really really appreciated! Thanks so much! :)",
+      userAvatar: "/Product-Detail-Image/Christa.png" // Specific avatar for Christa
     }
   ];
 
   const handleReviewSubmit = (reviewData) => {
-    // Here you would typically integrate with your backend to save the review.
+    // In a real application, you'd integrate with your backend to save the review.
     // For now, we'll just log it.
     console.log('New review submitted:', reviewData);
     // You might also want to refetch reviews or add the new review to the local state
@@ -58,11 +62,12 @@ const Reviews = () => {
         {reviews.map((review, index) => (
           <div key={index} className="flex space-x-4 pb-6 border-b border-gray-100 last:border-b-0 last:pb-0">
             <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
-              <Image 
-                src={`https://images.unsplash.com/photo-${1494790108755 + index + 1000}?w=100&h=100&fit=crop&crop=face&q=80`} 
-                alt={review.name} 
-                width={48} 
-                height={48} 
+              <Image
+                // Use the specific userAvatar path from the review object
+                src={review.userAvatar}
+                alt={review.name}
+                width={48}
+                height={48}
                 className="w-full h-full object-cover"
               />
             </div>

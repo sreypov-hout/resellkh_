@@ -43,7 +43,7 @@ const ReviewFormModal = ({ isOpen, onClose, onSubmit }) => {
         <div className="flex items-center space-x-4 mb-6">
           <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border border-gray-200">
             <Image
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face" // Placeholder avatar for the user writing the review
+              src="/Product-Detail-Image/Sonita.png" // Placeholder avatar for the user writing the review
               alt="User avatar: Him Sonita"
               width={64}
               height={64}
