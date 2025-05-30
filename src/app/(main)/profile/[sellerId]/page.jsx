@@ -4,6 +4,7 @@
 import ProfileBanner from '@/components/profile/ProfileBanner';
 import ListingsGrid from '@/components/profile/ListingsGrid';
 import ProfileTabs from '@/components/profile/ProfileTabs';
+import CartPoduct from '@/components/domain/CartProduct';
 
 export default function SellerProfilePage() {
 
@@ -20,6 +21,7 @@ export default function SellerProfilePage() {
       <ProfileBanner isOwner={false} user={userData} />
       <ProfileTabs />
       <ListingsGrid editable={false} />
+      <CartPoduct />
     </div>
   );
 }
