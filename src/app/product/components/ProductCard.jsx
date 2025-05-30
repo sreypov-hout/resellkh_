@@ -36,8 +36,6 @@ const ProductCard = ({ product }) => {
           {product.originalPrice && (
             <span className="text-gray-500 text-sm line-through ">{product.originalPrice}</span>
           )}
-        </div>
-        <div className="flex items-center space-x-2 mt-2">
           <button className=" text-white px-4 py-2 rounded-[50px] font-medium hover:bg-orange-600 transition-colors right- p-2 bg-white rounded-full">
             <svg width="14" height="20" viewBox="0 0 14 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M1.10547 1.14746H12.1055C12.4368 1.14746 12.7051 1.4157 12.7051 1.74707V18.1846C12.7048 18.595 12.3062 18.8758 11.9287 18.7578L11.8545 18.7285L7.19238 16.5771C6.86679 16.4269 6.49758 16.4079 6.16113 16.5205L6.01855 16.5771L1.35645 18.7285C0.95905 18.9117 0.506143 18.6221 0.505859 18.1846V1.74707L0.517578 1.62598C0.573584 1.35264 0.815572 1.14746 1.10547 1.14746Z" stroke="#2C2C2C" strokeWidth="0.8"/>

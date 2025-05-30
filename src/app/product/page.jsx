@@ -16,7 +16,7 @@ const ProductPage = () => {
     '/image1.png', // Main image on the right
     '/image2.png', // Top thumbnail
     '/image3.png', // Second thumbnail
-    '/image4.png', // Third thumbnail
+    '/video.mp4', // Third thumbnail
   ];
 
   const productData = {
@@ -31,8 +31,9 @@ const ProductPage = () => {
   };
 
   return (
+                       //max-w-7xl
     <>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-white text-black">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-white text-black">
         <nav className="text-sm text-gray-500 mb-6">
           <span>Home</span> / <span className="text-orange-500">Details</span>
         </nav>

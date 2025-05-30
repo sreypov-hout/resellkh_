@@ -52,7 +52,7 @@ const Reviews = () => {
         <h3 className="font-bold text-gray-900 text-lg">Reviews for Seller</h3>
         <button
           onClick={() => setIsModalOpen(true)} // Open modal on click
-          className="bg-orange-500 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
+          className="bg-orange-500 text-white px-5 py-2 rounded-[50px] text-sm font-medium hover:bg-orange-600 transition-colors"
         >
           Write a review
         </button>

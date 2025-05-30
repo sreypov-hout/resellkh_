@@ -5,7 +5,7 @@ const MoreFromSeller = () => {
   const products = [
     {
       id: 1,
-      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop',
+      image: '/Product-Detail-Image/card-1.png',
       title: 'Recycled leather shoulder bag',
       description: 'A classic handbag of the Recycled leather...',
       price: '$100',
@@ -14,7 +14,7 @@ const MoreFromSeller = () => {
     },
     {
       id: 2,
-      image: 'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=300&h=300&fit=crop',
+      image: '/Product-Detail-Image/card-2.png',
       title: 'Best Bow Hairstyles',
       description: 'Best hairstyles that will be perfect to suit...',
       price: '$1.45',
@@ -23,7 +23,7 @@ const MoreFromSeller = () => {
     },
     {
       id: 3,
-      image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop',
+      image: '/Product-Detail-Image/card-1.png',
       title: 'Swatch High-Quality',
       description: 'Swatch Classic Timepiece Elegance meets...',
       price: '$5',
@@ -32,7 +32,7 @@ const MoreFromSeller = () => {
     },
     {
       id: 4,
-      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop',
+      image: '/Product-Detail-Image/card-1.png',
       title: 'White Puller Cloud bag',
       description: 'Brand new White Puller Cloud bag selling at...',
       price: '$5',
@@ -41,7 +41,7 @@ const MoreFromSeller = () => {
     },
     {
       id: 5,
-      image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=300&fit=crop',
+      image: '/Product-Detail-Image/card-1.png',
       title: 'JACK WILLS Men\'s',
       description: 'Sweatshirt/jumper',
       price: '$29.5/6',
