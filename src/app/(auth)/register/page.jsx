@@ -1,6 +1,8 @@
 "use client";
+
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -10,8 +12,11 @@ export default function Register() {
     password: "",
     confirmPassword: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,7 +33,6 @@ export default function Register() {
     setError("");
 
     try {
-      // Simulate request
       await new Promise((res) => setTimeout(res, 1000));
       window.location.href = `/verify?email=${formData.email}`;
     } catch (err) {
@@ -39,94 +43,127 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row items-center justify-around bg-white px-4 sm:px-6 md:px-12 lg:px-24 xl:px-32">
       {/* Left - Form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-6 md:px-16 py-12">
-        <a href="/" className="mb-6">
-            <img src="/LOGO.png" alt="RESELLKH Logo" className=" object-contain" width={195} height={50} />
-        </a>
+      <div className="w-full lg:w-1/2 max-w-md py-12 space-y-6">
+        {/* Logo */}
+        <div className="flex justify-center mb-2">
+          <img src="/LOGO.png" alt="RESELLKH Logo" className="h-12" />
+        </div>
 
-
-        <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="flex flex-col md:flex-row gap-4">
+            <div className="w-full md:w-1/2">
+              <label className="text-sm text-gray-700 block mb-1">First Name</label>
+              <input
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder="Enter First Name"
+                required
+                className="w-full p-3 border rounded-full placeholder-gray-400 outline-none focus:ring-2 focus:ring-orange-400"
+              />
+            </div>
+            <div className="w-full md:w-1/2">
+              <label className="text-sm text-gray-700 block mb-1">Last Name</label>
+              <input
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder="Enter Last Name"
+                required
+                className="w-full p-3 border rounded-full placeholder-gray-400 outline-none focus:ring-2 focus:ring-orange-400"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-700 block mb-1">Email</label>
             <input
-              name="firstName"
-              placeholder="First Name"
-              value={formData.firstName}
+              name="email"
+              type="email"
+              value={formData.email}
               onChange={handleChange}
+              placeholder="Enter your email"
               required
-              className="w-full md:w-1/2 p-3 border rounded-full"
-            />
-            <input
-              name="lastName"
-              placeholder="Last Name"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-              className="w-full md:w-1/2 p-3 border rounded-full"
+              className="w-full p-3 border rounded-full placeholder-gray-400 outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border rounded-full"
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border rounded-full"
-          />
-          <input
-            name="confirmPassword"
-            type="password"
-            placeholder="Confirm Password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border rounded-full"
-          />
+
+          <div className="relative">
+            <label className="text-sm text-gray-700 block mb-1">Password</label>
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              required
+              className="w-full p-3 border rounded-full placeholder-gray-400 outline-none focus:ring-2 focus:ring-orange-400"
+            />
+            <button
+              type="button"
+              className="absolute right-4 bottom-3 text-gray-400"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FiEyeOff /> : <FiEye />}
+            </button>
+          </div>
+
+          <div className="relative">
+            <label className="text-sm text-gray-700 block mb-1">Confirm Password</label>
+            <input
+              name="confirmPassword"
+              type={showConfirm ? "text" : "password"}
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm your Password"
+              required
+              className="w-full p-3 border rounded-full placeholder-gray-400 outline-none focus:ring-2 focus:ring-orange-400"
+            />
+            <button
+              type="button"
+              className="absolute right-4 bottom-3 text-gray-400"
+              onClick={() => setShowConfirm(!showConfirm)}
+            >
+              {showConfirm ? <FiEyeOff /> : <FiEye />}
+            </button>
+          </div>
+
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full p-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition duration-200"
+            className="w-full p-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition"
           >
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
-        {error && <p className="text-red-600 mt-3">{error}</p>}
-
         {/* Divider */}
-        <div className="my-4 text-gray-400 w-full flex items-center justify-center">
-          <hr className="w-1/4" />
-          <span className="px-2">Or</span>
-          <hr className="w-1/4" />
+        <div className="flex items-center justify-between my-4">
+          <hr className="w-1/4 border-gray-300" />
+          <span className="text-gray-400 text-sm">Or</span>
+          <hr className="w-1/4 border-gray-300" />
         </div>
 
-        <button className="w-full max-w-md flex items-center justify-center gap-3 border p-3 rounded-full hover:bg-gray-100 transition duration-200">
-          <FcGoogle size={24} />
-          Continue with Google
+        <button className="w-full flex items-center justify-center gap-3 border border-gray-300 p-3 rounded-full hover:bg-gray-50 transition">
+          <FcGoogle size={22} />
+          <span className="text-sm font-medium text-gray-700">Continue with Google</span>
         </button>
 
-        <p className="mt-4 text-sm text-center">
+        <p className="mt-4 text-center text-sm">
           Already have an account?{" "}
-          <a href="/login" className="text-orange-600 font-medium">
+          <a href="/login" className="text-orange-600 font-semibold">
             Log in
           </a>
         </p>
       </div>
 
-      {/* Right - Image */}
-      <div className="hidden md:flex w-1/2 bg-white items-center justify-center">
-        <img src="/register.png" alt="Register" className="w-3/4 h-auto" />
+      {/* Right - Illustration */}
+      <div className="hidden lg:flex  justify-center mt-10 lg:mt-0 ">
+        <img src="/register.png" alt="Register Illustration"  width={530} height={514.7} />
       </div>
     </div>
   );

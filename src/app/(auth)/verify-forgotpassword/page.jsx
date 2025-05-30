@@ -1,15 +1,15 @@
 "use client";
-import { useSearchParams, useRouter } from "next/navigation";
+
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function VerifyForgotOTP() {
+export default function OTPVerification() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const email = searchParams.get("email");
 
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(60);
-  const [message, setMessage] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     if (timer > 0) {
@@ -18,80 +18,97 @@ export default function VerifyForgotOTP() {
     }
   }, [timer]);
 
-  const handleChange = (val, idx) => {
-    if (/^\d?$/.test(val)) {
-      const updatedOtp = [...otp];
-      updatedOtp[idx] = val;
-      setOtp(updatedOtp);
-
-      if (val && idx < 3) {
-        document.getElementById(`otp-${idx + 1}`).focus();
+  const handleChange = (value, index) => {
+    if (/^\d?$/.test(value)) {
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
+      if (value && index < 5) {
+        document.getElementById(`otp-${index + 1}`)?.focus();
       }
     }
   };
 
   const handleVerify = async () => {
     const code = otp.join("");
-
-    if (code.length !== 4) {
-      setMessage("❌ Please enter the complete 4-digit OTP.");
+    if (code.length < 6) {
+      alert("Please enter the full 6-digit OTP.");
       return;
     }
 
-    await new Promise((res) => setTimeout(res, 1000));
-
-    // ✅ Redirect to reset-password with email
-    router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`);
+    setVerifying(true);
+    await new Promise((r) => setTimeout(r, 1000));
+    alert(`✅ Verified ${email} with code ${code}`);
+    setVerifying(false);
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center bg-white px-6 py-10">
-      <div className="hidden md:flex w-1/2 justify-center">
-        <img src="/verify.png" alt="OTP Illustration" className="w-3/4" />
+    <div className="min-h-screen flex flex-col lg:flex-row items-center justify-center bg-white px-4 sm:px-10 md:px-20 py-10 gap-12">
+      {/* Left Illustration */}
+      <div className="hidden md:flex justify-center lg:w-1/2">
+        <img
+          src="/verify.png"
+          alt="OTP Illustration"
+          className="w-full max-w-md h-auto"
+        />
       </div>
-      <div className="w-full md:w-1/2 max-w-md space-y-6 text-center">
-        <div className="text-orange-500 text-4xl flex justify-center">✅</div>
 
-        <h2 className="text-2xl font-bold text-black">OTP Verification</h2>
+      {/* Right OTP Form */}
+      <div className="w-full lg:w-1/2 max-w-md text-center space-y-6">
+        <div className="w-10 h-10 mx-auto rounded-full bg-orange-100 text-orange-500 flex items-center justify-center text-lg">
+          ✓
+        </div>
 
+        <h2 className="text-2xl font-bold text-gray-900">OTP Verification</h2>
         <p className="text-gray-600 text-sm">
           Enter the OTP sent to{" "}
-          <span className="text-orange-600 font-semibold">{email}</span>
+          <span className="text-orange-500 font-semibold">
+            {email || "your email"}
+          </span>
         </p>
 
+        {/* OTP Boxes */}
         <div className="flex justify-center gap-4">
           {otp.map((digit, idx) => (
             <input
               key={idx}
               id={`otp-${idx}`}
               type="text"
+              maxLength={1}
               inputMode="numeric"
-              maxLength="1"
+              autoComplete="one-time-code"
+              className="w-10 sm:w-12 h-12 text-xl text-center border-0 border-b-2 border-gray-300 focus:border-orange-500 outline-none transition-all"
               value={digit}
               onChange={(e) => handleChange(e.target.value, idx)}
-              className="w-12 h-12 text-center border-b-2 text-xl focus:outline-none border-orange-500"
             />
           ))}
         </div>
 
-        <p className="text-orange-500 font-medium text-sm">{`00:${String(timer).padStart(2, "0")}`}</p>
+        <p className="text-sm text-orange-500 font-semibold">
+          {timer > 0 ? `00:${String(timer).padStart(2, "0")}` : "Expired"}
+        </p>
 
         <button
           onClick={handleVerify}
-          className="w-full bg-orange-500 text-white py-3 rounded-full font-semibold hover:bg-orange-600 transition"
+          disabled={verifying}
+          className={`w-full py-3 rounded-full font-medium transition text-white ${
+            verifying
+              ? "bg-orange-300 cursor-not-allowed"
+              : "bg-orange-500 hover:bg-orange-600"
+          }`}
         >
-          Verify
+          {verifying ? "Verifying..." : "Verify"}
         </button>
 
-        {message && <p className="text-sm text-red-500 mt-2">{message}</p>}
-
-        <p className="text-sm">
+        <p className="text-sm text-gray-600">
           Didn’t receive the OTP?{" "}
           <button
-            disabled={timer > 0}
             onClick={() => setTimer(60)}
+            disabled={timer > 0}
             className={`font-semibold ${
-              timer > 0 ? "text-gray-400 cursor-not-allowed" : "text-orange-500"
+              timer > 0
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-orange-500 hover:underline"
             }`}
           >
             Resend OTP
