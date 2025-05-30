@@ -6,7 +6,7 @@ export default function ResetSuccess() {
   const router = useRouter();
 
   const handleContinue = () => {
-    router.push("/auth/login");
+    router.push("/login");
   };
 
   return (

@@ -1,135 +1,112 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-    setError('');
+    setLoading(true);
 
-    try {
-      const res = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Invalid email or password');
-      }
-
-      const data = await res.json();
-      console.log('✅ Login Success:', data);
-
-      localStorage.setItem('token', data.token);
-      window.location.href = '/products';
-    } catch (err) {
-      setError(err.message);
-    }
+    // Simulate loading delay then redirect
+    setTimeout(() => {
+      router.push('/');
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-white">
+    <div className="min-h-screen flex items-center justify-center px-6 bg-white">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl w-full items-center">
-        {/* Image side (Desktop only) */}
-        <div className="hidden md:block">
-          <img
-            src="/login.png"
-            alt="Login illustration"
-            className="w-full max-w-md mx-auto"
-            width={195}
-            height={50}
-          />
+        {/* Left: Illustration */}
+        <div className="hidden md:flex justify-center">
+          <Image src="/login.png" alt="Login Illustration" width={500} height={500} />
         </div>
 
-        {/* Login form side */}
+        {/* Right: Login Form */}
         <div className="w-full max-w-md mx-auto">
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <a href="/">
-              <img
-                src="/logo.png"
-                alt="ResellKH Logo"
-                className="object-contain"
-                width={195}
-                height={50}
-              />
+              <Image src="/LOGO.png" alt="ResellKH Logo" width={150} height={50} />
             </a>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            {/* Error message */}
-            {error && (
-              <div className="text-red-600 text-sm font-medium text-center">
-                {error}
-              </div>
-            )}
-
-            {/* Email input */}
+          <form className="space-y-5" onSubmit={handleLogin}>
+            {/* Email */}
             <div>
-              <label className="text-sm font-medium block mb-1">Email</label>
+              <label className="text-sm font-medium text-gray-700 block mb-1">Email</label>
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="w-full border border-gray-300 rounded-full px-4 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 required
               />
             </div>
 
-            {/* Password input */}
+            {/* Password */}
             <div>
-              <label className="text-sm font-medium block mb-1">Password</label>
+              <label className="text-sm font-medium text-gray-700 block mb-1">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
-                  className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border border-gray-300 rounded-full px-4 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 pr-10"
                   required
                 />
                 <button
                   type="button"
-                  className="absolute right-4 top-2.5 text-gray-500 text-sm"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label="Toggle password visibility"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl"
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  {showPassword ? <HiOutlineEyeOff /> : <HiOutlineEye />}
                 </button>
+              </div>
+              <div className="text-right mt-1">
+                <a href="/forgotpassword" className="text-sm text-gray-500 hover:text-orange-500">
+                  Forgot Password?
+                </a>
               </div>
             </div>
 
-            {/* Forgot password link */}
-            <div className="text-right">
-              <a
-                href="/forgotpassword"
-                className="text-sm text-orange-500 font-medium hover:underline"
-              >
-                Forgot Password?
-              </a>
-            </div>
-
-            {/* Submit button */}
+            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 transition text-white rounded-full py-2 font-semibold"
+              disabled={loading}
+              className={`w-full bg-orange-500 hover:bg-orange-600 text-white rounded-full py-3 font-semibold transition ${
+                loading ? 'opacity-60 cursor-not-allowed' : ''
+              }`}
             >
-              Log In
+              {loading ? 'Logging in...' : 'Log In'}
             </button>
 
-            {/* Link to register */}
-            <p className="text-center text-sm mt-4">
-              Don’t have an account?{' '}
-              <a href="/register" className="text-orange-500 font-semibold">
+            {/* Divider */}
+            <div className="flex items-center justify-between my-4">
+              <hr className="w-1/4 border-gray-300" />
+              <span className="text-gray-400 text-sm">Or</span>
+              <hr className="w-1/4 border-gray-300" />
+            </div>
+
+            {/* Google Login */}
+            <button className="w-full flex items-center justify-center gap-3 border border-gray-300 p-3 rounded-full hover:bg-gray-50 transition">
+              <Image src="/google-20.png" alt="Google" width={20} height={20} />
+              <span className="text-sm font-medium text-gray-700">Continue with Google</span>
+            </button>
+
+            <p className="mt-4 text-center text-sm">
+              Don’t have an Account?{' '}
+              <a href="/register" className="text-orange-600 font-semibold hover:underline">
                 Register
               </a>
             </p>

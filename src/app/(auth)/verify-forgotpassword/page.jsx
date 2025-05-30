@@ -1,13 +1,14 @@
-"use client";
+'use client';
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function OTPVerification() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const email = searchParams.get("email");
 
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", ""]);
   const [timer, setTimer] = useState(60);
   const [verifying, setVerifying] = useState(false);
 
@@ -23,7 +24,7 @@ export default function OTPVerification() {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
-      if (value && index < 5) {
+      if (value && index < 3) {
         document.getElementById(`otp-${index + 1}`)?.focus();
       }
     }
@@ -31,15 +32,16 @@ export default function OTPVerification() {
 
   const handleVerify = async () => {
     const code = otp.join("");
-    if (code.length < 6) {
-      alert("Please enter the full 6-digit OTP.");
+    if (code.length < 4) {
+      alert("Please enter the full 4-digit OTP.");
       return;
     }
 
     setVerifying(true);
     await new Promise((r) => setTimeout(r, 1000));
-    alert(`✅ Verified ${email} with code ${code}`);
-    setVerifying(false);
+
+    // ✅ Redirect to reset-password page
+    router.push("/reset-password");
   };
 
   return (
@@ -67,7 +69,7 @@ export default function OTPVerification() {
           </span>
         </p>
 
-        {/* OTP Boxes */}
+        {/* OTP Inputs */}
         <div className="flex justify-center gap-4">
           {otp.map((digit, idx) => (
             <input
@@ -84,10 +86,12 @@ export default function OTPVerification() {
           ))}
         </div>
 
+        {/* Timer */}
         <p className="text-sm text-orange-500 font-semibold">
           {timer > 0 ? `00:${String(timer).padStart(2, "0")}` : "Expired"}
         </p>
 
+        {/* Verify Button */}
         <button
           onClick={handleVerify}
           disabled={verifying}
@@ -100,6 +104,7 @@ export default function OTPVerification() {
           {verifying ? "Verifying..." : "Verify"}
         </button>
 
+        {/* Resend OTP */}
         <p className="text-sm text-gray-600">
           Didn’t receive the OTP?{" "}
           <button
