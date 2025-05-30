@@ -1,13 +1,13 @@
 // src/app/product/page.jsx
 // This is a Server Component by default
 
-import ProductGallery from './components/ProductGallery';
-import ProductDetails from './components/ProductDetails';
-import SellerInfo from './components/SellerInfo';
-import Reviews from './components/Reviews';
-import MoreFromSeller from './components/MoreFromSeller';
-import OtherProducts from './components/OtherProducts';
-import ContactSellerHeader from './components/ContactSellerHeader';
+import ProductGallery from '../../components/product/ProductGallery';
+import ProductDetails from '../../components/product/ProductDetails';
+import SellerInfo from '../../components/product/SellerInfo';
+import Reviews from '../../components/product/Reviews';
+import MoreFromSeller from '../../components/product/MoreFromSeller';
+import OtherProducts from '../../components/product/OtherProducts';
+import ContactSellerHeader from '../../components/product/ContactSellerHeader';
 // import Footer from './components/Footer';
 
 const ProductPage = () => {
