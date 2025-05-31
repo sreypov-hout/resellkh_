@@ -1,4 +1,16 @@
-export default function HomePage() {
-  return <h1 className="px-16 bg-orange-300 text-center+
-   text-2xl">landing page</h1>;
+import CategorySlider from "@/components/landing/CategorySlider";
+import Banner from "@/components/landing/Banner";
+import TrendingProducts from "@/components/landing/TrendingProducts";
+import RecommendedList from "@/components/landing/RecommendedList";
+import DailyBanner from "@/components/landing/DailyBanner";
+
+export default function LandingPage() {
+  return <>
+  <Banner />
+  <CategorySlider />
+  <TrendingProducts />
+  <RecommendedList />
+  <DailyBanner />
+
+  </>;
 }
