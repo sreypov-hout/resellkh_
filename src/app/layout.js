@@ -30,7 +30,9 @@
 // }
 
 // src/app/layout.js (REQUIRED)
+// src/app/layout.js or src/app/(main)/layout.js
 import './globals.css';
+import ClientLayout from './ClientLayout';
 
 export const metadata = {
   title: 'ResellKH',
@@ -40,7 +42,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        <ClientLayout>{children}</ClientLayout> {/* ✅ Fix here */}
+      </body>
     </html>
   );
 }
+
