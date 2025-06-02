@@ -10,7 +10,7 @@ export default function Footer() {
         {/* Logo + Description */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <Image src="/Logo.png" alt="ResellKH Logo" width={120} height={50} />
+            <Image src="/Logo.png" alt="ResellKH Logo" width={100} height={50} />
           </div>
           <p className="text-sm text-gray-600 leading-relaxed">
             We provide high-quality services and products to meet your needs.

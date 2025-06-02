@@ -58,41 +58,36 @@ export default function Notifications() {
   );
 
   return (
-    <section className="w-full px-14 py-6">
+    <section className="w-full px-[7%] py-6">
       <div className="bg-white border border-gray-300 rounded-[24px] p-6 sm:p-10 shadow-sm">
         {/* Title */}
         <h1 className="text-xl sm:text-2xl font-semibold mb-6">Notifications</h1>
 
         {/* Tabs */}
-        <div className="flex items-center gap-10 border-b pb-4 mb-6 text-sm sm:text-base">
-          {['all', 'unread'].map((tab) => {
+        <div className="flex justify-center items-center gap-10 border-b pb-4 mb-6 text-sm sm:text-base">
+        {['all', 'unread'].map((tab) => {
             const isActive = activeTab === tab;
             const count = tab === 'all'
-              ? allNotifications.length
-              : allNotifications.filter((n) => n.unread).length;
+            ? allNotifications.length
+            : allNotifications.filter((n) => n.unread).length;
 
             return (
-              <button
-                key={tab}
+            <button key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`relative font-medium ${
-                  isActive ? 'text-black' : 'text-gray-600'
-                } focus:outline-none`}
-              >
-                <span className="absolute -top-3 -left-5 sm:-left-6 bg-orange-500 text-white text-[10px] sm:text-xs px-2 py-0.5 rounded-full">
-                  {count}
-                </span>
-                <span
-                  className={`pb-1 ${
-                    isActive ? 'border-b-2 border-black' : ''
-                  }`}
+                className={`flex items-center gap-2 font-medium relative pb-1 transition ${
+                    isActive ? 'text-black border-b-2 border-black' : 'text-gray-600'
+                }`}
                 >
-                  {tab === 'all' ? 'All' : 'Unread'}
+                <span className="bg-orange-500 text-black text-[10px] sm:text-xs px-2 py-0.5 rounded-full">
+                    {count}
                 </span>
-              </button>
+                <span>{tab === 'all' ? 'All' : 'Unread'}</span>
+            </button>
+
             );
-          })}
+        })}
         </div>
+
 
         {/* Sections */}
         <Section title="Today" data={today} />
@@ -115,12 +110,13 @@ function Section({ title, data }) {
           <div key={item.id} className="flex items-start gap-3 sm:gap-5">
             {/* Avatar */}
             <Image
-              src={item.avatar}
-              alt="avatar"
-              width={48}
-              height={48}
-              className="w-12 h-12 rounded-full object-cover"
+            src="/image-notifications.png"
+            alt="avatar"
+            width={48}
+            height={48}
+            className="w-12 h-12 rounded-full object-cover"
             />
+
             {/* Notification Box */}
             <div className="flex-1">
               <div className="bg-[#eee7e7] w-full rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:justify-between sm:items-start">
