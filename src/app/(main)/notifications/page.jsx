@@ -58,7 +58,7 @@ export default function Notifications() {
   );
 
   return (
-    <section className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+    <section className="w-full px-14 py-6">
       <div className="bg-white border border-gray-300 rounded-[24px] p-6 sm:p-10 shadow-sm">
         {/* Title */}
         <h1 className="text-xl sm:text-2xl font-semibold mb-6">Notifications</h1>
