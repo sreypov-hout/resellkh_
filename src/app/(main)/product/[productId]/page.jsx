@@ -27,13 +27,13 @@ const ProductPage = () => {
     condition: 'Like new',
     category: 'Fashion',
     description: "I wore it just once for a chill outing, and it looked amazing. Super soft and lightweight - perfect for layering or wearing on its own. Honestly, I love it, but it's a way too many similar tops, so I'm...",
-    images: hoodieImageUrls, // Pass the actual image URLs here
+    images: hoodieImageUrls, 
   };
 
   return (
-                       //max-w-7xl
+                       //max-w-7xl           change to  px-[7%]
     <>
-      <div className=" mx-auto px-4 sm:px-6 lg:px-14 py-4 bg-white text-black">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-[7%] py-4 bg-white text-black">
         <nav className="text-sm text-gray-500 mb-6">
           <span>Home</span> / <span className="text-orange-500">Details</span>
         </nav>
@@ -59,6 +59,8 @@ const ProductPage = () => {
         <OtherProducts />
       </div>
       {/* <Footer /> */}
+
+      
     </>
   );
 };

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link'; // Import Link for navigation
 import ReviewFormModal from './ReviewFormModal'; // Import the new modal component
 
 const Reviews = () => {
@@ -47,7 +48,7 @@ const Reviews = () => {
   };
   
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+    <div className="bg-white rounded-lg p-6 shadow-sm"> {/* Removed border-gray-200 if parent already has it */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-bold text-gray-900 text-lg">Reviews for Seller</h3>
         <button
@@ -60,10 +61,13 @@ const Reviews = () => {
       
       <div className="space-y-6">
         {reviews.map((review, index) => (
-          <div key={index} className="flex space-x-4 pb-6 border-b border-gray-100 last:border-b-0 last:pb-0">
+          <div 
+            key={index} 
+            // Apply bottom border and padding only to items that are NOT the last one
+            className={`flex space-x-4 pb-6 ${index < reviews.length - 1 ? '' : ''}`}
+          >
             <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
               <Image
-                // Use the specific userAvatar path from the review object
                 src={review.userAvatar}
                 alt={review.name}
                 width={48}
@@ -85,6 +89,13 @@ const Reviews = () => {
         ))}
       </div>
       
+      {/* "Read all review" Link */}
+      <div className="mt-6 text-center"> {/* Added margin-top for spacing and center alignment */}
+        <Link href="/seller-reviews" className="text-gray-900 hover:text-orange-500 text-sm font-medium"> {/* Adjusted styling */}
+          Read all review &gt;
+        </Link>
+      </div>
+
       {/* Render the ReviewFormModal */}
       <ReviewFormModal
         isOpen={isModalOpen}
