@@ -40,7 +40,7 @@ const ProductGallery = ({ product }) => {
             key={index}
             onClick={() => setSelectedImageIndex(index)}
             className={`
-              w-[70px] h-[70px] rounded-lg overflow-hidden relative flex-shrink-0
+              w-[95px] h-[95px] rounded-lg overflow-hidden relative flex-shrink-0
               border-2 transition-all duration-200
               ${selectedImageIndex === index ? 'border-orange-500 ring-2 ring-orange-500' : 'border-gray-200 hover:border-gray-300'}
             `}
@@ -66,7 +66,7 @@ const ProductGallery = ({ product }) => {
       </div>
 
       {/* Main Product Display Area */}
-      <div className="flex-grow w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative border border-gray-200">
+      <div className="flex-grow w-full h-[400px] md:h-[300px] lg:h-[400px] rounded-lg overflow-hidden relative border border-gray-200">
         {isSelectedMediaVideo ? (
           // Render Video Player if the selected media item is a video
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white">

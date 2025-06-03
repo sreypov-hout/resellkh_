@@ -8,7 +8,7 @@ import Reviews from '@/components/product/Reviews';
 import MoreFromSeller from '@/components/product/MoreFromSeller';
 import OtherProducts from '@/components/product/OtherProducts';
 import ContactSellerHeader from '@/components/product/ContactSellerHeader';
-// import Footer from './components/Footer';
+import Footer from '@/components/layout/Footer';
 
 const ProductPage = () => {
   // Define actual image URLs for the hoodie from the provided image
@@ -58,7 +58,7 @@ const ProductPage = () => {
         <MoreFromSeller />
         <OtherProducts />
       </div>
-      {/* <Footer /> */}
+      <Footer />
 
       
     </>
