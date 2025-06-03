@@ -40,7 +40,7 @@ const ProductGallery = ({ product }) => {
             key={index}
             onClick={() => setSelectedImageIndex(index)}
             className={`
-              w-[95px] h-[95px] rounded-lg overflow-hidden relative flex-shrink-0
+              w-[94px] h-[94px] rounded-lg overflow-hidden relative flex-shrink-0
               border-2 transition-all duration-200
               ${selectedImageIndex === index ? 'border-orange-500 ring-2 ring-orange-500' : 'border-gray-200 hover:border-gray-300'}
             `}
