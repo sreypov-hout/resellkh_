@@ -23,7 +23,7 @@ const MoreFromSeller = () => {
     },
     {
       id: 3,
-      image: '/Product-Detail-Image/card-1.png',
+      image: '/Product-Detail-Image/card-3.png',
       title: 'Swatch High-Quality',
       description: 'Swatch Classic Timepiece Elegance meets...',
       price: '$5',
@@ -32,7 +32,7 @@ const MoreFromSeller = () => {
     },
     {
       id: 4,
-      image: '/Product-Detail-Image/card-1.png',
+      image: '/Product-Detail-Image/card-4.png',
       title: 'White Puller Cloud bag',
       description: 'Brand new White Puller Cloud bag selling at...',
       price: '$5',
@@ -41,7 +41,7 @@ const MoreFromSeller = () => {
     },
     {
       id: 5,
-      image: '/Product-Detail-Image/card-1.png',
+      image: '/Product-Detail-Image/card-5.png',
       title: 'JACK WILLS Men\'s',
       description: 'Sweatshirt/jumper',
       price: '$29.5/6',

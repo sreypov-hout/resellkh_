@@ -13,6 +13,7 @@ const ProductGallery = ({ product }) => {
     '/Product-Detail-Image/video.mp4', // Placeholder for a video thumbnail/still
   ];
 
+  
   const mediaItems = product?.images?.length > 0 ? product.images : defaultMediaItems;
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);

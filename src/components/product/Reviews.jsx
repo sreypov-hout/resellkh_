@@ -53,9 +53,12 @@ const Reviews = () => {
         <h3 className="font-bold text-gray-900 text-lg">Reviews for Seller</h3>
         <button
           onClick={() => setIsModalOpen(true)} // Open modal on click
-          className="bg-orange-500 text-white px-5 py-2 rounded-[50px] text-sm font-medium hover:bg-orange-600 transition-colors"
+          className="bg-orange-500 text-white px-5 py-2 rounded-[50px] text-sm font-medium hover:bg-orange-600 transition-colors flex items-center gap-2" // Added hover effect and flex for icon alignment
         >
           Write a review
+        <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3.94 12.036C3.707 12.66 3.51 13.236 3.334 13.819C4.294 13.122 5.435 12.68 6.752 12.515C9.265 12.201 11.498 10.542 12.628 8.457L11.172 7.002L12.585 5.587L13.585 4.586C14.015 4.156 14.5 3.362 15.013 2.218C9.42 3.085 5.996 6.51 3.94 12.036ZM14 7.001L15 8C14 11 11 14 7 14.5C4.331 14.834 2.664 16.667 1.998 20H0C1 14 3 0 18 0C17 2.997 16.002 4.996 15.003 5.997L14 7.001Z" fill="white"/>
+        </svg>
         </button>
       </div>
       
@@ -90,7 +93,7 @@ const Reviews = () => {
       </div>
       
       {/* "Read all review" Link */}
-      <div className="mt-6 text-center"> {/* Added margin-top for spacing and center alignment */}
+      <div className="mt-6 text-left"> {/* Added margin-top for spacing and center alignment */}
         <Link href="/seller-reviews" className="text-gray-900 hover:text-orange-500 text-sm font-medium"> {/* Adjusted styling */}
           Read all review &gt;
         </Link>
