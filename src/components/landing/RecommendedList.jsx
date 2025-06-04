@@ -307,26 +307,119 @@ const recommendedItems = [
     price: "$15",
     image: "/images/recommended/gucci_ballerina.jpg",
   },
+  {
+    name: "Starry Co ’Josie’ necklace",
+    description: "Worn once to try, didn’t like the way it looked on me.",
+    price: "$6",
+    image: "/images/recommended/josie.jpg",
+  },
+  {
+    name: "[Female] Black & White Top",
+    description: "Size stated in shirt is L but fits more like M.",
+    price: "$5",
+    image: "/images/recommended/blacktop.jpg",
+  },
+  {
+    name: "Gucci Black Ballerina",
+    description:
+      "Bought in MBS Singapore, only come with item only. Enforced base with anti-slip.",
+    price: "$15",
+    image: "/images/recommended/gucci_ballerina.jpg",
+  },
+  {
+    name: "Starry Co ’Josie’ necklace",
+    description: "Worn once to try, didn’t like the way it looked on me.",
+    price: "$6",
+    image: "/images/recommended/josie.jpg",
+  },
+  {
+    name: "[Female] Black & White Top",
+    description: "Size stated in shirt is L but fits more like M.",
+    price: "$5",
+    image: "/images/recommended/blacktop.jpg",
+  },
+  {
+    name: "Gucci Black Ballerina",
+    description:
+      "Bought in MBS Singapore, only come with item only. Enforced base with anti-slip.",
+    price: "$15",
+    image: "/images/recommended/gucci_ballerina.jpg",
+  },
+    {
+    name: "america flag, USA Knitted",
+    description: "* NOTE: It’s for a kid (short), not for an adult.",
+    price: "$16",
+    image: "/images/recommended/flagknit.jpg",
+  },
+  {
+    name: "Shoulder bag hand white leather",
+    description: "Like new. Good condition. No dustbag.",
+    price: "$10",
+    image: "/images/recommended/whitebag.jpg",
+  },
+  {
+    name: "Authentic Zara Men Blouse Shirt",
+    description:
+      "Preloved years ago. Replace battery if needed. Not for fussy buyer.",
+    price: "$20",
+    image: "/images/recommended/zara.jpg",
+  },
+  {
+    name: "Black leather shoulder bag",
+    description:
+      "Black real leather. Carry on shoulder/crossbody. Size: 25x10x17cm",
+    price: "$10",
+    image: "/images/recommended/blackbag.jpg",
+  },
+  {
+    name: "Roadbike",
+    description: "Preloved roadbike with phone holder. No trade.",
+    price: "$125",
+    image: "/images/recommended/roadbike.jpg",
+  },
+  {
+    name: "[new] beauty josen sunscreen",
+    description:
+      "beauty of joseon relief sun - used once only so it's still full but no box!! rfs: switched to new sunscreen.",
+    price: "$9",
+    image: "/images/recommended/josen.jpg",
+  },
+  {
+    name: "Solid wood coffee table",
+    description:
+      "Black real leather shoulder bag with double strap. Can carry on shoulder or crossbody.",
+    price: "$25",
+    image: "/images/recommended/table.jpg",
+  },
+  {
+    name: "Love and Co necklace",
+    description: "Got it as a gift but don’t wear it.",
+    price: "$7",
+    image: "/images/recommended/love.jpg",
+  },
 ];
 
 export default function RecommendedList() {
-  const [showAll, setShowAll] = useState(false);
-  const itemsToShow = showAll
-    ? recommendedItems
-    : recommendedItems.slice(0, 25);
+  const [visibleCount, setVisibleCount] = useState(25);
+
+  const handleViewMore = () => {
+    setVisibleCount((prev) => prev + 25);
+  };
+
+  const itemsToShow = recommendedItems.slice(0, visibleCount);
 
   return (
-    <section className="py-12 bg-white">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="w-full bg-white py-10">
+      <div className="w-full">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
-          Recommended For you
+          Recommended For You
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-6">
           {itemsToShow.map((item, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden"
+              className="bg-white rounded-xl shadow overflow-hidden"
             >
               <div className="relative w-full h-[160px]">
                 <Image
@@ -345,7 +438,7 @@ export default function RecommendedList() {
                 <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">
                   {item.name}
                 </h3>
-                <p className="text-xs text-gray-500 line-clamp-2">
+                <p className="text-xs text-gray-500 line-clamp-2 whitespace-pre-line">
                   {item.description}
                 </p>
                 <div className="flex items-center justify-between mt-2">
@@ -363,14 +456,17 @@ export default function RecommendedList() {
             </div>
           ))}
         </div>
-        <div className="text-center mt-8">
-          <button
-            onClick={() => setShowAll((prev) => !prev)}
-            className="px-6 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition"
-          >
-            {showAll ? "View less" : "View more"}
-          </button>
-        </div>
+
+        {visibleCount < recommendedItems.length && (
+          <div className="text-center mt-8">
+            <button
+              onClick={handleViewMore}
+              className="px-6 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition"
+            >
+              View more
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

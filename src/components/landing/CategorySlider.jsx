@@ -26,13 +26,13 @@ export default function CategorySlider() {
   };
 
   return (
-    <section className="py-10 bg-white">
-      <div className="max-w-screen-xl mx-auto px-6">
-        <div className="flex justify-between items-center mb-6">
+    <section className="w-full bg-white py-10">
+      <div className="w-full">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <h2 className="text-xl font-bold text-gray-900">
             What would you like to find?
           </h2>
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-start sm:self-auto">
             <button
               onClick={() => scroll("left")}
               className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
@@ -50,26 +50,26 @@ export default function CategorySlider() {
 
         <div
           ref={scrollRef}
-          className="flex gap-10 overflow-x-auto scroll-smooth pb-1"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }} 
+          className="flex gap-[50] overflow-x-auto scroll-smooth no-scrollbar pb-1"
         >
           {categories.map((cat, index) => (
             <div
               key={index}
-              className="flex-shrink-0 flex flex-col items-center w-[120px]"
+              className="relative flex-shrink-0 w-[120px] h-[120px] rounded-2xl overflow-hidden shadow-md group cursor-pointer"
             >
-              <div className="w-[100px] h-[100px] rounded-2xl overflow-hidden shadow-md bg-white mb-2">
-                <Image
-                  src={cat.image}
-                  alt={cat.name}
-                  width={100}
-                  height={100}
-                  className="object-cover w-full h-full"
-                />
+              <Image
+                src={cat.image}
+                alt={cat.name}
+                fill
+                className="object-cover"
+              />
+
+              {/* Hover text over image */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition duration-200 flex items-center justify-center">
+                <span className="text-white text-sm font-semibold">
+                  {cat.name}
+                </span>
               </div>
-              <span className="text-sm text-gray-800 text-center">
-                {cat.name}
-              </span>
             </div>
           ))}
         </div>

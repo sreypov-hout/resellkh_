@@ -2,56 +2,63 @@ import Image from "next/image";
 
 export default function Banner() {
   return (
-    <section className="bg-white py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
-
+    <section className="w-full bg-white py-10 px-4">
+      <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-start justify-between gap-10">
+        {/* Text Side */}
         <div className="w-full md:w-1/2 text-center md:text-left">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-snug">
+          <h1 className="text-[32px] sm:text-[40px] md:text-[48px] font-bold text-gray-900 font-[Poppins] leading-tight mb-3">
             We help you shop smarter
           </h1>
-          <h2 className="text-xl sm:text-2xl text-orange-500 font-semibold mb-6">
+          <h2 className="text-[20px] sm:text-[28px] md:text-[32px] font-bold text-orange-500 font-[Poppins] mb-6 text-left ml-4 md:ml-20">
             one resold product at a time.
           </h2>
-          <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed max-w-md mx-auto md:mx-0">
-            Cambodia’s trusted online marketplace where buying and selling is fast,
-            easy, and secure. Whether you're looking to declutter your home, start a
-            side hustle, or find great deals on quality new and used products,
-            ReSellKH is the perfect platform for you.
+
+          <p className="text-[16px] sm:text-[17px] md:text-[18px] font-[Poppins] text-gray-600 leading-relaxed max-w-md mx-auto md:mx-0">
+            Cambodia’s trusted online marketplace where buying and selling is
+            fast, easy, and secure. Whether you're looking to declutter your
+            home, start a side hustle, or find great deals on quality new and
+            used products, ReSellKH is the perfect platform for you.
           </p>
         </div>
 
-        <div className="w-full md:w-1/2 flex justify-center md:justify-end gap-6">
+        {/* Image Side */}
+        <div className="w-full md:w-1/2 flex items-center justify-center md:justify-end gap-4">
+          {/* Left side: vertical 2 small images */}
           <div className="flex flex-col gap-4">
             <Image
-              src="/images/banner/hero1.png"
+              src="/images/banner/hero1.jpg"
               alt="Scan"
-              width={80}
-              height={80}
-              className="rounded-xl object-cover"
+              width={100}
+              height={120}
+              className="rounded-xl object-cover w-[100px] h-[120px]"
             />
             <Image
-              src="/images/banner/hero2.png"
+              src="/images/banner/hero2.jpg"
               alt="Clothes"
-              width={80}
-              height={80}
-              className="rounded-xl object-cover"
-            />
-            <Image
-              src="/images/banner/hero3.png"
-              alt="Snap photo"
-              width={80}
-              height={80}
-              className="rounded-xl object-cover"
+              width={100}
+              height={120}
+              className="rounded-xl object-cover w-[100px] h-[120px]"
             />
           </div>
 
-          <div className="relative w-[240px] h-[240px] sm:w-[260px] sm:h-[260px]">
-            <div className="absolute top-4 left-4 w-full h-full bg-black/10 blur-lg rounded-2xl z-0" />
+          {/* Right side: large main image */}
+          <div className="relative w-[240px] h-[240px]">
+            {/* Blurred background (hero4.jpg) */}
+            <div className="absolute  top-2 left-2 w-full h-full z-0 rounded-xl overflow-hidden">
+              <Image
+                src="/images/banner/hero4.jpg"
+                alt="Blurred bg"
+                fill
+                className="object-cover opacity-60 blur-sm"
+              />
+            </div>
+
+            {/* Foreground image (hero3.jpg) */}
             <Image
-              src="/images/banner/hero4.png"
-              alt="Main view"
+              src="/images/banner/hero3.jpg"
+              alt="Main"
               fill
-              className="rounded-2xl object-cover relative z-10"
+              className="object-cover rounded-xl relative z-10 shadow-lg"
             />
           </div>
         </div>
