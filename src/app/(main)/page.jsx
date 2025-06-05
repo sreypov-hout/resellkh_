@@ -13,6 +13,7 @@ export default function LandingPage() {
         <TrendingProducts />
         <RecommendedList />
         <DailyBanner />
+        
       </div>
     </div>
   );

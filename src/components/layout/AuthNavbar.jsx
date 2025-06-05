@@ -15,7 +15,7 @@ export default function AuthNavbar({ user = { name: 'User', avatar: '/image.png'
   const router = useRouter();
 
   return (
-    <header className="w-full bg-white px-14 py-4">
+    <header className="w-full bg-white px-[7%] py-4">
       <div className="max-w-screen-full mx-auto flex flex-col gap-3">
         {/* Top Navigation */}
         <div className="flex justify-between items-center">

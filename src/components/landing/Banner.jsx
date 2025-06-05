@@ -4,7 +4,6 @@ export default function Banner() {
   return (
     <section className="w-full bg-white py-10 px-4">
       <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-start justify-between gap-10">
-        {/* Text Side */}
         <div className="w-full md:w-1/2 text-center md:text-left">
           <h1 className="text-[32px] sm:text-[40px] md:text-[48px] font-bold text-gray-900 font-[Poppins] leading-tight mb-3">
             We help you shop smarter
@@ -21,9 +20,7 @@ export default function Banner() {
           </p>
         </div>
 
-        {/* Image Side */}
         <div className="w-full md:w-1/2 flex items-center justify-center md:justify-end gap-4">
-          {/* Left side: vertical 2 small images */}
           <div className="flex flex-col gap-4">
             <Image
               src="/images/banner/hero1.jpg"
@@ -40,10 +37,7 @@ export default function Banner() {
               className="rounded-xl object-cover w-[100px] h-[120px]"
             />
           </div>
-
-          {/* Right side: large main image */}
           <div className="relative w-[240px] h-[240px]">
-            {/* Blurred background (hero4.jpg) */}
             <div className="absolute  top-2 left-2 w-full h-full z-0 rounded-xl overflow-hidden">
               <Image
                 src="/images/banner/hero4.jpg"
@@ -53,7 +47,6 @@ export default function Banner() {
               />
             </div>
 
-            {/* Foreground image (hero3.jpg) */}
             <Image
               src="/images/banner/hero3.jpg"
               alt="Main"

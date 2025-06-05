@@ -64,7 +64,6 @@ export default function CategorySlider() {
                 className="object-cover"
               />
 
-              {/* Hover text over image */}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition duration-200 flex items-center justify-center">
                 <span className="text-white text-sm font-semibold">
                   {cat.name}
