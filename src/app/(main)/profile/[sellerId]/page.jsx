@@ -1,25 +1,33 @@
 // File: src/app/(main)/profile/[userId]/page.jsx
-'use client';
+"use client";
 
-import ProfileBanner from '@/components/profile/ProfileBanner';
-import ListingsGrid from '@/components/profile/ListingsGrid';
-import ProfileTabs from '@/components/profile/ProfileTabs';
+import ProfileBanner from "@/components/profile/ProfileBanner";
+import ProfileTabs from "@/components/profile/ProfileTabs";
+// import { useSession } from 'next-auth/react'; // or any auth state
+
 
 export default function SellerProfilePage() {
 
- const userData = {
-  name: 'Bou Leakhena',
-  avatar: '/girl 2.jpg',
-  cover: '/cover.jpg',
-  rating: 4.8,
-  reviewsCount: 112,
-};
+  // const { data: session } = useSession(); // assuming you're using NextAuth
+  // const isOwner = session?.user?.id === profileUser?.id;
+
+  const userData = {
+    name: "Bou Leakhena",
+    avatar: "/girl 2.jpg",
+    cover: "/cover.jpg",
+    rating: 4.5,
+    reviewsCount: 2,
+  };
+
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
-      <ProfileBanner isOwner={false} user={userData} />
+    <>
+    <div className="max-w-full px-[7%] py-4 mx-auto">
+      <ProfileBanner isOwner={true} user={userData} />
+      {/* <ProfileBanner isOwner={isOwner} user={profileUser} /> */}
       <ProfileTabs />
-      <ListingsGrid editable={false} />
     </div>
+    <p className="h-[300px] w-full bg-gray-400 text-center">footer</p>
+    </>
   );
 }
