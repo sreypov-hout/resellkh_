@@ -16,9 +16,13 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}", // <- Important for src/ structure
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        poppins: ["Poppins", "sans-serif"],
+        quicksand: ["Quicksand", "sans-serif"],
+        oxygen: ["Oxygen", "sans-serif"],
+      },
+    },
   },
   plugins: [],
 };
-
-

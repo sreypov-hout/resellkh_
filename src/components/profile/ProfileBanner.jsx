@@ -6,6 +6,7 @@ export default function ProfileBanner({ isOwner, user }) {
   const {
     name = 'Bou Leakhena',
     avatar = '/images/avatar.jpg',
+
     cover = 'cover.jpg',
     rating = null,
     reviewsCount = null,
@@ -67,7 +68,6 @@ export default function ProfileBanner({ isOwner, user }) {
             </button>
           )}
         </div>
-
       </div>
     </div>
   );
