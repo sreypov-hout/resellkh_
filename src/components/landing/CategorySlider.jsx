@@ -50,7 +50,7 @@ export default function CategorySlider() {
 
         <div
           ref={scrollRef}
-          className="flex gap-[50] overflow-x-auto scroll-smooth no-scrollbar pb-1"
+          className="flex gap-[60] overflow-x-auto scroll-smooth no-scrollbar pb-1"
         >
           {categories.map((cat, index) => (
             <div

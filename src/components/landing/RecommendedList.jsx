@@ -3,399 +3,408 @@
 import { useState } from "react";
 import Image from "next/image";
 import { FiBookmark } from "react-icons/fi";
+import ProductCart from "../domain/ProductCart";
 
 const recommendedItems = [
   {
-    name: "Bally Original Leather NoteBook",
-    description: "Original Box\nNever used",
-    price: "$15",
-    image: "/images/recommended/bally.jpg",
+    id: 1,
+    imageUrl: "/images/recommended/bally.jpg",
+    title: "Bally Original Leather NoteBook",
+    description: "Original Box. Never used.",
+    productPrice: 15,
   },
   {
-    name: "Charles & Keith Leather Metallic",
+    id: 2,
+    imageUrl: "/images/recommended/charles.jpg",
+    title: "Charles & Keith Leather Metallic",
     description:
-      "No visual flaws, only the handle is asymmetric... Comes with a dust back.",
-    price: "$29",
-    image: "/images/recommended/charles.jpg",
+      "No visual flaws, only the handle is asymmetric... Comes with a dust bag.",
+    productPrice: 29,
   },
   {
-    name: "watch",
+    id: 3,
+    imageUrl: "/images/recommended/watch.jpg",
+    title: "Watch",
     description:
       "One Piece Men's High-Quality Silicone Strap Watch Richard Quartz Men’s Watch",
-    price: "$450",
-    oldPrice: "$600",
-    discount: "45%",
-    image: "/images/recommended/watch.jpg",
+    productPrice: 450,
+    discountPercent: 25, // from $600
   },
   {
-    name: "French carbon engineer bicycle",
-    description:
-      "Highly negotiable.\nUsed once only.\nBicycle too small for me.",
-    price: "$500",
-    image: "/images/recommended/bike.jpg",
+    id: 4,
+    imageUrl: "/images/recommended/bike.jpg",
+    title: "French carbon engineer bicycle",
+    description: "Highly negotiable. Used once only. Bicycle too small for me.",
+    productPrice: 500,
   },
   {
-    name: "H bracelet",
-    description: "Genuine titanium steel H bracelet.\nCondition: 10/10",
-    price: "$30",
-    oldPrice: "$50",
-    discount: "32%",
-    image: "/images/recommended/bracelet.jpg",
+    id: 5,
+    imageUrl: "/images/recommended/bracelet.jpg",
+    title: "H bracelet",
+    description: "Genuine titanium steel H bracelet. Condition: 10/10",
+    productPrice: 30,
+    discountPercent: 40, // from $50
   },
   {
-    name: "Luminox Navy SEAL Whiteout",
+    id: 6,
+    imageUrl: "/images/recommended/luminox.jpg",
+    title: "Luminox Navy SEAL Whiteout",
     description:
       "Rarely seen now in the secondary market. SEAL Ref. 3507.WO “Whiteout”.",
-    price: "$35",
-    image: "/images/recommended/luminox.jpg",
+    productPrice: 35,
   },
   {
-    name: "Floral sandals",
-    description: "Size 8.5\nLightly used (~5 times)\nClearing due to no space.",
-    price: "$9.50",
-    image: "/images/recommended/floral.jpg",
+    id: 7,
+    imageUrl: "/images/recommended/floral.jpg",
+    title: "Floral sandals",
+    description: "Size 8.5. Lightly used (~5 times). Clearing due to no space.",
+    productPrice: 9.5,
   },
   {
-    name: "Calvin Klein T-Shirts",
+    id: 8,
+    imageUrl: "/images/recommended/calvin.jpg",
+    title: "Calvin Klein T-Shirts",
     description:
       "First two never worn before, last one has been worn < 5 times.",
-    price: "$20",
-    image: "/images/recommended/calvin.jpg",
+    productPrice: 20,
   },
   {
-    name: "White Puffer Cloud bag",
+    id: 9,
+    imageUrl: "/images/recommended/cloudbag.jpg",
+    title: "White Puffer Cloud bag",
     description:
       "Brand New White Puffer Cloud Bag selling at $15. Second pic tote bags $5 each!",
-    price: "$5",
-    image: "/images/recommended/cloudbag.jpg",
+    productPrice: 5,
   },
   {
-    name: "Lululemon Cropped Full Zip",
+    id: 10,
+    imageUrl: "/images/recommended/lululemon.jpg",
+    title: "Lululemon Cropped Full Zip",
     description:
       "Brand new white knitted top – washed but never worn. Free size, fits up to UK6 well.",
-    price: "$7.5",
-    oldPrice: "$15",
-    discount: "50%",
-    image: "/images/recommended/lululemon.jpg",
+    productPrice: 7.5,
+    discountPercent: 50, // from $15
   },
-
   {
-    name: "BADMINTON RACKET MUSCLE",
+    id: 11,
+    imageUrl: "/images/recommended/racket.jpg",
+    title: "BADMINTON RACKET MUSCLE",
     description: "* NOTE: It’s for a kid (short), not for an adult.",
-    price: "$16",
-    image: "/images/recommended/racket.jpg",
+    productPrice: 16,
   },
   {
-    name: "Seventh Stores V2 Hoodie size M",
-    description: "Worn once or twice. Bought in Japan. Open for nego.",
-    price: "$3",
-    image: "/images/recommended/seventh.jpg",
+    id: 12,
+    imageUrl: "/images/recommended/seventh.jpg",
+    title: "Seventh Stores V2 Hoodie size M",
+    description: "Worn once or twice. Bought in Japan. Open for negotiation.",
+    productPrice: 3,
   },
   {
-    name: "RedWing Iron Ranger 8080",
+    id: 13,
+    imageUrl: "/images/recommended/redwing.jpg",
+    title: "RedWing Iron Ranger 8080",
     description: "Size 8.5D. Well taken care of. Slight negotiations welcome.",
-    price: "$20",
-    image: "/images/recommended/redwing.jpg",
+    productPrice: 20,
   },
   {
-    name: "MIU ICONIC DENIM JEANS",
-    description: "SGD 507 - Credit Card\nSGD 490 - PayNow\nRetail SGD 1,670",
-    price: "$8",
-    image: "/images/recommended/miu_jeans.jpg",
+    id: 14,
+    imageUrl: "/images/recommended/miu_jeans.jpg",
+    title: "MIU ICONIC DENIM JEANS",
+    description: "SGD 507 - Credit Card. SGD 490 - PayNow. Retail SGD 1,670",
+    productPrice: 8,
   },
   {
-    name: "Brand new bag",
-    description: "No brand. Brand new, but put in the cabinet for awhile",
-    price: "$10",
-    image: "/images/recommended/newbag.jpg",
+    id: 15,
+    imageUrl: "/images/recommended/newbag.jpg",
+    title: "Brand new bag",
+    description: "No brand. Brand new, but put in the cabinet for awhile.",
+    productPrice: 10,
   },
   {
-    name: "New Balance 327",
-    description: "Size 38.5\nUsed once only.",
-    price: "$32",
-    image: "/images/recommended/nb327.jpg",
+    id: 16,
+    imageUrl: "/images/recommended/nb327.jpg",
+    title: "New Balance 327",
+    description: "Size 38.5. Used once only.",
+    productPrice: 32,
   },
   {
-    name: "Brand new Women’s Laptop",
+    id: 17,
+    imageUrl: "/images/recommended/laptop.jpg",
+    title: "Brand new Women’s Laptop",
     description: "Laptop backpack. Fits 13 inch laptop / iPad / tablet users.",
-    price: "$6",
-    image: "/images/recommended/laptop.jpg",
+    productPrice: 6,
   },
   {
-    name: "Baby sky blue shift dress work",
+    id: 18,
+    imageUrl: "/images/recommended/babydress.jpg",
+    title: "Baby sky blue shift dress work",
     description: "Worn less than 5 times. XS. Light blue color. Excellent.",
-    price: "$7.5",
-    oldPrice: "$15",
-    discount: "50%",
-    image: "/images/recommended/babydress.jpg",
+    productPrice: 7.5,
+    discountPercent: 50, // from $15
   },
   {
-    name: "Miu Miu Logo Sweatpants",
+    id: 19,
+    imageUrl: "/images/recommended/miu_sweats.jpg",
+    title: "Miu Miu Logo Sweatpants",
     description: "Retail SGD 1,960. Excellent condition (see pictures).",
-    price: "$5",
-    image: "/images/recommended/miu_sweats.jpg",
+    productPrice: 5,
   },
   {
-    name: "Title product",
+    id: 20,
+    imageUrl: "/images/recommended/title.jpg",
+    title: "Title product",
     description:
       "UNIQLOCK Montu Blue Palm Leaf Shirt XLv. Casual with pearl button.",
-    price: "$22",
-    image: "/images/recommended/title.jpg",
+    productPrice: 22,
   },
   {
-    name: "Maverick series leather watch",
+    id: 21,
+    imageUrl: "/images/recommended/maverick.jpg",
+    title: "Maverick series leather watch",
     description:
       "Preloved years ago. Have to replace battery your own. Not for fussy buyer.",
-    price: "$20",
-    image: "/images/recommended/maverick.jpg",
+    productPrice: 20,
   },
   {
-    name: "Daniel Wellington Watch",
+    id: 22,
+    imageUrl: "/images/recommended/wellington.jpg",
+    title: "Daniel Wellington Watch",
     description:
       "Daniel Wellington Sheffield Silver Dapper Watch - Black. Diameter 38mm / 7mm.",
-    price: "$13",
-    image: "/images/recommended/wellington.jpg",
+    productPrice: 13,
   },
   {
-    name: "Lululemon Scuba Oversized",
+    id: 23,
+    imageUrl: "/images/recommended/scuba.jpg",
+    title: "Lululemon Scuba Oversized",
     description:
       "Pre-owned - Good. Might have a few signs of wear, but all imperfections shown.",
-    price: "$22",
-    image: "/images/recommended/scuba.jpg",
+    productPrice: 22,
   },
   {
-    name: "B-600 Muscle Badminton Racket",
+    id: 24,
+    imageUrl: "/images/recommended/b600.jpg",
+    title: "B-600 Muscle Badminton Racket",
     description: "2 rackets. Free jump rope. With old grip. Sold as-is.",
-    price: "$15",
-    image: "/images/recommended/b600.jpg",
+    productPrice: 15,
   },
   {
-    name: "Authentic Van Cleef & Arpels",
+    id: 25,
+    imageUrl: "/images/recommended/vancleef.jpg",
+    title: "Authentic Van Cleef & Arpels",
     description:
       "Mother-of-pearl 1 stone. Color/features vary due to nature of gem.",
-    price: "$19",
-    image: "/images/recommended/vancleef.jpg",
+    productPrice: 19,
   },
   {
-    name: "Size M Seventh Store",
+    id: 26,
+    imageUrl: "/images/recommended/seventhstore.jpg",
+    title: "Size M Seventh Store",
     description: "Also willing to trade for a size L. Well used hoodie.",
-    price: "$10",
-    image: "/images/recommended/seventhstore.jpg",
+    productPrice: 10,
   },
   {
-    name: "america flag, USA Knitted",
+    id: 27,
+    imageUrl: "/images/recommended/flagknit.jpg",
+    title: "America flag, USA Knitted",
     description: "* NOTE: It’s for a kid (short), not for an adult.",
-    price: "$16",
-    image: "/images/recommended/flagknit.jpg",
+    productPrice: 16,
   },
   {
-    name: "Shoulder bag hand white leather",
+    id: 28,
+    imageUrl: "/images/recommended/whitebag.jpg",
+    title: "Shoulder bag hand white leather",
     description: "Like new. Good condition. No dustbag.",
-    price: "$10",
-    image: "/images/recommended/whitebag.jpg",
+    productPrice: 10,
   },
   {
-    name: "Authentic Zara Men Blouse Shirt",
+    id: 29,
+    imageUrl: "/images/recommended/zara.jpg",
+    title: "Authentic Zara Men Blouse Shirt",
     description:
       "Preloved years ago. Replace battery if needed. Not for fussy buyer.",
-    price: "$20",
-    image: "/images/recommended/zara.jpg",
+    productPrice: 20,
   },
   {
-    name: "Black leather shoulder bag",
+    id: 30,
+    imageUrl: "/images/recommended/blackbag.jpg",
+    title: "Black leather shoulder bag",
     description:
       "Black real leather. Carry on shoulder/crossbody. Size: 25x10x17cm",
-    price: "$10",
-    image: "/images/recommended/blackbag.jpg",
+    productPrice: 10,
   },
   {
-    name: "Roadbike",
+    id: 31,
+    imageUrl: "/images/recommended/roadbike.jpg",
+    title: "Roadbike",
     description: "Preloved roadbike with phone holder. No trade.",
-    price: "$125",
-    image: "/images/recommended/roadbike.jpg",
+    productPrice: 125,
   },
   {
-    name: "[new] beauty josen sunscreen",
+    id: 32,
+    imageUrl: "/images/recommended/josen.jpg",
+    title: "[new] beauty josen sunscreen",
     description:
       "beauty of joseon relief sun - used once only so it's still full but no box!! rfs: switched to new sunscreen.",
-    price: "$9",
-    image: "/images/recommended/josen.jpg",
+    productPrice: 9,
   },
   {
-    name: "Solid wood coffee table",
+    id: 33,
+    imageUrl: "/images/recommended/table.jpg",
+    title: "Solid wood coffee table",
     description:
       "Black real leather shoulder bag with double strap. Can carry on shoulder or crossbody.",
-    price: "$25",
-    image: "/images/recommended/table.jpg",
+    productPrice: 25,
   },
   {
-    name: "Love and Co necklace",
+    id: 34,
+    imageUrl: "/images/recommended/love.jpg",
+    title: "Love and Co necklace",
     description: "Got it as a gift but don’t wear it.",
-    price: "$7",
-    image: "/images/recommended/love.jpg",
+    productPrice: 7,
   },
   {
-    name: "Anurak Mens shirt white",
+    id: 35,
+    imageUrl: "/images/recommended/anurak.jpg",
+    title: "Anurak Mens shirt white",
     description:
       "Tailored light blue cotton stripes shirt with mother of pearl buttons. Cut away collar, split yoke.",
-    price: "$11",
-    image: "/images/recommended/anurak.jpg",
+    productPrice: 11,
   },
   {
-    name: "Authentic Gucci GG Rubber",
+    id: 36,
+    imageUrl: "/images/recommended/gucci_rubber.jpg",
+    title: "Authentic Gucci GG Rubber",
     description: "Black real leather. Refer to Gucci’s official size guide.",
-    price: "$10",
-    image: "/images/recommended/gucci_rubber.jpg",
+    productPrice: 10,
   },
   {
-    name: "Chanel Pink Mini Handle Bag",
+    id: 37,
+    imageUrl: "/images/recommended/chanel_pink.jpg",
+    title: "Chanel Pink Mini Handle Bag",
     description:
       "Like new Chanel mini clutch bag. Paid for 5k+ in retail. Comes with full set, bought in Singapore MBS.",
-    price: "$50",
-    image: "/images/recommended/chanel_pink.jpg",
+    productPrice: 50,
   },
   {
-    name: "Puma HYROX Edition Shorts",
+    id: 38,
+    imageUrl: "/images/recommended/puma.jpg",
+    title: "Puma HYROX Edition Shorts",
     description: "Authentic from JD Sports. Used very few times.",
-    price: "$6",
-    image: "/images/recommended/puma.jpg",
+    productPrice: 6,
   },
   {
-    name: "Black Backpack",
+    id: 39,
+    imageUrl: "/images/recommended/backpack.jpg",
+    title: "Black Backpack",
     description:
       "Feel free to ask for more pics. Bought a year ago but kept in storage. Prefer tote bags now.",
-    price: "$8",
-    image: "/images/recommended/backpack.jpg",
+    productPrice: 8,
   },
   {
-    name: "UNIQLO ARMY GREEN BLOUSE",
+    id: 40,
+    imageUrl: "/images/recommended/uniqlo_green.jpg",
+    title: "UNIQLO ARMY GREEN BLOUSE",
     description: "Fits size 2XL. ptp 63cm, length down 64cm.",
-    price: "$4",
-    image: "/images/recommended/uniqlo_green.jpg",
+    productPrice: 4,
   },
-
   {
-    name: "Anta Shockwave Pro 5 US 9",
+    id: 41,
+    imageUrl: "/images/recommended/anta.jpg",
+    title: "Anta Shockwave Pro 5 US 9",
     description:
       "Preloved shockwave 5 pro basketball shoe. Still has decent traction. Can be used for outdoor court.",
-    price: "$14",
-    image: "/images/recommended/anta.jpg",
+    productPrice: 14,
   },
   {
-    name: "Love Bonito Lime Green",
+    id: 42,
+    imageUrl: "/images/recommended/bonito.jpg",
+    title: "Love Bonito Lime Green",
     description:
-      "Brand: Love Bonito\nSize: Small\nSelling $10 with tracked mail postage",
-    price: "$3",
-    image: "/images/recommended/bonito.jpg",
+      "Brand: Love Bonito. Size: Small. Selling $10 with tracked mail postage",
+    productPrice: 3,
   },
   {
-    name: "Starry Co ’Josie’ necklace",
+    id: 43,
+    imageUrl: "/images/recommended/josie.jpg",
+    title: "Starry Co ’Josie’ necklace",
     description: "Worn once to try, didn’t like the way it looked on me.",
-    price: "$6",
-    image: "/images/recommended/josie.jpg",
+    productPrice: 6,
   },
   {
-    name: "[Female] Black & White Top",
+    id: 44,
+    imageUrl: "/images/recommended/blacktop.jpg",
+    title: "[Female] Black & White Top",
     description: "Size stated in shirt is L but fits more like M.",
-    price: "$5",
-    image: "/images/recommended/blacktop.jpg",
+    productPrice: 5,
   },
   {
-    name: "Gucci Black Ballerina",
+    id: 45,
+    imageUrl: "/images/recommended/gucci_ballerina.jpg",
+    title: "Gucci Black Ballerina",
     description:
       "Bought in MBS Singapore, only come with item only. Enforced base with anti-slip.",
-    price: "$15",
-    image: "/images/recommended/gucci_ballerina.jpg",
+    productPrice: 15,
   },
   {
-    name: "Starry Co ’Josie’ necklace",
-    description: "Worn once to try, didn’t like the way it looked on me.",
-    price: "$6",
-    image: "/images/recommended/josie.jpg",
-  },
-  {
-    name: "[Female] Black & White Top",
-    description: "Size stated in shirt is L but fits more like M.",
-    price: "$5",
-    image: "/images/recommended/blacktop.jpg",
-  },
-  {
-    name: "Gucci Black Ballerina",
-    description:
-      "Bought in MBS Singapore, only come with item only. Enforced base with anti-slip.",
-    price: "$15",
-    image: "/images/recommended/gucci_ballerina.jpg",
-  },
-  {
-    name: "Starry Co ’Josie’ necklace",
-    description: "Worn once to try, didn’t like the way it looked on me.",
-    price: "$6",
-    image: "/images/recommended/josie.jpg",
-  },
-  {
-    name: "[Female] Black & White Top",
-    description: "Size stated in shirt is L but fits more like M.",
-    price: "$5",
-    image: "/images/recommended/blacktop.jpg",
-  },
-  {
-    name: "Gucci Black Ballerina",
-    description:
-      "Bought in MBS Singapore, only come with item only. Enforced base with anti-slip.",
-    price: "$15",
-    image: "/images/recommended/gucci_ballerina.jpg",
-  },
-    {
-    name: "america flag, USA Knitted",
+    id: 46,
+    imageUrl: "/images/recommended/flagknit.jpg",
+    title: "america flag, USA Knitted",
     description: "* NOTE: It’s for a kid (short), not for an adult.",
-    price: "$16",
-    image: "/images/recommended/flagknit.jpg",
+    productPrice: 16,
   },
   {
-    name: "Shoulder bag hand white leather",
+    id: 47,
+    imageUrl: "/images/recommended/whitebag.jpg",
+    title: "Shoulder bag hand white leather",
     description: "Like new. Good condition. No dustbag.",
-    price: "$10",
-    image: "/images/recommended/whitebag.jpg",
+    productPrice: 10,
   },
   {
-    name: "Authentic Zara Men Blouse Shirt",
+    id: 48,
+    imageUrl: "/images/recommended/zara.jpg",
+    title: "Authentic Zara Men Blouse Shirt",
     description:
       "Preloved years ago. Replace battery if needed. Not for fussy buyer.",
-    price: "$20",
-    image: "/images/recommended/zara.jpg",
+    productPrice: 20,
   },
   {
-    name: "Black leather shoulder bag",
+    id: 49,
+    imageUrl: "/images/recommended/blackbag.jpg",
+    title: "Black leather shoulder bag",
     description:
       "Black real leather. Carry on shoulder/crossbody. Size: 25x10x17cm",
-    price: "$10",
-    image: "/images/recommended/blackbag.jpg",
+    productPrice: 10,
   },
   {
-    name: "Roadbike",
+    id: 50,
+    imageUrl: "/images/recommended/roadbike.jpg",
+    title: "Roadbike",
     description: "Preloved roadbike with phone holder. No trade.",
-    price: "$125",
-    image: "/images/recommended/roadbike.jpg",
+    productPrice: 125,
   },
   {
-    name: "[new] beauty josen sunscreen",
+    id: 51,
+    imageUrl: "/images/recommended/josen.jpg",
+    title: "[new] beauty josen sunscreen",
     description:
       "beauty of joseon relief sun - used once only so it's still full but no box!! rfs: switched to new sunscreen.",
-    price: "$9",
-    image: "/images/recommended/josen.jpg",
+    productPrice: 9,
   },
   {
-    name: "Solid wood coffee table",
+    id: 52,
+    imageUrl: "/images/recommended/table.jpg",
+    title: "Solid wood coffee table",
     description:
       "Black real leather shoulder bag with double strap. Can carry on shoulder or crossbody.",
-    price: "$25",
-    image: "/images/recommended/table.jpg",
+    productPrice: 25,
   },
   {
-    name: "Love and Co necklace",
+    id: 53,
+    imageUrl: "/images/recommended/love.jpg",
+    title: "Love and Co necklace",
     description: "Got it as a gift but don’t wear it.",
-    price: "$7",
-    image: "/images/recommended/love.jpg",
+    productPrice: 7,
   },
 ];
 
@@ -415,46 +424,30 @@ export default function RecommendedList() {
           Recommended For You
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-          {itemsToShow.map((item, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl shadow overflow-hidden"
-            >
-              <div className="relative w-full h-[160px]">
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  className="object-cover"
-                />
-                {item.discount && (
-                  <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full shadow">
-                    {item.discount} Off
-                  </div>
-                )}
-              </div>
-              <div className="p-3">
-                <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">
-                  {item.name}
-                </h3>
-                <p className="text-xs text-gray-500 line-clamp-2 whitespace-pre-line">
-                  {item.description}
-                </p>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="text-sm font-semibold text-orange-500">
-                    {item.price}
-                    {item.oldPrice && (
-                      <span className="text-gray-400 line-through text-xs ml-2">
-                        {item.oldPrice}
-                      </span>
-                    )}
-                  </div>
-                  <FiBookmark className="text-gray-500 w-4 h-4" />
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-[60] justify-items-center">
+          {itemsToShow.map((item) => {
+            const price =
+              typeof item.productPrice === "number"
+                ? item.discountPercent
+                  ? (item.productPrice * (100 - item.discountPercent)) / 100
+                  : item.productPrice
+                : 0;
+
+            return (
+              <ProductCart
+                key={item.id}
+                id={item.id}
+                imageUrl={item.imageUrl}
+                title={item.title}
+                description={item.description}
+                price={price.toFixed(2)}
+                originalPrice={item.discountPercent ? item.productPrice : null}
+                discountText={
+                  item.discountPercent ? `${item.discountPercent}% OFF` : null
+                }
+              />
+            );
+          })}
         </div>
 
         {visibleCount < recommendedItems.length && (

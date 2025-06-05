@@ -2,47 +2,46 @@ import Image from "next/image";
 
 export default function DailyBanner() {
   return (
-    <section className="w-full bg-[#f0eaed] py-10 px-4">
+    <section className="w-full bg-[#f7f2f5] py-10 px-4 rounded-[40px]">
       <div className="max-w-[1200px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 font-quicksand">
+        {/* Text Section */}
         <div className="flex-1 text-center lg:text-left">
-          <h2 className="text-[22px] sm:text-[26px] md:text-[30px] font-bold text-gray-900 leading-snug mb-4">
+          <h2 className="text-[20px] sm:text-[30px] md:text-[35px] font-bold text-gray-900 leading-snug mb-4">
             Your daily resell marketplace — shop
             <br className="hidden sm:block" />
             or sell second-hand today.
             <br className="hidden sm:block" />
             All from home, all with <span className="text-orange-500">ReSellKH</span>
           </h2>
-          <p className="text-[15px] sm:text-[17px] md:text-[20px] text-gray-600 font-medium">
-            Start You'r Daily Shopping with{" "}
-            <span className="text-orange-500 font-semibold">ReSellKH</span>
+          <p className="text-[14px] sm:text-[16px] md:text-[18px] text-gray-500 font-medium">
+            Start your daily shopping with <span className="text-orange-500 font-semibold">ReSellKH</span>
           </p>
         </div>
 
-        <div className="w-full lg:w-[480px] flex flex-col sm:flex-row items-center justify-center gap-4 relative">
-          <div className="flex gap-4">
+        {/* Image Section */}
+        <div className="w-full lg:w-[480px] relative flex justify-center items-center">
+          <div className="absolute top-0 left-0 rounded-3xl overflow-hidden shadow-md w-[180px] h-[180px]">
             <Image
               src="/images/banner/banner1.jpg"
               alt="bg1"
-              width={160}
-              height={160}
-              className="rounded-xl object-cover shadow-md w-[140px] h-[140px] md:w-[160px] md:h-[160px]"
+              fill
+              className="object-cover"
             />
+          </div>
+          <div className="absolute top-0 right-0 rounded-3xl overflow-hidden shadow-md w-[180px] h-[180px]">
             <Image
               src="/images/banner/banner2.jpg"
               alt="bg2"
-              width={160}
-              height={160}
-              className="rounded-xl object-cover shadow-md w-[140px] h-[140px] md:w-[160px] md:h-[160px]"
+              fill
+              className="object-cover"
             />
           </div>
-          
-          <div className="md:absolute md:top-10 md:left-12 w-[150px] h-[150px] md:w-[160px] md:h-[160px]">
+          <div className="relative top-[40px] rounded-3xl overflow-hidden shadow-lg w-[200px] h-[200px] z-10">
             <Image
               src="/images/banner/banner3.jpg"
               alt="bg3"
-              width={160}
-              height={160}
-              className="rounded-xl object-cover shadow-lg w-full h-full"
+              fill
+              className="object-cover"
             />
           </div>
         </div>
