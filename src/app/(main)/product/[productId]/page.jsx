@@ -12,12 +12,13 @@ import Footer from '@/components/layout/Footer';
 
 const ProductPage = () => {
   // Define actual image URLs for the hoodie from the provided image
-  const hoodieImageUrls = [
-    '/image1.png', // Main image on the right
-    '/image2.png', // Top thumbnail
-    '/image3.png', // Second thumbnail
-    '/video.mp4', // Third thumbnail
-  ];
+  // const hoodieImageUrls = [
+  //   '/image1.png', // Main image on the right
+  //   '/image2.png', // Top thumbnail
+  //   '/image3.png', // Second thumbnail
+  //   '/video.mp4', // Third thumbnail
+  // ];
+  
 
   const productData = {
     id: 'lulu-hoodie-123',
@@ -27,7 +28,7 @@ const ProductPage = () => {
     condition: 'Like new',
     category: 'Fashion',
     description: "I wore it just once for a chill outing, and it looked amazing. Super soft and lightweight - perfect for layering or wearing on its own. Honestly, I love it, but it's a way too many similar tops, so I'm...",
-    images: hoodieImageUrls, 
+    // images: hoodieImageUrls, 
   };
 
   return (

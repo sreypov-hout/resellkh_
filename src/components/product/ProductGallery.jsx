@@ -6,10 +6,9 @@ import ImageFullscreenModal from './ImageFullscreenModal'; // Import the fullscr
 
 const ProductGallery = ({ product }) => {
   const defaultMediaItems = [
-    'https://raw.githubusercontent.com/Ankhun/Next.js-E-Commerce-Page-Example/main/public/images/lulu-main.jpeg',
-    'https://raw.githubusercontent.com/Ankhun/Next.js-E-Commerce-Page-Example/main/public/images/lulu-thumb1.jpeg',
-    'https://raw.githubusercontent.com/Ankhun/Next.js-E-Commerce-Page-Example/main/public/images/lulu-thumb2.jpeg',
-    'https://raw.githubusercontent.com/Ankhun/Next.js-E-Commerce-Page-Example/main/public/images/lulu-thumb3.jpeg',
+    '/Product-Detail-Image/image1.png', // Placeholder for the first image
+    '/Product-Detail-Image/image2.png', // Placeholder for the second image
+    '/Product-Detail-Image/image3.png', // Placeholder for the third image
     '/Product-Detail-Image/video.mp4', // Placeholder for a video thumbnail/still
   ];
 
@@ -72,7 +71,7 @@ const ProductGallery = ({ product }) => {
           // Render Video Player if the selected media item is a video
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white">
             <video
-              src="/Product-Detail-Image/video.mp4" // **IMPORTANT: Replace with your actual video URL**
+              src="/" // **IMPORTANT: Replace with your actual video URL**
               controls
               loop
               muted

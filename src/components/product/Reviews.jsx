@@ -94,7 +94,7 @@ const Reviews = () => {
       
       {/* "Read all review" Link */}
       <div className="mt-6 text-left"> {/* Added margin-top for spacing and center alignment */}
-        <Link href="/seller-reviews" className="text-gray-900 hover:text-orange-500 text-sm font-medium"> {/* Adjusted styling */}
+        <Link href="/seller-reviews" className="text-gray-900 hover:text-orange-500 transition-colors text-sm font-medium"> {/* Adjusted styling */}
           Read all review &gt;
         </Link>
       </div>
