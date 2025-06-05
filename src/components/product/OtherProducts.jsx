@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import ProductCard from './ProductCard';
+import ProductCard from './ProductCard'; // Assuming ProductCard is in the same directory
 
 // Sample product list with 10 products
 const allProducts = [
@@ -10,7 +10,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-1.png',
     title: 'Vintage White Hoodie',
     description: 'Comfortable vintage style hoodie...',
-    price: '$7',
+    price: '7',
     originalPrice: null,
     isNew: false,
   },
@@ -19,7 +19,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-2.png',
     title: 'Coho Hoodie in brown',
     description: 'Coho Hoodie in brown...',
-    price: '$12-$45.00',
+    price: '12-$45.00',
     originalPrice: null,
     isNew: true,
   },
@@ -28,7 +28,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-3.png',
     title: 'Brandy Melville Graphic Hoodie',
     description: 'Graphic Hoodie size one size...',
-    price: '$22',
+    price: '22',
     originalPrice: null,
     isNew: false,
   },
@@ -37,7 +37,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-4.png',
     title: 'Brandy Hoodie',
     description: 'Brandy Melville Hoodie...',
-    price: '$15',
+    price: '15',
     originalPrice: null,
     isNew: false,
   },
@@ -46,7 +46,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-5.png',
     title: 'OCT 100% cotton beige Hoodies',
     description: 'Beige cotton hoodie...',
-    price: '$18',
+    price: '18',
     originalPrice: null,
     isNew: false,
   },
@@ -55,7 +55,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-6.png',
     title: 'Classic Black Hoodie',
     description: 'Simple black hoodie...',
-    price: '$25',
+    price: '25',
     originalPrice: null,
     isNew: true,
   },
@@ -64,7 +64,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-7.png',
     title: 'Urban Street Hoodie',
     description: 'Street-style hoodie...',
-    price: '$35',
+    price: '35',
     originalPrice: null,
     isNew: false,
   },
@@ -73,7 +73,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-8.png',
     title: 'Tie-Dye Hoodie',
     description: 'Trendy tie-dye pattern...',
-    price: '$40',
+    price: '40',
     originalPrice: null,
     isNew: true,
   },
@@ -82,7 +82,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-9.png',
     title: 'Khaki Zip Hoodie',
     description: 'Full-zip khaki hoodie...',
-    price: '$28',
+    price: '28',
     originalPrice: null,
     isNew: false,
   },
@@ -91,7 +91,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-10.png',
     title: 'Oversized Fleece Hoodie',
     description: 'Warm fleece hoodie...',
-    price: '$32',
+    price: '32',
     originalPrice: null,
     isNew: false,
   },
@@ -100,7 +100,7 @@ const allProducts = [
     image: '/Product-Detail-Image/more-11.png',
     title: 'Oversized Fleece Hoodie',
     description: 'Warm fleece hoodie...',
-    price: '$32',
+    price: '32',
     originalPrice: null,
     isNew: false,
   }
@@ -123,7 +123,17 @@ const OtherProducts = () => {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
         {visibleProducts.map(product => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            key={product.id}
+            id={product.id}
+            imageUrl={product.image}
+            title={product.title}
+            description={product.description}
+            price={product.price}
+            originalPrice={product.originalPrice}
+            // Dynamically set discountText based on the 'isNew' property
+            discountText={product.isNew ? "10% OFF" : null}
+          />
         ))}
       </div>
 
