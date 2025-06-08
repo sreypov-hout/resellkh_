@@ -58,6 +58,7 @@ const ProductPage = () => {
         
         <MoreFromSeller />
         <OtherProducts />
+        
       </div>
       <Footer />
 

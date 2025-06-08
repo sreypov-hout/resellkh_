@@ -16,7 +16,7 @@ export default function ProductCard({
   const bookmarked = isBookmarked(id);
 
   return (
-    <div className="flex flex-col cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden transition-transform w-[220px] h-[370px]">
+    <div className="flex flex-col cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden transition-transform w-[220px] h-[350px]">
       {/* Image Section */}
       <div className="relative w-full h-[240px]">
         {discountText && (
