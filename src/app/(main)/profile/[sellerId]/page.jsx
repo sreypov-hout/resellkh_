@@ -25,10 +25,10 @@ export default function SellerProfilePage() {
   return (
     <>
     <div className="max-w-full px-[7%] py-4 mx-auto">
-      {/* <ProfileBanner isOwner={true} user={userData} /> */}
+      <ProfileBanner isOwner={true} user={userData} />
       {/* <ProfileBanner isOwner={isOwner} user={profileUser} /> */}
-      {/* <ProfileTabs /> */}
-      <EditProfilePage />
+      <ProfileTabs />
+      {/* <EditProfilePage /> */}
     </div>
     <p className="h-[300px] w-full bg-gray-400 text-center">footer</p>
     </>

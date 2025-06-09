@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { FaLock, FaPlusCircle } from "react-icons/fa";
 import CustomDropdown from "./someComponent/CustomDropdown";
+import Link from "next/link";
 
 export default function EditProfilePage() {
   const [formData, setFormData] = useState({
@@ -36,13 +37,15 @@ export default function EditProfilePage() {
         </div>
 
         {/* Info Card */}
-        <div className="absolute left-6 right-6 bottom-[-1430px] md:bottom-[-1420px] lg:bottom-[-1410px] bg-white rounded-xl shadow px-6 pt-6 ">
+        <div className="absolute left-6 right-6 bottom-[-1414px] md:bottom-[-1382px] lg:bottom-[-1385px] bg-white rounded-xl shadow px-6 pt-6 ">
           <div className="w-full mb-6">
             <h1 className="text-lg font-bold mb-1">Edit Profile</h1>
-            <p className="text-sm text-gray-500 flex items-center">
-              Profile
+            <div className="flex items-center">
+              <p className="text-sm text-gray-500 flex items-center">
+                <Link href="/profile/sellerId">Profile</Link>
+              </p>
               <svg
-              className="inline-block w-4 mx-1"
+                className="inline-block w-4 mx-1"
                 viewBox="0 0 21 20"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -52,8 +55,11 @@ export default function EditProfilePage() {
                   fill="#2C2C2C"
                 />
               </svg>
-              <span className="text-orange-500">Edit profile</span>
-            </p>
+
+              <span className="pointer-events-none text-orange-500">
+                Edit profile
+              </span>
+            </div>
 
             <div className="max-w-4xl mx-auto px-2 mb-10 mt-5">
               {/* Profile photo and bio section */}
@@ -155,7 +161,7 @@ export default function EditProfilePage() {
                             <path
                               d="M13.8459 25C21.4928 25 27.6918 19.4036 27.6918 12.5C27.6918 5.59644 21.4928 0 13.8459 0C6.19903 0 0 5.59644 0 12.5C0 19.4036 6.19903 25 13.8459 25Z"
                               fill="#F1641E"
-                              fill-opacity="0.69"
+                              // fill-opacity="0.69"
                             />
                           </g>
                           <path
@@ -234,12 +240,26 @@ export default function EditProfilePage() {
                       onChange={handleChange("gender")}
                     />
 
-                    <Input
+                    {/* <Input
                       label="Birthday"
                       type="date"
                       value={formData.birthday}
                       onChange={handleChange("birthday")}
-                    />
+                    /> */}
+
+                    {/* Updated Birthday field using react-datepicker */}
+                    <div className="mb-4 relative">
+                      <label className="block text-sm font-semibold text-gray-900 mb-1 ">
+                        Birthday
+                      </label>
+                      <Input
+                        type="date"
+                        value={formData.birthday}
+                        onChange={handleChange("birthday")}
+                        placeholder="Select your birthday"
+                        // className="w-full border h-[45px] rounded-[24px] border-gray-900 px-3 py-2 text-sm bg-white focus:outline-none focus:border-orange-400"
+                      />
+                    </div>
                   </section>
 
                   {/* Save Button */}

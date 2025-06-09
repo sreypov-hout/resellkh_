@@ -1,11 +1,9 @@
 'use client';
 import Image from 'next/image';
 import { FaStar } from 'react-icons/fa';
-import EditProfilePage from './EditProfilePage';
-import { useState } from 'react';
+import Link from 'next/link';
 
 export default function ProfileBanner({ isOwner, user }) {
-  const [editing, setEditing] = useState(false);
   const {
     name = 'Bou Leakhena',
     avatar = '/images/avatar.jpg',
@@ -66,7 +64,8 @@ export default function ProfileBanner({ isOwner, user }) {
 
           {isOwner && (
             <button className="border px-4 py-1 rounded-full text-sm hover:bg-gray-100">
-              Edit Profile 
+              <Link href="/profile/edit-profile">Edit Profile</Link>
+               
             </button>
           )}
 

@@ -55,7 +55,7 @@ export default function CustomDropdown({ label, options, value, onChange }) {
 
         {/* Options */}
         {open && (
-          <div className="absolute right-[0px] top-[37px] z-10 mt-2 w-full bg-white border rounded-[16px] shadow-md max-h-60 overflow-y-auto focus:outline-none">
+          <div className="absolute right-[1px] top-[37px] z-10 mt-2 w-full bg-white border rounded-[16px] shadow-md max-h-60 overflow-y-auto focus:outline-none">
             {options.map((opt) => (
               <div
                 key={opt}
