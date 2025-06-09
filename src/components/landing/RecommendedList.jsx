@@ -418,13 +418,13 @@ export default function RecommendedList() {
   const itemsToShow = recommendedItems.slice(0, visibleCount);
 
   return (
-    <section className="w-full bg-white py-10">
+    <section className="w-full py-[10]">
       <div className="w-full">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
           Recommended For You
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-[60] justify-items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-[45] justify-items-center">
           {itemsToShow.map((item) => {
             const price =
               typeof item.productPrice === "number"
