@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FiSearch, FiFilter } from "react-icons/fi";
-import ProductCart from "@/components/domain/ProductCart";
+import Cart from "@/components/profile/someComponent/Cart";
 
 const products = [
   {
@@ -199,7 +199,7 @@ export default function ListingsWithFilter() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
             {filteredProducts.map((item) => {
               const price =
                 typeof item.productPrice === "number"
@@ -209,7 +209,7 @@ export default function ListingsWithFilter() {
                   : 0;
 
               return (
-                <ProductCart
+                <Cart
                   key={item.id}
                   id={item.id}
                   imageUrl={item.imageUrl}
