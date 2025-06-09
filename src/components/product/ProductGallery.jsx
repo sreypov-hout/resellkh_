@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import ImageFullscreenModal from './ImageFullscreenModal'; // Import the fullscreen modal component
+// import ImageFullscreenModal from './ImageFullscreenModal'; // Import the fullscreen modal component
 
 const ProductGallery = ({ product }) => {
   const defaultMediaItems = [
@@ -71,7 +71,7 @@ const ProductGallery = ({ product }) => {
           // Render Video Player if the selected media item is a video
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white">
             <video
-              src="/" // **IMPORTANT: Replace with your actual video URL**
+              src="/Product-Detail-Image/video.mp4" // **IMPORTANT: Replace with your actual video URL**
               controls
               loop
               muted
@@ -101,7 +101,7 @@ const ProductGallery = ({ product }) => {
       </div>
 
       {/* Fullscreen Image Modal - rendered conditionally */}
-      <ImageFullscreenModal
+      {/* <ImageFullscreenModal
         isOpen={isFullscreenOpen}
         images={imagesForFullscreen} // Pass filtered images to the modal
         selectedImageIndex={imagesForFullscreen.findIndex(src => src === mediaItems[selectedImageIndex])}
@@ -110,7 +110,7 @@ const ProductGallery = ({ product }) => {
           const originalIndex = mediaItems.indexOf(imagesForFullscreen[newModalIndex]);
           setSelectedImageIndex(originalIndex !== -1 ? originalIndex : 0);
         }}
-      />
+      /> */}
     </div>
   );
 };
