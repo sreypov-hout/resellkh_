@@ -10,7 +10,7 @@ export default function Register() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row items-center justify-around bg-white px-4 sm:px-6 md:px-12 lg:px-24 xl:px-32">
       {/* Left - Form */}
-      <div className="w-full lg:w-1/2 max-w-md py-8 space-y-6">
+      <div className="w-full lg:w-1/2 max-w-md py-8 space-y-4">
         {/* Logo */}
         <div className="flex justify-center mb-2">
           <img src="/LOGO.png" alt="RESELLKH Logo" className="h-12" />

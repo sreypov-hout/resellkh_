@@ -16,6 +16,7 @@ export default function AuthNavbar({ user = { name: 'User', avatar: '/image.png'
 
   return (
     <header className="w-full bg-white px-[7%] py-4">
+
       <div className="max-w-screen-full mx-auto flex flex-col gap-3">
         {/* Top Navigation */}
         <div className="flex justify-between items-center">
@@ -41,7 +42,7 @@ export default function AuthNavbar({ user = { name: 'User', avatar: '/image.png'
             <Link href="/" className="cursor-pointer hover:text-orange-500">
             <BsBookmark className="cursor-pointer hover:text-orange-500" />
             </Link>
-            <Link href="/" className="cursor-pointer hover:text-orange-500">
+            <Link href="/notifications" className="cursor-pointer hover:text-orange-500">
             <div className="relative">
               <BsBell className="cursor-pointer text-xl hover:text-orange-500" />
               <span className="absolute left-2 -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></span>

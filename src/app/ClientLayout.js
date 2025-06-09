@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import AuthNavbar from '@/components/layout/AuthNavbar';
 import GuestNavbar from '@/components/layout/GuestNavbar';
+import Footer from '@/components/layout/Footer';
 
 export default function ClientLayout({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(null);
@@ -15,8 +16,8 @@ export default function ClientLayout({ children }) {
 
   return (
     <>
-      {isLoggedIn ? <AuthNavbar /> : <GuestNavbar />}
-      {children}
+      {/* {isLoggedIn ? <AuthNavbar /> : <GuestNavbar />  } */}
+      {children}<Footer />
     </>
   );
 }

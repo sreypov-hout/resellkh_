@@ -1,12 +1,19 @@
 'use client';
 import Image from 'next/image';
 import { FaStar } from 'react-icons/fa';
+<<<<<<< HEAD
 import Link from 'next/link';
+=======
+>>>>>>> 451b3c4ad2224c7c3dca35722b4e7ba0b1b0e2f4
 
 export default function ProfileBanner({ isOwner, user }) {
   const {
     name = 'Bou Leakhena',
     avatar = '/images/avatar.jpg',
+<<<<<<< HEAD
+=======
+
+>>>>>>> 451b3c4ad2224c7c3dca35722b4e7ba0b1b0e2f4
     cover = 'cover.jpg',
     rating = null,
     reviewsCount = null,

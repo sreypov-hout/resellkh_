@@ -1,6 +1,8 @@
+// ProductCart.jsx (Reusable Card Component with Local Bookmark Support)
 "use client";
+
+import { useState } from "react";
 import Image from "next/image";
-import { useBookmark } from "@/context/BookmarkContext";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa";
 
 export default function ProductCart({
@@ -12,8 +14,11 @@ export default function ProductCart({
   originalPrice = null,
   discountText = null,
 }) {
-  const { toggleBookmark, isBookmarked } = useBookmark();
-  const bookmarked = isBookmarked(id);
+  const [bookmarked, setBookmarked] = useState(false);
+
+  const toggleBookmark = () => {
+    setBookmarked((prev) => !prev);
+  };
 
   return (
     <div className="flex flex-col cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden transition-transform w-[240px] h-[370px]">
@@ -50,9 +55,7 @@ export default function ProductCart({
           </div>
           <div
             className={`cursor-pointer ${bookmarked ? "text-orange-500" : "text-gray-400"}`}
-            onClick={() =>
-              toggleBookmark({ id, imageUrl, title, description, price })
-            }
+            onClick={toggleBookmark}
           >
             {bookmarked ? <FaBookmark size={18} /> : <FaRegBookmark size={18} />}
           </div>
@@ -61,3 +64,27 @@ export default function ProductCart({
     </div>
   );
 }
+
+
+{/*I chang*/}
+
+{/*toggleBookmark({
+  id, imageUrl, title, description, price, source: "Trending"
+})
+*/}
+
+{/* const [bookmarkedIds, setBookmarkedIds] = useState([]);
+
+const toggleBookmark = (id) => {
+  setBookmarkedIds((prev) =>
+    prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+  );
+};
+
+<ProductCart
+  key={item.id}
+  {...item}
+  bookmarked={bookmarkedIds.includes(item.id)}
+  toggleBookmark={() => toggleBookmark(item.id)}
+/>
+*/}

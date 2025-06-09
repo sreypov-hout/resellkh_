@@ -30,7 +30,9 @@
 // }
 
 // src/app/layout.js (REQUIRED)
+// src/app/layout.js or src/app/(main)/layout.js
 import './globals.css';
+import ClientLayout from './ClientLayout';
 
 export const metadata = {
   title: 'ResellKH',
@@ -46,3 +48,4 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+
