@@ -2,8 +2,8 @@ import Image from "next/image";
 
 export default function Banner() {
   return (
-    <section className="w-full bg-white py-10 px-4">
-      <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-start justify-between gap-10">
+    <section className="w-full py-[70] ">
+      <div className="max-w-auto mx-auto flex flex-col md:flex-row items-start justify-between gap-[45] ">
         <div className="w-full md:w-1/2 text-center md:text-left">
           <h1 className="text-[32px] sm:text-[40px] md:text-[48px] font-bold text-gray-900 font-[Poppins] leading-tight mb-3">
             We help you shop smarter

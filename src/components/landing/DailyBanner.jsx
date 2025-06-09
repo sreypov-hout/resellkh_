@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function DailyBanner() {
   return (
-    <section className="w-full bg-[#f7f2f5] py-10 px-4 rounded-[40px]">
+    <section className="w-full bg-[#f7f2f5] py-[70] rounded-[40px]">
       <div className="max-w-[1200px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 font-quicksand">
         {/* Text Section */}
         <div className="flex-1 text-center lg:text-left">

@@ -111,10 +111,10 @@ export default function TrendingNow() {
   };
 
   return (
-    <section className="w-full bg-white py-10">
+    <section className="w-full py-[10] ">
       <div className="w-full">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-[45] mb-6">
           <h2 className="text-xl font-bold text-gray-900">Trending now</h2>
           <div className="flex gap-2 self-start sm:self-auto">
             <button
@@ -135,7 +135,7 @@ export default function TrendingNow() {
         {/* Scrollable Cards */}
         <div
           ref={scrollRef}
-          className="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar pb-1"
+          className="flex gap-[30] overflow-x-auto scroll-smooth no-scrollbar pb-1"
         >
           {trendingItems.map((item) => {
             const price =

@@ -26,9 +26,9 @@ export default function CategorySlider() {
   };
 
   return (
-    <section className="w-full bg-white py-10">
+    <section className="w-full py-[10]">
       <div className="w-full">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-[45] mb-6">
           <h2 className="text-xl font-bold text-gray-900">
             What would you like to find?
           </h2>
