@@ -6,14 +6,14 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 const trendingItems = [
   {
-    id: 1,
+    id: 100,
     imageUrl: "/images/trending/shoe1.jpg",
     title: "Asics x Jound GT-2160",
     description: "Selling a pair of lightly used",
     productPrice: 219,
   },
   {
-    id: 2,
+    id: 101,
     imageUrl: "/images/trending/shoe2.jpg",
     title: "ASICS Gel Nimbus 26",
     description: "No box but used less than 5 times...",
@@ -21,28 +21,28 @@ const trendingItems = [
     discountPercent: 15,
   },
   {
-    id: 3,
+    id: 102,
     imageUrl: "/images/trending/shoe3.jpg",
     title: "Men's Asics Gel-Cumulus",
     description: "Very good condition Asics Gel-Cumulus...",
     productPrice: 50,
   },
   {
-    id: 4,
+    id: 103,
     imageUrl: "/images/trending/shoe4.jpg",
     title: "ASICS Japanese Edition Denims",
     description: "Barely worn special denim edition...",
     productPrice: 100,
   },
   {
-    id: 5,
+    id: 104,
     imageUrl: "/images/trending/shoe5.jpg",
     title: "New Balance 327",
     description: "Size 36.5. Used once only.",
     productPrice: 32,
   },
   {
-    id: 6,
+    id: 105,
     imageUrl: "/images/recommended/charles.jpg",
     title: "Charles & Keith Leather Metallic",
     description:
@@ -50,14 +50,14 @@ const trendingItems = [
     productPrice: 29,
   },
   {
-    id: 7,
+    id: 106,
     imageUrl: "/images/recommended/bike.jpg",
     title: "French Carbon Engineer Bicycle",
     description: "Highly negotiable. Used once only. Bicycle too small for me.",
     productPrice: 500,
   },
   {
-    id: 8,
+    id: 107,
     imageUrl: "/images/recommended/bracelet.jpg",
     title: "H Bracelet",
     description: "Genuine titanium steel H bracelet. Condition: 10/10",
@@ -65,7 +65,7 @@ const trendingItems = [
     discountPercent: 40,
   },
   {
-    id: 9,
+    id: 108,
     imageUrl: "/images/recommended/cloudbag.jpg",
     title: "White Puffer Cloud Bag",
     description:
@@ -73,7 +73,7 @@ const trendingItems = [
     productPrice: 5,
   },
   {
-    id: 10,
+    id: 109,
     imageUrl: "/images/recommended/lululemon.jpg",
     title: "Lululemon Cropped Full Zip",
     description:
@@ -82,14 +82,14 @@ const trendingItems = [
     discountPercent: 50,
   },
   {
-    id: 11,
+    id: 110,
     imageUrl: "/images/recommended/miu_sweats.jpg",
     title: "Miu Miu Logo Sweatpants",
     description: "Retail SGD 1,960. Excellent condition (see pictures).",
     productPrice: 5,
   },
   {
-    id: 12,
+    id: 111,
     imageUrl: "/images/recommended/title.jpg",
     title: "UNIQLOCK Montu Shirt XLv",
     description: "Montu Blue Palm Leaf Shirt XLv. Casual with pearl button.",

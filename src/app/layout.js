@@ -34,6 +34,7 @@ import { Book } from 'lucide-react';
 import './globals.css';
 import { Poppins } from "next/font/google";
 import { BookmarkProvider } from '@/context/BookmarkContext';
+import { Toaster } from "react-hot-toast";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans">
         <BookmarkProvider >
+          <Toaster position="top-right" reverseOrder={false} />
         {children}
         </BookmarkProvider>
       </body>

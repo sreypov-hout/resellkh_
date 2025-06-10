@@ -8,11 +8,23 @@ export const BookmarkProvider = ({ children }) => {
   const [bookmarks, setBookmarks] = useState([]);
 
   const toggleBookmark = (product) => {
-    setBookmarks((prev) =>
-      prev.find((item) => item.id === product.id)
-        ? prev.filter((item) => item.id !== product.id)
-        : [...prev, product]
-    );
+    // setBookmarks((prev) =>
+    //   prev.find((item) => item.id === product.id)
+    //     ? prev.filter((item) => item.id !== product.id)
+    //     : [...prev, product]
+    // );
+
+    
+    const isAlreadyBookmarked = bookmarks.find((item) => item.id === product.id);
+
+    if (isAlreadyBookmarked) {
+      console.log("Removing bookmark:", product.title); // log removal
+      setBookmarks((prev) => prev.filter((item) => item.id !== product.id));
+    } else {
+      console.log("Adding bookmark:", product.title); // log addition
+      setBookmarks((prev) => [...prev, product]);
+    }
+
   };
 
   
