@@ -9,7 +9,7 @@ const trendingItems = [
     id: 1,
     imageUrl: "/images/trending/shoe1.jpg",
     title: "Asics x Jound GT-2160",
-    description: "Selling a pair of lightly used Asics x JJJJound GT-2160s...",
+    description: "Selling a pair of lightly used",
     productPrice: 219,
   },
   {
@@ -18,7 +18,6 @@ const trendingItems = [
     title: "ASICS Gel Nimbus 26",
     description: "No box but used less than 5 times...",
     productPrice: 150,
-    originalPrice: 180,
     discountPercent: 15,
   },
   {
@@ -63,7 +62,6 @@ const trendingItems = [
     title: "H Bracelet",
     description: "Genuine titanium steel H bracelet. Condition: 10/10",
     productPrice: 30,
-    originalPrice: 50,
     discountPercent: 40,
   },
   {
@@ -81,7 +79,6 @@ const trendingItems = [
     description:
       "Brand new white knitted top – washed but never worn. Free size, fits up to UK6 well.",
     productPrice: 7.5,
-    originalPrice: 15,
     discountPercent: 50,
   },
   {
@@ -111,11 +108,13 @@ export default function TrendingNow() {
   };
 
   return (
-    <section className="w-full py-[10] ">
-      <div className="w-full">
+    <section className="w-full pt-[50px]">
+      <div className="w-full ">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-[45] mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Trending now</h2>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-[15] mb-2 lg">
+          <h2 className="text-xl sm:text-xl font-bold text-gray-900 ">
+            Trending now
+          </h2>
           <div className="flex gap-2 self-start sm:self-auto">
             <button
               onClick={() => scroll("left")}
@@ -135,7 +134,7 @@ export default function TrendingNow() {
         {/* Scrollable Cards */}
         <div
           ref={scrollRef}
-          className="flex gap-[30] overflow-x-auto scroll-smooth no-scrollbar pb-1"
+          className="flex gap-[26] overflow-x-auto scroll-smooth no-scrollbar px-[2px] py-1"
         >
           {trendingItems.map((item) => {
             const price =
@@ -148,7 +147,8 @@ export default function TrendingNow() {
             return (
               <div
                 key={item.id}
-                className="flex-shrink-0 w-[90%] sm:w-[45%] md:w-[30%] lg:w-[23%] xl:w-[18%] max-w-[240px] mx-auto"
+                // className="flex-shrink-0 min-w-[240px] max-w-[240px] h-[352px]"
+                className="flex-shrink-0 w-[211px] sm:w-[230px] md:w-[220px] lg:w-[240px] h-[340px]"
               >
                 <ProductCart
                   id={item.id}
@@ -160,9 +160,7 @@ export default function TrendingNow() {
                     item.discountPercent ? item.productPrice : null
                   }
                   discountText={
-                    item.discountPercent
-                      ? `${item.discountPercent}% OFF`
-                      : null
+                    item.discountPercent ? `${item.discountPercent}% OFF` : null
                   }
                 />
               </div>

@@ -7,7 +7,7 @@ import DailyBanner from "@/components/landing/DailyBanner";
 export default function LandingPage() {
   return (
     
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-[3.1%]">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-[7%]">
         <Banner />
         <CategorySlider />
         <TrendingProducts />
