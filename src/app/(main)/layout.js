@@ -1,20 +1,18 @@
 // src/app/(main)/layout.js
-import ClientLayout from '@/app/ClientLayout';
-import AuthNavbar from '@/components/layout/AuthNavbar';
-import { BookmarkProvider } from '@/context/BookmarkContext';
-import { Book } from 'lucide-react';
+import AuthNavbar from "@/components/layout/AuthNavbar";
 
 export const metadata = {
-  title: 'ResellKH - Marketplace',
+  title: "ResellKH - Marketplace",
 };
 
 export default function MainLayout({ children }) {
-//   return <ClientLayout>{children}</ClientLayout>;
-return <>
-<BookmarkProvider>
-<AuthNavbar />
-{children}
-</BookmarkProvider>
-</>
+  //   return <ClientLayout>{children}</ClientLayout>;
+  return (
+    <>
+  
+        <AuthNavbar />
+        {children}
+     
+    </>
+  );
 }
-

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { useBookmark } from "@/context/BookmarkContext"; // ⬅️ added
 
 export default function Cart({
   id,
@@ -13,10 +14,21 @@ export default function Cart({
   originalPrice = null,
   discountText = null,
 }) {
-  const [bookmarked, setBookmarked] = useState(false);
 
-  const toggleBookmark = () => {
-    setBookmarked((prev) => !prev);
+  const { toggleBookmark, isBookmarked } = useBookmark();
+  const bookmarked = isBookmarked(id);
+
+  const handleToggle = () => {
+    console.log("🧩 Toggling product:", id);
+    toggleBookmark({
+      id,
+      imageUrl,
+      title,
+      description,
+      price,
+      originalPrice,
+      discountPercent: discountText ? parseInt(discountText) : null,
+    });
   };
 
   return (
@@ -52,12 +64,14 @@ export default function Cart({
               <span className="text-gray-400 line-through text-[13px]">${originalPrice}</span>
             )}
           </div>
+        
           <div
             className={`cursor-pointer ${bookmarked ? "text-orange-500" : "text-gray-400"}`}
-            onClick={toggleBookmark}
+            onClick={handleToggle}
           >
             {bookmarked ? <FaBookmark size={18} /> : <FaRegBookmark size={18} />}
           </div>
+
         </div>
       </div>
     </div>
