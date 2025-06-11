@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import ProductCard from './ProductCard'; // Assuming ProductCard is in the same directory
+import ProductCard from './ProductCard';
 
-// Sample product list with 10 products
 const allProducts = [
   {
     id: 1,
@@ -12,7 +11,6 @@ const allProducts = [
     description: 'Comfortable vintage style hoodie...',
     price: '7',
     originalPrice: null,
-    isNew: false,
   },
   {
     id: 2,
@@ -21,7 +19,6 @@ const allProducts = [
     description: 'Coho Hoodie in brown...',
     price: '12-$45.00',
     originalPrice: null,
-    isNew: true,
   },
   {
     id: 3,
@@ -30,7 +27,6 @@ const allProducts = [
     description: 'Graphic Hoodie size one size...',
     price: '22',
     originalPrice: null,
-    isNew: false,
   },
   {
     id: 4,
@@ -39,7 +35,6 @@ const allProducts = [
     description: 'Brandy Melville Hoodie...',
     price: '15',
     originalPrice: null,
-    isNew: false,
   },
   {
     id: 5,
@@ -48,7 +43,6 @@ const allProducts = [
     description: 'Beige cotton hoodie...',
     price: '18',
     originalPrice: null,
-    isNew: false,
   },
   {
     id: 6,
@@ -56,8 +50,7 @@ const allProducts = [
     title: 'Classic Black Hoodie',
     description: 'Simple black hoodie...',
     price: '25',
-    originalPrice: null,
-    isNew: true,
+    originalPrice: '30',
   },
   {
     id: 7,
@@ -66,7 +59,6 @@ const allProducts = [
     description: 'Street-style hoodie...',
     price: '35',
     originalPrice: null,
-    isNew: false,
   },
   {
     id: 8,
@@ -74,8 +66,7 @@ const allProducts = [
     title: 'Tie-Dye Hoodie',
     description: 'Trendy tie-dye pattern...',
     price: '40',
-    originalPrice: null,
-    isNew: true,
+    originalPrice: '45',
   },
   {
     id: 9,
@@ -84,7 +75,6 @@ const allProducts = [
     description: 'Full-zip khaki hoodie...',
     price: '28',
     originalPrice: null,
-    isNew: false,
   },
   {
     id: 10,
@@ -93,7 +83,6 @@ const allProducts = [
     description: 'Warm fleece hoodie...',
     price: '32',
     originalPrice: null,
-    isNew: false,
   },
   {
     id: 11,
@@ -101,8 +90,7 @@ const allProducts = [
     title: 'Oversized Fleece Hoodie',
     description: 'Warm fleece hoodie...',
     price: '32',
-    originalPrice: null,
-    isNew: false,
+    originalPrice: '40',
   }
 ];
 
@@ -112,7 +100,17 @@ const OtherProducts = () => {
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_LOAD);
 
   const handleLoadMore = () => {
-    setVisibleCount(prev => prev + PRODUCTS_PER_LOAD);
+    setVisibleCount((prev) => prev + PRODUCTS_PER_LOAD);
+  };
+
+  const getDiscountText = (price, originalPrice) => {
+    const numericPrice = parseFloat(price);
+    const numericOriginal = parseFloat(originalPrice);
+    if (!isNaN(numericPrice) && !isNaN(numericOriginal) && numericOriginal > numericPrice) {
+      const discount = Math.round(((numericOriginal - numericPrice) / numericOriginal) * 100);
+      return `${discount}% OFF`;
+    }
+    return null;
   };
 
   const visibleProducts = allProducts.slice(0, visibleCount);
@@ -122,7 +120,7 @@ const OtherProducts = () => {
       <h2 className="text-xl font-bold text-gray-900 mb-6">Other products you may like</h2>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-        {visibleProducts.map(product => (
+        {visibleProducts.map((product) => (
           <ProductCard
             key={product.id}
             id={product.id}
@@ -131,8 +129,7 @@ const OtherProducts = () => {
             description={product.description}
             price={product.price}
             originalPrice={product.originalPrice}
-            // Dynamically set discountText based on the 'isNew' property
-            discountText={product.isNew ? "10% OFF" : null}
+            discountText={getDiscountText(product.price, product.originalPrice)}
           />
         ))}
       </div>

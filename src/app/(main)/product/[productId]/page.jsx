@@ -32,7 +32,7 @@ const ProductPage = () => {
   };
 
   return (
-                       //max-w-7xl           change to  px-[7%]
+                       //max-w-7xl           change to  px-[7%] max-w-full px-[7%] py-4 mx-auto
     <>
       <div className=" mx-auto px-4 sm:px-6 lg:px-[7%] py-4 bg-white text-black">
         <nav className="text-sm text-gray-500 mb-6">
@@ -62,7 +62,7 @@ const ProductPage = () => {
       </div>
       <Footer />
 
-      
+
     </>
   );
 };
