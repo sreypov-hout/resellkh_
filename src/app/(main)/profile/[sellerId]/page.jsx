@@ -28,9 +28,7 @@ export default function SellerProfilePage() {
       <ProfileBanner isOwner={true} user={userData} />
       {/* <ProfileBanner isOwner={isOwner} user={profileUser} /> */}
       <ProfileTabs />
-      {/* <EditProfilePage /> */}
     </div>
-    <p className="h-[300px] w-full bg-gray-400 text-center">footer</p>
     </>
   );
 }

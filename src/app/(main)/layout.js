@@ -12,6 +12,9 @@ export default function MainLayout({ children }) {
   
         <AuthNavbar />
         {children}
+        <div className="h-[300px] w-full bg-gray-400 text-center">
+          footer
+        </div>
      
     </>
   );
