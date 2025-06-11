@@ -10,162 +10,151 @@ export default function ResultSearchPage() {
   const query = searchParams.get("query");
 
   const result = [
-    {
-      id: 1,
-      imageUrl: "/images/recommended/bally.jpg",
-      title: "Bally Original Leather NoteBook",
-      description: "Original Box. Never used.",
-      productPrice: 15,
-    },
-    {
-      id: 2,
-      imageUrl: "/images/recommended/charles.jpg",
-      title: "Charles & Keith Leather Metallic",
-      description:
-        "No visual flaws, only the handle is asymmetric... Comes with a dust bag.",
-      productPrice: 29,
-    },
-    {
-      id: 3,
-      imageUrl: "/images/recommended/watch.jpg",
-      title: "Watch",
-      description:
-        "One Piece Men's High-Quality Silicone Strap Watch Richard Quartz Men’s Watch",
-      productPrice: 450,
-      discountPercent: 25, // from $600
-    },
-    {
-      id: 4,
-      imageUrl: "/images/recommended/bike.jpg",
-      title: "French carbon engineer bicycle",
-      description:
-        "Highly negotiable. Used once only. Bicycle too small for me.",
-      productPrice: 500,
-    },
-    {
-      id: 5,
-      imageUrl: "/images/recommended/bracelet.jpg",
-      title: "H bracelet",
-      description: "Genuine titanium steel H bracelet. Condition: 10/10",
-      productPrice: 30,
-      discountPercent: 40, // from $50
-    },
-    {
-      id: 6,
-      imageUrl: "/images/recommended/luminox.jpg",
-      title: "Luminox Navy SEAL Whiteout",
-      description:
-        "Rarely seen now in the secondary market. SEAL Ref. 3507.WO “Whiteout”.",
-      productPrice: 35,
-    },
-    {
-      id: 7,
-      imageUrl: "/images/recommended/floral.jpg",
-      title: "Floral sandals",
-      description:
-        "Size 8.5. Lightly used (~5 times). Clearing due to no space.",
-      productPrice: 9.5,
-    },
-    {
-      id: 8,
-      imageUrl: "/images/recommended/calvin.jpg",
-      title: "Calvin Klein T-Shirts",
-      description:
-        "First two never worn before, last one has been worn < 5 times.",
-      productPrice: 20,
-    },
-    {
-      id: 9,
-      imageUrl: "/images/recommended/cloudbag.jpg",
-      title: "White Puffer Cloud bag",
-      description:
-        "Brand New White Puffer Cloud Bag selling at $15. Second pic tote bags $5 each!",
-      productPrice: 5,
-    },
-    {
-      id: 10,
-      imageUrl: "/images/recommended/lululemon.jpg",
-      title: "Lululemon Cropped Full Zip",
-      description:
-        "Brand new white knitted top – washed but never worn. Free size, fits up to UK6 well.",
-      productPrice: 7.5,
-      discountPercent: 50, // from $15
-    },
-    {
-      id: 11,
-      imageUrl: "/images/recommended/racket.jpg",
-      title: "BADMINTON RACKET MUSCLE",
-      description: "* NOTE: It’s for a kid (short), not for an adult.",
-      productPrice: 16,
-    },
-    {
-      id: 12,
-      imageUrl: "/images/recommended/seventh.jpg",
-      title: "Seventh Stores V2 Hoodie size M",
-      description: "Worn once or twice. Bought in Japan. Open for negotiation.",
-      productPrice: 3,
-    },
-    {
-      id: 13,
-      imageUrl: "/images/recommended/redwing.jpg",
-      title: "RedWing Iron Ranger 8080",
-      description:
-        "Size 8.5D. Well taken care of. Slight negotiations welcome.",
-      productPrice: 20,
-    },
-    {
-      id: 14,
-      imageUrl: "/images/recommended/miu_jeans.jpg",
-      title: "MIU ICONIC DENIM JEANS",
-      description: "SGD 507 - Credit Card. SGD 490 - PayNow. Retail SGD 1,670",
-      productPrice: 8,
-    },
-    {
-      id: 15,
-      imageUrl: "/images/recommended/newbag.jpg",
-      title: "Brand new bag",
-      description: "No brand. Brand new, but put in the cabinet for awhile.",
-      productPrice: 10,
-    },
-    {
-      id: 16,
-      imageUrl: "/images/recommended/nb327.jpg",
-      title: "New Balance 327",
-      description: "Size 38.5. Used once only.",
-      productPrice: 32,
-    },
-    {
-      id: 17,
-      imageUrl: "/images/recommended/laptop.jpg",
-      title: "Brand new Women’s Laptop",
-      description:
-        "Laptop backpack. Fits 13 inch laptop / iPad / tablet users.",
-      productPrice: 6,
-    },
-    {
-      id: 18,
-      imageUrl: "/images/recommended/babydress.jpg",
-      title: "Baby sky blue shift dress work",
-      description: "Worn less than 5 times. XS. Light blue color. Excellent.",
-      productPrice: 7.5,
-      discountPercent: 50, // from $15
-    },
-    {
-      id: 19,
-      imageUrl: "/images/recommended/miu_sweats.jpg",
-      title: "Miu Miu Logo Sweatpants",
-      description: "Retail SGD 1,960. Excellent condition (see pictures).",
-      productPrice: 5,
-    },
-    {
-      id: 20,
-      imageUrl: "/images/recommended/title.jpg",
-      title: "Title product",
-      description:
-        "UNIQLOCK Montu Blue Palm Leaf Shirt XLv. Casual with pearl button.",
-      productPrice: 22,
-    },
-  ];
+      {
+    id: 1,
+    imageUrl: "/images/handbags/recycled-shoulder.jpg",
+    title: "Recycled leather shoulder bag",
+    description: "A smaller version of our Recycled Leather Shoulder Bag. Enhanced in matte leather with a smooth, pebble finish and soft nude hardware.",
+    productPrice: 20,
+  },
+  {
+    id: 2,
+    imageUrl: "/images/handbags/keith-white.jpg",
+    title: "Keith White Shoulder Bag",
+    description: "Large capacity; can fit a lot. Like-new.",
+    productPrice: 2.5,
+    discountPercent: 50, // from $5
+  },
+  {
+    id: 3,
+    imageUrl: "/images/handbags/ribbon-silver.jpg",
+    title: "Ribbon silver shoulder bag",
+    description: "Large capacity; can fit a lot. (Some dents from lack of use; see listing)",
+    productPrice: 6,
+  },
+  {
+    id: 4,
+    imageUrl: "/images/handbags/white-puffer.jpg",
+    title: "White Puffer Cloud bag",
+    description: "Brand New White Puffer Cloud Bag selling at $15. Rsp $29.80.",
+    productPrice: 5,
+  },
+  {
+    id: 5,
+    imageUrl: "/images/handbags/charles-keith-quilted.jpg",
+    title: "White chain quilted shoulder bag",
+    description: "Pre-loved Charles and Keith Bag. Please refer to pics for condition.",
+    productPrice: 2.1,
+    discountPercent: 30, // from $3
+  },
+  {
+    id: 6,
+    imageUrl: "/images/handbags/y2k-black.jpg",
+    title: "Y2K tote bag shoulder bag black",
+    description: "Tracked mailing only. Not an exact imitation; priced up. Feel free to ask questions.",
+    productPrice: 7,
+  },
+  {
+    id: 7,
+    imageUrl: "/images/handbags/black-adjustable.jpg",
+    title: "Black shoulder bag – adjustable",
+    description: "Selling my brand new Black Chain Bag. 1 compartment fits phone, wallet, keys, lipsticks, tissues.",
+    productPrice: 8,
+  },
+  {
+    id: 8,
+    imageUrl: "/images/handbags/white-shoulder.jpg",
+    title: "White shoulder carry bag",
+    description: "UNIQLO: Mott Blue Palm Leaf Print. BUTTON DOWN Short Sleeve Casual Shirt XLv mrgt3xy",
+    productPrice: 22,
+  },
+  {
+    id: 9,
+    imageUrl: "/images/handbags/beige-hand.jpg",
+    title: "Shoulder bag hand white leather",
+    description: "Like new. Good condition. No dustbag.",
+    productPrice: 10,
+  },
+  {
+    id: 10,
+    imageUrl: "/images/handbags/mini-embossed.jpg",
+    title: "Mini Embossed cow leather",
+    description: "Item is 99% new, as although the metal protection was removed, it was never carried out or used. Size: 19 x 13 x 6 cm",
+    productPrice: 169,
+  },
+  {
+    id: 11,
+    imageUrl: "/images/handbags/denim-tote.jpg",
+    title: "Denim Tote Bag",
+    description: "Available in green / black / beige. Size: 45cm * 12cm W * 32cm H",
+    productPrice: 8,
+  },
+  {
+    id: 12,
+    imageUrl: "/images/handbags/mini-embossed-black.jpg",
+    title: "Mini Embossed cow leather",
+    description: "Item is 99% new, as although the metal protection are removed, it has never carried out or used. Size: 19 x 13 x 6 cm",
+    productPrice: 169,
+  },
+  {
+    id: 13,
+    imageUrl: "/images/handbags/ruched-handle.jpg",
+    title: "Ruched Handle Baguette Bag",
+    description: "Received as gift in late 2023. 100% authentic. Kept in wardrobe for so long. Black tote, perfect for travelling or even as diaper bag.",
+    productPrice: 4.2,
+    discountPercent: 65, // from $12
+  },
+  {
+    id: 14,
+    imageUrl: "/images/handbags/black-leather-goldchain.jpg",
+    title: "Black leather shoulder bag",
+    description: "Black real leather shoulder bag with double strap. Can carry on shoulder or crossbody. Dimensions: 25 x 10 x 17 cm. Meet up...",
+    productPrice: 10,
+  },
+  {
+    id: 15,
+    imageUrl: "/images/handbags/sun-rises-cloud.jpg",
+    title: "When the sun rises cloud bag",
+    description: "RTP: $42.90. Selling as the bag is a little small for me.",
+    productPrice: 25,
+  },
+  {
+    id: 16,
+    imageUrl: "/images/handbags/rattan-sling.jpg",
+    title: "Rattan Sling Bag",
+    description: "Not used before, no defects.",
+    productPrice: 6,
+  },
+  {
+    id: 17,
+    imageUrl: "/images/handbags/tofu-bun.jpg",
+    title: "Tofu Bun bag",
+    description: "YSL Tofu Bun. Size: 23 x 14cm",
+    productPrice: 65,
+  },
+  {
+    id: 18,
+    imageUrl: "/images/handbags/charles-keith-black.jpg",
+    title: "Charles and Keith bag",
+    description: "Worn less than 5 times, good condition. It is made of premium quality embossed calfskin or cowhide.",
+    productPrice: 25,
+  },
+  {
+    id: 19,
+    imageUrl: "/images/handbags/mini-sling-blue.jpg",
+    title: "Brand New Mini Sling Bag",
+    description: "Free with any purchase on my listing. Brand new and never used, but interior of the strap shell might peel off. Bought around $30.",
+    productPrice: 3,
+  },
+  {
+    id: 20,
+    imageUrl: "/images/handbags/anekka-crossbody.jpg",
+    title: "Anekka cross body bag",
+    description: "Well used. Selling as the bag is a little small for me.",
+    productPrice: 8,
+  },
+];
+
 
   const [visibleCount, setVisibleCount] = useState(10);
 

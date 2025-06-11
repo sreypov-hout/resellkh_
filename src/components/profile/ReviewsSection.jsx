@@ -10,7 +10,7 @@ const reviewsData = [
     date: "2025-05-08",
     rating: 5,
     comment: "Great and friendly seller, and the dress I bought was even better than I had expected. It's probably the prettiest thing I own in my closet now. Super happy with my item!",
-    avatar: "/images/profile/girl1.jpg"
+    avatar: "/images/profile/Mollyy.jpg"
   },
   {
     id: 2,
@@ -18,7 +18,7 @@ const reviewsData = [
     date: "2025-03-22",
     rating: 5,
     comment: "Great seller & pleasant exp 💕",
-    avatar: "/images/profile/girl2.jpg"
+    avatar: "/images/profile/Rofath Nii.jpg"
   },
   {
     id: 3,
@@ -26,7 +26,7 @@ const reviewsData = [
     date: "2025-03-18",
     rating: 4,
     comment: "Seller was very nice and kind, tho meeting up can be quite troublesome. I'm thankful she still made the effort to pass me the shirt after her work! Thank you.",
-    avatar: "/images/profile/girl3.jpg"
+    avatar: "/images/profile/Engelina.jpg"
   },
   {
     id: 4,
@@ -34,7 +34,7 @@ const reviewsData = [
     date: "2025-03-16",
     rating: 5,
     comment: "Nice and friendly seller that can deal with you. Straightforward transaction. Seller was friendly and flexible with the meetup location. Appreciate the kind gesture too.",
-    avatar: "/images/profile/girl4.jpg"
+    avatar: "/images/profile/Christari.jpg"
   },
   {
     id: 5,
@@ -42,7 +42,7 @@ const reviewsData = [
     date: "2025-03-22",
     rating: 5,
     comment: "Smooth transaction & trust worthy! Recommended seller.",
-    avatar: "/images/profile/girl5.jpg"
+    avatar: "/images/profile/rabbit.jpg"
   },
   {
     id: 6,
@@ -50,7 +50,7 @@ const reviewsData = [
     date: "2025-03-16",
     rating: 5,
     comment: "Adorable socks of great quality and fantastic price! Seller sent out so quickly — we received it the very next day in the mailbox! Really really appreciate! Thanks so much :)",
-    avatar: "/images/profile/girl6.jpg"
+    avatar: "/images/profile/Heng Yew Chye.jpg"
   },
   {
     id: 7,
@@ -58,7 +58,7 @@ const reviewsData = [
     date: "2025-03-16",
     rating: 5,
     comment: "Fast to deal with. Great seller.",
-    avatar: "/images/profile/girl7.jpg"
+    avatar: "/images/profile/Christa.jpg"
   }
 ];
 
