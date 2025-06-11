@@ -1,5 +1,6 @@
 // src/app/(main)/layout.js
 import AuthNavbar from "@/components/layout/AuthNavbar";
+import Footer from "@/components/layout/Footer";
 
 export const metadata = {
   title: "ResellKH - Marketplace",
@@ -12,9 +13,7 @@ export default function MainLayout({ children }) {
   
         <AuthNavbar />
         {children}
-        <div className="h-[300px] w-full bg-gray-400 text-center">
-          footer
-        </div>
+        <Footer />
      
     </>
   );

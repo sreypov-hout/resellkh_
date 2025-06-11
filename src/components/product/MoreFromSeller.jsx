@@ -1,96 +1,128 @@
+'use client';
+
 import ProductCard from './ProductCard'; // Assuming ProductCard is in the same directory
+import ProductCart from '../domain/ProductCart';
+import { useRef } from 'react';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 const MoreFromSeller = () => {
   const products = [
     {
       id: 1,
-      image: '/Product-Detail-Image/card-1.png',
+      imageUrl: '/Product-Detail-Image/card-1.png',
       title: 'Recycled leather shoulder bag',
       description: 'A classic handbag of the Recycled leather...',
-      price: '100',
-      originalPrice: '200'
+      productPrice: 100,
+      discountPercent: 20
     },
     {
       id: 2,
-      image: '/Product-Detail-Image/card-2.png',
+      imageUrl: '/Product-Detail-Image/card-2.png',
       title: 'Best Bow Hairstyles',
       description: 'Best hairstyles that will be perfect to suit...',
-      price: '1.45',
-      originalPrice: null
+      productPrice: 1.45,
     },
     {
       id: 3,
-      image: '/Product-Detail-Image/card-3.png',
+      imageUrl: '/Product-Detail-Image/card-3.png',
       title: 'Swatch High-Quality',
       description: 'Swatch Classic Timepiece Elegance meets...',
-      price: '5',
-      originalPrice: null
+      productPrice: 5,
     },
     {
       id: 4,
-      image: '/Product-Detail-Image/card-4.png',
+      imageUrl: '/Product-Detail-Image/card-4.png',
       title: 'White Puller Cloud bag',
       description: 'Brand new White Puller Cloud bag selling at...',
-      price: '5',
-      originalPrice: null
+      productPrice: 5,
     },
     {
       id: 5,
-      image: '/Product-Detail-Image/card-5.png',
+      imageUrl: '/Product-Detail-Image/card-5.png',
       title: "JACK WILLS Men's",
       description: 'Sweatshirt/jumper',
-      price: '29.5',
-      originalPrice: null
-    }
+      productPrice: 29.5,
+    },
+    {
+      id: 6,
+      imageUrl: '/Product-Detail-Image/card-2.png',
+      title: 'Best Bow Hairstyles',
+      description: 'Best hairstyles that will be perfect to suit...',
+      productPrice: 1.45,
+    },
   ];
 
-  // Calculate discount text
-  const getDiscountText = (price, originalPrice) => {
-    if (!originalPrice || Number(originalPrice) <= Number(price)) return null;
-    const discount = Math.round(((originalPrice - price) / originalPrice) * 100);
-    return `${discount}% OFF`;
-  };
-
-  return (
-    <section className="mb-12">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-900">More from this seller</h2>
-        <div className="flex space-x-2">
-          <button className="p-2 rounded-lg hover:bg-gray-50">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button className="p-2 rounded-lg hover:bg-gray-50">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+  const scrollRef = useRef(null);
+  
+    const scroll = (dir) => {
+      scrollRef.current?.scrollBy({
+        left: dir === "left" ? -320 : 320,
+        behavior: "smooth",
+      });
+    };
+  
+    return (
+      <section className="w-full">
+        <div className="w-full ">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-[15] mb-2 lg">
+            <h2 className="text-xl sm:text-xl font-bold text-gray-900 mb-3">
+              More from this seller
+            </h2>
+            <div className="flex gap-2 self-start sm:self-auto">
+              <button
+                onClick={() => scroll("left")}
+                className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
+              >
+                <FiChevronLeft className="w-5 h-5 text-gray-700" />
+              </button>
+              <button
+                onClick={() => scroll("right")}
+                className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
+              >
+                <FiChevronRight className="w-5 h-5 text-gray-700" />
+              </button>
+            </div>
+          </div>
+  
+          {/* Scrollable Cards */}
+          <div
+            ref={scrollRef}
+            className="flex gap-[26] overflow-x-auto scroll-smooth no-scrollbar px-[2px] py-1"
+          >
+            {products.map((item) => {
+              const price =
+                typeof item.productPrice === "number"
+                  ? item.discountPercent
+                    ? (item.productPrice * (100 - item.discountPercent)) / 100
+                    : item.productPrice
+                  : 0;
+  
+              return (
+                <div
+                  key={item.id}
+                  className="flex-shrink-0 w-[211px] sm:w-[230px] md:w-[220px] lg:w-[240px] h-[340px]"
+                >
+                  <ProductCart
+                    id={item.id}
+                    imageUrl={item.imageUrl}
+                    title={item.title}
+                    description={item.description}
+                    price={price.toFixed(2)}
+                    originalPrice={
+                      item.discountPercent ? item.productPrice : null
+                    }
+                    discountText={
+                      item.discountPercent ? `${item.discountPercent}% OFF` : null
+                    }
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {products.map(product => {
-          const price = parseFloat(product.price);
-          const originalPrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
-          const discountText = getDiscountText(price, originalPrice);
-
-          return (
-            <ProductCard
-              key={product.id}
-              id={product.id}
-              imageUrl={product.image}
-              title={product.title}
-              description={product.description}
-              price={product.price}
-              originalPrice={product.originalPrice}
-              discountText={discountText}
-            />
-          );
-        })}
-      </div>
-    </section>
-  );
+      </section>
+    );
 };
 
 export default MoreFromSeller;

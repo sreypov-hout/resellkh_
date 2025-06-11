@@ -2,7 +2,7 @@
 "use client";
 
 import { useBookmark } from "@/context/BookmarkContext";
-import Cart from "@/components/profile/someComponent/Cart";
+import CartInBookmarkPage from "@/components/profile/someComponent/CartInBookmarkPage";
 
 export default function FavoritePage() {
   const { bookmarks } = useBookmark();
@@ -34,7 +34,7 @@ export default function FavoritePage() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
               {bookmarks.map((item) => (
-                <Cart
+                <CartInBookmarkPage
                   key={item.id}
                   {...item}
                   discountText={

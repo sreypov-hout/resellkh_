@@ -51,7 +51,7 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body  className="font-sans">
         <BookmarkProvider >
-          <Toaster position="top-right" reverseOrder={false} />
+          <Toaster position="certainty" reverseOrder={false} />
         {children}
         </BookmarkProvider>
       </body>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 export default function ConfirmModal({
   isOpen,
   onClose,
@@ -7,11 +9,30 @@ export default function ConfirmModal({
   title,
   message,
 }) {
+
+  useEffect(() => {
+    const preventScroll = (e) => {
+      if (isOpen) {
+        e.preventDefault();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("touchmove", preventScroll, { passive: false });
+      document.addEventListener("wheel", preventScroll, { passive: false });
+    }
+
+    return () => {
+      document.removeEventListener("touchmove", preventScroll);
+      document.removeEventListener("wheel", preventScroll);
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center">
-      <div className="bg-white w-[90%] max-w-md rounded-2xl shadow-lg p-6 relative text-center">
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white w-[90%] max-w-md rounded-2xl shadow-lg p-6 relative text-center" onClick={(e) => e.stopPropagation()} >
         <button
           onClick={onClose}
           className="absolute top-3 right-4 text-gray-500 hover:text-black"
@@ -28,8 +49,8 @@ export default function ConfirmModal({
           </div>
         </div> */}
 
-        <h2 className="text-md font-semibold mb-2">{title}</h2>
-        <p className="text-sm text-gray-600 mb-6">{message}</p>
+        <h2 className="text-md font-semibold mb-5">{title}</h2>
+        <p className="text-sm px-3 text-gray-600 mb-6">{message}</p>
 
         <div className="flex justify-center gap-4">
           <button
