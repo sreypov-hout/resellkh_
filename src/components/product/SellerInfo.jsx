@@ -20,7 +20,7 @@ const SellerInfo = () => {
         }}>
         <div className="w-12 h-12 bg-gray-300 rounded-full overflow-hidden">
           <Image
-            src="/Product-Detail-Image/avatar.jpg"
+            src="/girl 2.jpg"
             alt="Seller"
             width={48}
             height={48}

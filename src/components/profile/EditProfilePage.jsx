@@ -1,10 +1,37 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import { FaLock, FaPlusCircle } from "react-icons/fa";
 import CustomDropdown from "./someComponent/CustomDropdown";
 import Link from "next/link";
+import { useRef, useState } from 'react';
+
+const provinceOptions = [
+  "Phnom Penh",
+  "Banteay Meanchey",
+  "Battambang",
+  "Kampong Cham",
+  "Kampong Chhnang",
+  "Kampong Speu",
+  "Kampong Thom",
+  "Kandal",
+  "Kep",
+  "Koh Kong",
+  "Kratie",
+  "Mondulkiri",
+  "Oddar Meanchey",
+  "Pailin",
+  "Preah Sihanouk",
+  "Preah Vihear",
+  "Prey Veng",
+  "Pursat",
+  "Ratanakiri",
+  "Siem Reap",
+  "Stung Treng",
+  "Svay Rieng",
+  "Takeo",
+  "Tbong Khmum",
+  "Bavet"
+];
 
 export default function EditProfilePage() {
   const [formData, setFormData] = useState({
@@ -28,6 +55,26 @@ export default function EditProfilePage() {
     alert("Changes saved");
   };
 
+   const fileInputRef = useRef(null);
+  const [selectedImage, setSelectedImage] = useState('/girl 2.jpg');
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageURL = URL.createObjectURL(file);
+      setSelectedImage(imageURL);
+
+      // TODO: Upload this file to backend
+      // const formData = new FormData();
+      // formData.append("file", file);
+      // await fetch('/api/upload', { method: 'POST', body: formData });
+    }
+  };
+
+  const triggerFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <>
       <div className="relative w-full mb-6">
@@ -41,41 +88,42 @@ export default function EditProfilePage() {
           <div className="w-full mb-6">
             <h1 className="text-lg font-bold mb-1">Edit Profile</h1>
             <div className="flex items-center">
-              <p className="text-sm text-gray-500 flex items-center">
-                <Link href="/profile/sellerId">Profile</Link>
-              </p>
-              <svg
-                className="inline-block w-4 mx-1"
-                viewBox="0 0 21 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M14.4305 10.6641L8.86053 15.9766C8.47555 16.3437 7.85303 16.3437 7.47214 15.9766L6.54655 15.0937C6.16157 14.7266 6.16157 14.1328 6.54655 13.7695L10.4946 10.0039L6.54655 6.23828C6.16157 5.87109 6.16157 5.27734 6.54655 4.91406L7.46804 4.02344C7.85303 3.65625 8.47555 3.65625 8.85643 4.02344L14.4264 9.33594C14.8154 9.70313 14.8154 10.2969 14.4305 10.6641Z"
-                  fill="#2C2C2C"
-                />
-              </svg>
-
-              <span className="pointer-events-none text-orange-500">
-                Edit profile
-              </span>
+              <div className="flex items-center text-gray-500">
+                <Link href="/profile/sellerId" className="hover:text-black">Profile</Link>
+                <svg className='mx-1' width="20" height="20" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M6.98558 5.06864C7.32339 4.7931 7.8211 4.8128 8.13643 5.12775L13.0048 9.99638C13.1679 10.1596 13.2563 10.3779 13.2563 10.6044C13.2563 10.8309 13.1681 11.0488 13.0048 11.2127L8.13633 16.0811C7.80004 16.417 7.2557 16.417 6.92029 16.0811C6.58388 15.7451 6.58388 15.2006 6.92019 14.8648L11.1802 10.6044L6.92029 6.34407C6.60492 6.02908 6.5852 5.53088 6.86112 5.19302L6.92025 5.12769L6.98558 5.06864Z" fill="#343A40" />
+                </svg>
+                <span className="text-orange-500 cursor-default">Edit profile</span>
+              </div>
             </div>
 
             <div className="max-w-4xl mx-auto px-2 mb-10 mt-5">
               {/* Profile photo and bio section */}
               <div className="flex items-center gap-6 mb-10">
                 <Image
-                  src="/images/profile/girl 1.jpg"
+                  src={selectedImage}
                   alt="avatar"
                   width={120}
                   height={120}
-                  className="rounded-full border-4 border-white  object-cover w-[120px] h-[120px]"
+                  className="rounded-full border-4 border-white object-cover w-[120px] h-[120px]"
                 />
                 <div className="flex flex-col justify-center">
-                  <p className="text-sm text-gray-700 mb-2 max-w-md">
-                    {formData.bio}
-                  </p>
-                  <button className="text-sm border px-4 py-1 rounded hover:bg-gray-100 w-fit">
+                  <p className="text-sm text-gray-700 mb-2 max-w-md">{formData.bio}</p>
+
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+
+                  {/* Trigger button */}
+                  <button
+                    onClick={triggerFileSelect}
+                    className="text-sm border px-4 py-1 rounded hover:bg-gray-100 w-fit"
+                  >
                     Update a photo
                   </button>
                 </div>
@@ -124,8 +172,9 @@ export default function EditProfilePage() {
                   <CustomDropdown
                     // label="Location"
                     value={formData.location}
-                    options={["Phnom Penh", "Siem Reap", "Battambang"]}
+                    options={provinceOptions}
                     onChange={handleChange("location")}
+
                   />
 
                   {/* Business Address */}
@@ -161,7 +210,7 @@ export default function EditProfilePage() {
                             <path
                               d="M13.8459 25C21.4928 25 27.6918 19.4036 27.6918 12.5C27.6918 5.59644 21.4928 0 13.8459 0C6.19903 0 0 5.59644 0 12.5C0 19.4036 6.19903 25 13.8459 25Z"
                               fill="#F1641E"
-                              // fill-opacity="0.69"
+                            // fill-opacity="0.69"
                             />
                           </g>
                           <path
@@ -234,10 +283,10 @@ export default function EditProfilePage() {
                       Gender
                     </h2>
                     <CustomDropdown
-                      // label="Gender"
                       value={formData.gender}
                       options={["Male", "Female", "Other"]}
                       onChange={handleChange("gender")}
+                      dropdownHeight="110px"
                     />
 
                     {/* <Input
@@ -257,7 +306,7 @@ export default function EditProfilePage() {
                         value={formData.birthday}
                         onChange={handleChange("birthday")}
                         placeholder="Select your birthday"
-                        // className="w-full border h-[45px] rounded-[24px] border-gray-900 px-3 py-2 text-sm bg-white focus:outline-none focus:border-orange-400"
+                      // className="w-full border h-[45px] rounded-[24px] border-gray-900 px-3 py-2 text-sm bg-white focus:outline-none focus:border-orange-400"
                       />
                     </div>
                   </section>

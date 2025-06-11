@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-export default function CustomDropdown({ label, options, value, onChange }) {
+export default function CustomDropdown({ label, options, value, onChange, dropdownHeight }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -28,18 +28,18 @@ export default function CustomDropdown({ label, options, value, onChange }) {
         </label>
       )}
 
-      {/* Dropdown container */}
       <div
-        className="relative w-full border h-[45px] rounded-[24px] border-gray-900 px-4 text-sm cursor-pointer flex items-center justify-between"
+        tabIndex={0}
+        role="button"
+        className="relative w-full border h-[45px] rounded-[24px] border-gray-900 focus:outline-none focus:border-orange-400 px-4 text-sm cursor-pointer flex items-center justify-between"
         onClick={() => setOpen(!open)}
       >
         {/* Content (text + icon) */}
         <div className="flex w-full items-center justify-between">
           <span className="text-gray-800">{value || 'Select'}</span>
           <svg
-            className={`w-5 h-5 text-gray-500 transform transition-transform duration-200 ${
-              open ? 'rotate-180' : 'rotate-0'
-            }`}
+            className={`w-5 h-5 text-gray-500 transform transition-transform duration-200 ${open ? 'rotate-180' : 'rotate-0'
+              }`}
             fill="none"
             viewBox="0 0 30 29"
             xmlns="http://www.w3.org/2000/svg"
@@ -55,13 +55,15 @@ export default function CustomDropdown({ label, options, value, onChange }) {
 
         {/* Options */}
         {open && (
-          <div className="absolute right-[1px] top-[37px] z-10 mt-2 w-full bg-white border rounded-[16px] shadow-md max-h-60 overflow-y-auto focus:outline-none">
+          <div
+            className="absolute right-[1px] top-[37px] z-10 mt-2 w-full bg-white border rounded-[16px] shadow-md overflow-y-auto focus:outline-none"
+            style={{ height: dropdownHeight || "220px" }}
+          >
             {options.map((opt) => (
               <div
                 key={opt}
-                className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
-                  value === opt ? 'text-black font-semibold' : ''
-                }`}
+                className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${value === opt ? "text-black font-semibold" : ""
+                  }`}
                 onClick={() => handleSelect(opt)}
               >
                 {opt}
@@ -69,6 +71,7 @@ export default function CustomDropdown({ label, options, value, onChange }) {
             ))}
           </div>
         )}
+
       </div>
     </div>
   );

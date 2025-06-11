@@ -106,16 +106,8 @@ export default function ListingNearMePage() {
         <p className=" text-gray-500 flex items-center">
           <Link href="/">Home</Link>
         </p>
-        <svg
-          className="inline-block w-4 mx-1"
-          viewBox="0 0 21 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M14.4305 10.6641L8.86053 15.9766C8.47555 16.3437 7.85303 16.3437 7.47214 15.9766L6.54655 15.0937C6.16157 14.7266 6.16157 14.1328 6.54655 13.7695L10.4946 10.0039L6.54655 6.23828C6.16157 5.87109 6.16157 5.27734 6.54655 4.91406L7.46804 4.02344C7.85303 3.65625 8.47555 3.65625 8.85643 4.02344L14.4264 9.33594C14.8154 9.70313 14.8154 10.2969 14.4305 10.6641Z"
-            fill="#2C2C2C"
-          />
+        <svg className='mx-1' width="20" height="20" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M6.98558 5.06864C7.32339 4.7931 7.8211 4.8128 8.13643 5.12775L13.0048 9.99638C13.1679 10.1596 13.2563 10.3779 13.2563 10.6044C13.2563 10.8309 13.1681 11.0488 13.0048 11.2127L8.13633 16.0811C7.80004 16.417 7.2557 16.417 6.92029 16.0811C6.58388 15.7451 6.58388 15.2006 6.92019 14.8648L11.1802 10.6044L6.92029 6.34407C6.60492 6.02908 6.5852 5.53088 6.86112 5.19302L6.92025 5.12769L6.98558 5.06864Z" fill="#343A40" />
         </svg>
 
         <span className="pointer-events-none text-orange-500">
@@ -138,22 +130,22 @@ export default function ListingNearMePage() {
           <div className="p-4 rounded-[24px] border border-gray-200">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-  {/* Title */}
-  <h2 className="text-sm md:text-lg lg:text-lg font-semibold text-gray-800">
-    11 found results of listing near you in Cambodia
-  </h2>
+              {/* Title */}
+              <h2 className="text-sm md:text-lg lg:text-lg font-semibold text-gray-800">
+                11 found results of listing near you in Cambodia
+              </h2>
 
-  {/* Distance Info */}
-  <div className="flex items-center gap-2 text-gray-600 text-sm whitespace-nowrap">
-    <svg  className="text-white" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-<path d="M2.28906 7.77998V17.51C2.28906 19.41 3.63906 20.19 5.27906 19.25L7.62906 17.91C8.13906 17.62 8.98906 17.59 9.51906 17.86L14.7691 20.49C15.2991 20.75 16.1491 20.73 16.6591 20.44L20.9891 17.96C21.5391 17.64 21.9991 16.86 21.9991 16.22V6.48998C21.9991 4.58998 20.6491 3.80998 19.0091 4.74998L16.6591 6.08998C16.1491 6.37998 15.2991 6.40998 14.7691 6.13998L9.51906 3.51998C8.98906 3.25998 8.13906 3.27998 7.62906 3.56998L3.29906 6.04998C2.73906 6.36998 2.28906 7.14998 2.28906 7.77998Z" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M8.55859 4V17" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M15.7305 6.62012V20.0001" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+              {/* Distance Info */}
+              <div className="flex items-center gap-2 text-gray-600 text-sm whitespace-nowrap">
+                <svg className="text-white" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.28906 7.77998V17.51C2.28906 19.41 3.63906 20.19 5.27906 19.25L7.62906 17.91C8.13906 17.62 8.98906 17.59 9.51906 17.86L14.7691 20.49C15.2991 20.75 16.1491 20.73 16.6591 20.44L20.9891 17.96C21.5391 17.64 21.9991 16.86 21.9991 16.22V6.48998C21.9991 4.58998 20.6491 3.80998 19.0091 4.74998L16.6591 6.08998C16.1491 6.37998 15.2991 6.40998 14.7691 6.13998L9.51906 3.51998C8.98906 3.25998 8.13906 3.27998 7.62906 3.56998L3.29906 6.04998C2.73906 6.36998 2.28906 7.14998 2.28906 7.77998Z" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M8.55859 4V17" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M15.7305 6.62012V20.0001" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
 
-    <span>Less than 5km</span>
-  </div>
-</div>
+                <span>Less than 5km</span>
+              </div>
+            </div>
 
 
             {/* Listing Grid or Empty State */}
@@ -209,7 +201,7 @@ export default function ListingNearMePage() {
                 })}
               </div>
             )}
-            
+
           </div>
         </div>
       </div>
