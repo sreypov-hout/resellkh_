@@ -7,8 +7,8 @@ export default function ProfileBanner({ isOwner, user }) {
     name = 'Bou Leakhena',
     avatar = '/images/avatar.jpg',
     cover = 'cover.jpg',
-    rating = null,
-    reviewsCount = null,
+    rating = 4.5,
+    reviewsCount = 59,
   } = user || {};
 
   return (

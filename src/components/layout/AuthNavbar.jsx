@@ -1,27 +1,51 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { BiCategoryAlt } from 'react-icons/bi';
-import Image from 'next/image';
-import SearchBar from './navbar/SearchBar';
-import LocationDropdown from './navbar/LocationDropdown';
-import ImageScanModal from './navbar/ImageScanModal';
-import Link from 'next/link';
-import ConfirmLogout from './navbar/Confirmlogout';
-import { useRef, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { BiCategoryAlt } from "react-icons/bi";
+import Image from "next/image";
+import SearchBar from "./navbar/SearchBar";
+import LocationDropdown from "./navbar/LocationDropdown";
+import ImageScanModal from "./navbar/ImageScanModal";
+import Link from "next/link";
+import ConfirmLogout from "./navbar/Confirmlogout";
+import { useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 
-export default function AuthNavbar({ user = { name: 'Bou Leakhena', avatar: '/girl 2.jpg' } }) {
+// {
+//   user = { name: "Bou Leakhena", avatar: "/girl 2.jpg" },
+// }
+export default function AuthNavbar() {
+  const [user, setUser] = useState(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const profileRef = useRef(null);
-
   const router = useRouter();
-
   const pathname = usePathname();
+
+  useEffect(() => {
+    const checkToken = () => {
+      const token = localStorage.getItem("authToken");
+      if (token) {
+        const mockUser = {
+          name: "Bou Leakhena",
+          avatar: "/girl 2.jpg",
+        };
+        setUser(mockUser);
+      } else {
+        setUser(null);
+      }
+    };
+
+    checkToken();
+    window.addEventListener("storage", checkToken);
+
+    return () => window.removeEventListener("storage", checkToken);
+  }, []);
+
+
 
   // Close profile dropdown and logout modal on route change
   useEffect(() => {
@@ -42,22 +66,37 @@ export default function AuthNavbar({ user = { name: 'Bou Leakhena', avatar: '/gi
     }
   }, []);
 
-
   return (
-    <header className="w-full sticky top-0 z-20 bg-white px-[7%] py-4">
-
+    <div className="w-full sticky top-0 z-20 bg-white px-[7%] py-4">
       <div className="max-w-screen-full mx-auto flex flex-col gap-3">
         <div className="flex justify-between items-center">
-          <img src="/logo.png" alt="ResellKH Logo" onClick={() => router.push('/')}
-            className="text-2xl cursor-pointer h-[40px] " />
+          <img
+            src="/logo.png"
+            alt="ResellKH Logo"
+            onClick={() => router.push("/")}
+            className="text-2xl cursor-pointer h-[40px] "
+          />
 
           <nav className="hidden md:flex gap-6 text-sm text-gray-800">
-            <Link href="#" className="hover:text-orange-500">Fashion</Link>
-            <Link href="#" className="hover:text-orange-500">Accessories</Link>
-            <Link href="#" className="hover:text-orange-500">Sport</Link>
-            <Link href="#" className="hover:text-orange-500">Beauty</Link>
-            <Link href="#" className="hover:text-orange-500">Book</Link>
-            <Link href="#" className="group flex items-center gap-1 text-gray-800 hover:text-orange-500">
+            <Link href="#" className="hover:text-orange-500">
+              Fashion
+            </Link>
+            <Link href="#" className="hover:text-orange-500">
+              Accessories
+            </Link>
+            <Link href="#" className="hover:text-orange-500">
+              Sport
+            </Link>
+            <Link href="#" className="hover:text-orange-500">
+              Beauty
+            </Link>
+            <Link href="#" className="hover:text-orange-500">
+              Book
+            </Link>
+            <Link
+              href="#"
+              className="group flex items-center gap-1 text-gray-800 hover:text-orange-500"
+            >
               <svg
                 className="w-5 h-5 group-hover:text-orange-500 transition-colors duration-200"
                 fill="currentColor"
@@ -73,96 +112,164 @@ export default function AuthNavbar({ user = { name: 'Bou Leakhena', avatar: '/gi
                 All Categories
               </span>
             </Link>
-
           </nav>
 
           {/* Icons + Avatar + Sell */}
-          <div className="flex items-center gap-4 text-gray-700 text-lg">
-            <Link href="/favourites" className="cursor-pointer hover:text-orange-500">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 3C3 2.20435 3.31607 1.44129 3.87868 0.87868C4.44129 0.316071 5.20435 0 6 0L18 0C18.7956 0 19.5587 0.316071 20.1213 0.87868C20.6839 1.44129 21 2.20435 21 3V23.25C20.9999 23.3857 20.9631 23.5188 20.8933 23.6351C20.8236 23.7515 20.7236 23.8468 20.604 23.9108C20.4844 23.9748 20.3497 24.0052 20.2142 23.9988C20.0787 23.9923 19.9474 23.9492 19.8345 23.874L12 19.6515L4.1655 23.874C4.05256 23.9492 3.92135 23.9923 3.78584 23.9988C3.65033 24.0052 3.5156 23.9748 3.396 23.9108C3.2764 23.8468 3.17641 23.7515 3.10667 23.6351C3.03694 23.5188 3.00007 23.3857 3 23.25V3ZM6 1.5C5.60218 1.5 5.22064 1.65804 4.93934 1.93934C4.65804 2.22064 4.5 2.60218 4.5 3V21.849L11.5845 18.126C11.7076 18.0441 11.8521 18.0004 12 18.0004C12.1479 18.0004 12.2924 18.0441 12.4155 18.126L19.5 21.849V3C19.5 2.60218 19.342 2.22064 19.0607 1.93934C18.7794 1.65804 18.3978 1.5 18 1.5H6Z" fill="black" />
-              </svg>
-
-            </Link>
-            <Link href="/notifications" className="cursor-pointer hover:text-orange-500">
-              <div className="relative">
-                <svg width="25" height="25" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15.0243 3.63745C10.8868 3.63745 7.52426 6.99995 7.52426 11.1375V14.75C7.52426 15.5125 7.19926 16.6749 6.81176 17.3249L5.37426 19.7125C4.48676 21.1875 5.09926 22.825 6.72426 23.375C12.1118 25.175 17.9243 25.175 23.3118 23.375C24.8243 22.875 25.4868 21.0875 24.6618 19.7125L23.2243 17.3249C22.8493 16.6749 22.5243 15.5125 22.5243 14.75V11.1375C22.5243 7.01245 19.1493 3.63745 15.0243 3.63745Z" stroke="#171717" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
-                  <path d="M17.3379 4.00005C16.9504 3.88755 16.5504 3.80005 16.1379 3.75005C14.9379 3.60005 13.7879 3.68755 12.7129 4.00005C13.0754 3.07505 13.9754 2.42505 15.0254 2.42505C16.0754 2.42505 16.9754 3.07505 17.3379 4.00005Z" stroke="#171717" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M18.7754 23.825C18.7754 25.8875 17.0879 27.575 15.0254 27.575C14.0004 27.575 13.0504 27.15 12.3754 26.475C11.7004 25.8 11.2754 24.85 11.2754 23.825" stroke="#171717" stroke-width="1.5" stroke-miterlimit="10" />
-                </svg>
-
-                <span className="absolute left-3 -top-0 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-              </div>
-            </Link>
-            <div className="relative" ref={profileRef}>
-              <Image
-                src={user.avatar}
-                alt="User Avatar"
-                width={32}
-                height={32}
-                className="rounded-full object-cover cursor-pointer"
-                onClick={() => setProfileOpen((prev) => !prev)}
-              />
-
-              {profileOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-30">
-                  <Link href="/profile/sellerId" className="cursor-pointer">
-                    <div className="flex items-center gap-3 px-4 py-3 border-b">
-                      <Image
-                        src={user.avatar}
-                        alt="User Avatar"
-                        width={40}
-                        height={40}
-                        className="rounded-full object-cover"
-                      />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                        <p className="text-xs text-gray-500">View your profile</p>
-                      </div>
-                    </div>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setProfileOpen(false);
-                      setShowLogoutModal(true);
-                    }}
-                    className="w-full px-4 py-3 rounded-b-xl flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100"
+          <div className="flex items-center gap-4 text-gray-700 text-sm">
+            {!user ? (
+              <>
+                <Link
+                  href="/register"
+                  className="hover:text-orange-500 font-medium"
+                >
+                  Register
+                </Link>
+                <Link
+                  href="/login"
+                  className="hover:text-orange-500 font-medium"
+                >
+                  Log in
+                </Link>
+                <button
+                  onClick={() => router.push("/sell")}
+                  className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm hover:bg-orange-600"
+                >
+                  Sell
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/favourites"
+                  className="cursor-pointer hover:text-orange-500"
+                >
+                  {/* Favourites Icon */}
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    {/* Logout icon */}
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M8.89844 7.56023C9.20844 3.96023 11.0584 2.49023 15.1084 2.49023H15.2384C19.7084 2.49023 21.4984 4.28023 21.4984 8.75023V15.2702C21.4984 19.7402 19.7084 21.5302 15.2384 21.5302H15.1084C11.0884 21.5302 9.23844 20.0802 8.90844 16.5402" stroke="#171717" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                      <path d="M15.0011 12H3.62109" stroke="#171717" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                      <path d="M5.85 8.65039L2.5 12.0004L5.85 15.3504" stroke="#171717" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path
+                      d="M3 3C3 2.20435 3.31607 1.44129 3.87868 0.87868C4.44129 0.316071 5.20435 0 6 0L18 0C18.7956 0 19.5587 0.316071 20.1213 0.87868C20.6839 1.44129 21 2.20435 21 3V23.25C20.9999 23.3857 20.9631 23.5188 20.8933 23.6351C20.8236 23.7515 20.7236 23.8468 20.604 23.9108C20.4844 23.9748 20.3497 24.0052 20.2142 23.9988C20.0787 23.9923 19.9474 23.9492 19.8345 23.874L12 19.6515L4.1655 23.874C4.05256 23.9492 3.92135 23.9923 3.78584 23.9988C3.65033 24.0052 3.5156 23.9748 3.396 23.9108C3.2764 23.8468 3.17641 23.7515 3.10667 23.6351C3.03694 23.5188 3.00007 23.3857 3 23.25V3ZM6 1.5C5.60218 1.5 5.22064 1.65804 4.93934 1.93934C4.65804 2.22064 4.5 2.60218 4.5 3V21.849L11.5845 18.126C11.7076 18.0441 11.8521 18.0004 12 18.0004C12.1479 18.0004 12.2924 18.0441 12.4155 18.126L19.5 21.849V3C19.5 2.60218 19.342 2.22064 19.0607 1.93934C18.7794 1.65804 18.3978 1.5 18 1.5H6Z"
+                      fill="black"
+                    />
+                  </svg>
+                </Link>
+
+                <Link
+                  href="/notifications"
+                  className="cursor-pointer hover:text-orange-500"
+                >
+                  <div className="relative">
+                    {/* Notification Icon */}
+                    <svg
+                      className="w-6 h-6 stroke-[1.5] stroke-gray-900" // control stroke width and color here
+                      viewBox="0 0 30 30"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M15.0243 3.63745C10.8868 3.63745 7.52426 6.99995 7.52426 11.1375V14.75C7.52426 15.5125 7.19926 16.6749 6.81176 17.3249L5.37426 19.7125C4.48676 21.1875 5.09926 22.825 6.72426 23.375C12.1118 25.175 17.9243 25.175 23.3118 23.375C24.8243 22.875 25.4868 21.0875 24.6618 19.7125L23.2243 17.3249C22.8493 16.6749 22.5243 15.5125 22.5243 14.75V11.1375C22.5243 7.01245 19.1493 3.63745 15.0243 3.63745Z"
+                        fill="none"
+                      />
+                      <path
+                        d="M17.3379 4.00005C16.9504 3.88755 16.5504 3.80005 16.1379 3.75005C14.9379 3.60005 13.7879 3.68755 12.7129 4.00005C13.0754 3.07505 13.9754 2.42505 15.0254 2.42505C16.0754 2.42505 16.9754 3.07505 17.3379 4.00005Z"
+                        fill="none"
+                      />
+                      <path
+                        d="M18.7754 23.825C18.7754 25.8875 17.0879 27.575 15.0254 27.575C14.0004 27.575 13.0504 27.15 12.3754 26.475C11.7004 25.8 11.2754 24.85 11.2754 23.825"
+                        fill="none"
+                      />
                     </svg>
-                    <span className="ps-2">Log out</span>
-                  </button>
+                    <span className="absolute left-3 -top-0 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                  </div>
+                </Link>
+
+                {/* Avatar Dropdown */}
+                <div className="relative" ref={profileRef}>
+                  <Image
+                    src={user.avatar}
+                    alt="User Avatar"
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover cursor-pointer"
+                    onClick={() => setProfileOpen((prev) => !prev)}
+                  />
+                  {profileOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-30">
+                      <Link href="/profile/sellerId" className="cursor-pointer">
+                        <div className="flex items-center gap-3 px-4 py-3 border-b">
+                          <Image
+                            src={user.avatar}
+                            alt="User Avatar"
+                            width={40}
+                            height={40}
+                            className="rounded-full object-cover"
+                          />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {user.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              View your profile
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setProfileOpen(false);
+                          setShowLogoutModal(true);
+                        }}
+                        className="w-full px-4 py-3 rounded-b-xl flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="stroke-[1.5] stroke-gray-900"
+                        >
+                          <path
+                            d="M8.89844 7.56023C9.20844 3.96023 11.0584 2.49023 15.1084 2.49023H15.2384C19.7084 2.49023 21.4984 4.28023 21.4984 8.75023V15.2702C21.4984 19.7402 19.7084 21.5302 15.2384 21.5302H15.1084C11.0884 21.5302 9.23844 20.0802 8.90844 16.5402"
+                            fill="none"
+                          />
+                          <path
+                            d="M15.0011 12H3.62109"
+                            fill="none"
+                          />
+                          <path
+                            d="M5.85 8.65039L2.5 12.0004L5.85 15.3504"
+                            fill="none"
+                          />
+                        </svg>
+                        <span className="ps-2">Log out</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-
-            <button
-              onClick={() => router.push('/sell')}
-              className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm hover:bg-orange-600"
-            >
-              Sell
-            </button>
+                <button
+                  onClick={() => router.push("/sell")}
+                  className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm hover:bg-orange-600"
+                >
+                  Sell
+                </button>
+              </>
+            )}
           </div>
         </div>
         <div className="flex flex-col lg:flex-row gap-3 mt-2">
-
-
           <SearchBar />
           <LocationDropdown />
-
         </div>
       </div>
 
-      {/* Image Scan Modal */}
       <ImageScanModal open={scanOpen} onClose={() => setScanOpen(false)} />
-
-      <ConfirmLogout
+      {/* <ConfirmLogout
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onConfirm={() => {
@@ -171,9 +278,20 @@ export default function AuthNavbar({ user = { name: 'Bou Leakhena', avatar: '/gi
           router.push("/login");
         }}
         title="Are you sure that you want to log out?"
-      />
+      /> */}
+      <ConfirmLogout
+  isOpen={showLogoutModal}
+  onClose={() => setShowLogoutModal(false)}
+  onConfirm={() => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("authTokenExpiry"); // if using expiry
+    setShowLogoutModal(false);
+    setUser(null); // clear user state
+    router.push("/");
+  }}
+  title="Are you sure that you want to log out?"
+/>
 
-    </header>
-
+    </div>
   );
 }

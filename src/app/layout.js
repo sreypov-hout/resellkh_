@@ -49,7 +49,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body  className="font-sans">
+      <body className="font-sans">
         <BookmarkProvider >
           <Toaster position="certainty" reverseOrder={false} />
         {children}

@@ -12,6 +12,7 @@ export default function MainLayout({ children }) {
     <>
   
         <AuthNavbar />
+        
         {children}
         <Footer />
      
