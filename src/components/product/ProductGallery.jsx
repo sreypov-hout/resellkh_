@@ -34,7 +34,7 @@ const ProductGallery = ({ product }) => {
             onClick={() => setSelectedImageIndex(index)}
             className={`
               w-[94px] h-[94px] rounded-lg overflow-hidden relative flex-shrink-0
-              border-2 transition-all duration-200
+              border transition-all duration-200
               ${selectedImageIndex === index ? 'border-orange-500 ring-2 ring-orange-500' : 'border-gray-200 hover:border-gray-300'}
             `}
           >
@@ -74,7 +74,7 @@ const ProductGallery = ({ product }) => {
               alt="Main product image"
               fill
               sizes="100%"
-              className="object-cover cursor-zoom-in"
+              className="object-cover"
               priority={true}
             />
           </Link>

@@ -16,7 +16,7 @@ const ProductPage = () => {
   //   '/image1.png', // Main image on the right
   //   '/image2.png', // Top thumbnail
   //   '/image3.png', // Second thumbnail
-  //   '/video.mp4', // Third thumbnail
+  //   '/Product-Detail-Image/video.mp4', // Third thumbnail
   // ];
   
 

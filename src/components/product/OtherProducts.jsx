@@ -17,8 +17,8 @@ const allProducts = [
     image: '/Product-Detail-Image/more-2.png',
     title: 'Coho Hoodie in brown',
     description: 'Coho Hoodie in brown...',
-    price: '12-$45.00',
-    originalPrice: null,
+    price: '12',
+    originalPrice: '25',
   },
   {
     id: 3,

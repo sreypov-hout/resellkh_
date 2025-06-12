@@ -40,7 +40,7 @@ const MoreFromSeller = () => {
       title: "JACK WILLS Men's",
       description: 'Sweatshirt/jumper',
       price: '29.5',
-      originalPrice: null
+      originalPrice: '59.99'
     }
   ];
 
