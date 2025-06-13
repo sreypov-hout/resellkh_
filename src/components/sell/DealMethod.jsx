@@ -7,15 +7,15 @@ export default function DealMethod({ location, setLocation, telegram, setTelegra
 
   return (
     <div className="p-5 border rounded-3xl bg-white space-y-4">
-      <p className="font-semibold text-lg">Deal Method</p>
+      <p className="font-semibold text-[17px]">Deal Method</p>
 
       {/* Meet-up Field */}
       <div>
-        <p className="text-sm font-medium mb-1">Meet-up</p>
+        <p className="text-sm text-gray-700 mb-1">Meet-up</p>
         {!showLocationInput ? (
           <button
             onClick={() => setShowLocationInput(true)}
-            className="flex items-center space-x-2 text-orange-500 font-medium hover:opacity-80"
+            className="flex items-center space-x-2 text-orange-500 font-medium hover:opacity-80 mt-2"
           >
             <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-white">
               <Move className="w-4 h-4" />
@@ -35,13 +35,13 @@ export default function DealMethod({ location, setLocation, telegram, setTelegra
 
       {/* Telegram Field */}
       <div>
-        <p className="text-sm font-medium mb-1">Telegram</p>
+        <p className="text-sm text-gray-700 mb-1">Telegram</p>
         <input
           type="text"
           placeholder="Add link or @username"
           value={telegram}
           onChange={(e) => setTelegram(e.target.value)}
-          className="w-full rounded-2xl bg-gray-100 px-5 py-3 placeholder-gray-500 text-gray-800 focus:outline-none"
+          className="w-full rounded-2xl bg-[#f1edef] px-5 py-3 placeholder-gray-500 text-gray-800 focus:outline-none"
         />
       </div>
     </div>

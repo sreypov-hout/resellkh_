@@ -16,7 +16,7 @@ const mockData = [
   },
   {
     id: 2,
-    categoryId: 2,
+    categoryId: 3,
     imageUrl: "/images/shoes/running.jpg",
     title: "Running Shoes",
     description: "Lightweight and durable.",
@@ -118,7 +118,7 @@ export default function CategoryPage() {
             {products.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <img
-                  src="/images/story_set/not_found.jpg"
+                  src="/images/story set/no listings.jpg"
                   alt="No Listings"
                   className="w-[350px] h-auto mb-6"
                 />
