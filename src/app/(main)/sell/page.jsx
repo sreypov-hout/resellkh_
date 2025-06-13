@@ -15,33 +15,32 @@ export default function SellDashboardPage() {
 
             {/* LEFT: Photo Upload */}
             <div>
-              <div>
-                <PhotoUploadPrompt />
-              </div>
+              <PhotoUploadPrompt />
             </div>
-
             {/* RIGHT: Sell Directly */}
             <div>
-              {/* Header with title and beta */}
-                <div className="flex justify-between items-start mb-6">
-                  <h2 className="text-xl font-bold text-gray-800">Sell Directly</h2>
-                  <span className="bg-orange-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                    Beta
-                  </span>
-                </div>
-              <div className="bg-[#E4E4E4] rounded-3xl p-6 shadow-sm relative">
-
-                {/* Header with title and beta
-                <div className="flex justify-between items-start mb-6">
-                  <h2 className="text-xl font-bold text-gray-800">Sell Directly</h2>
-                  <span className="bg-orange-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                    Beta
-                  </span>
-                </div> */}
-
-                <SellDirectly />
+            {/* Header: All content aligned to the right */}
+            <div className="flex flex-col items-end text-right mb-6 gap-2">
+              {/* Title + Beta */}
+              <div className="flex items-center justify-end">
+                <h1 className="text-xl font-bold text-gray-950">Sell to Brandname</h1>
+                <span className="ml-2 bg-orange-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                  Beta
+                </span>
               </div>
+
+              {/* Subtitle */}
+              <p className="text-sm sm:text-base text-black font-medium">
+                No listing needed, sell directly to us
+              </p>
             </div>
+
+            {/* Content Box */}
+            <div className="bg-[#E4E4E4] rounded-3xl p-6 shadow-sm relative">
+              <SellDirectly />
+            </div>
+          </div>
+
           </div>
 
           {/* BOTTOM: Draft management */}
