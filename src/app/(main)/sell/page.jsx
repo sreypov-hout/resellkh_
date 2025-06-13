@@ -28,7 +28,8 @@ export default function SellDashboardPage() {
                   Beta
                 </span>
               </div>
-
+   
+   
               {/* Subtitle */}
               <p className="text-sm sm:text-base text-black font-medium">
                 No listing needed, sell directly to us
