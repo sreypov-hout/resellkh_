@@ -45,7 +45,7 @@ const handleVerify = async () => {
     await new Promise((r) => setTimeout(r, 500));
 
     toast.success(`Verified ${email} successfully`, { position: "top-center" });
-    router.push("/"); // Redirect after success
+    router.push("/login"); // Redirect after success
   } catch (error) {
     toast.error("Verification failed. Please try again.");
   }

@@ -20,6 +20,12 @@ export default function LoginForm() {
     setTimeout(() => {
       router.push('/');
     }, 1000);
+
+    if (Object.length === 0) {
+      // Simulate token storage
+      localStorage.setItem("authToken", "mocked-token");
+      window.dispatchEvent(new Event("storage"));
+    }
   };
 
   return (

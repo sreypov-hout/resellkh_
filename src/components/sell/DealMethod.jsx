@@ -1,0 +1,49 @@
+'use client';
+import { useState } from 'react';
+import { Move } from 'lucide-react';
+
+export default function DealMethod({ location, setLocation, telegram, setTelegram }) {
+  const [showLocationInput, setShowLocationInput] = useState(false);
+
+  return (
+    <div className="p-5 border rounded-3xl bg-white space-y-4">
+      <p className="font-semibold text-lg">Deal Method</p>
+
+      {/* Meet-up Field */}
+      <div>
+        <p className="text-sm font-medium mb-1">Meet-up</p>
+        {!showLocationInput ? (
+          <button
+            onClick={() => setShowLocationInput(true)}
+            className="flex items-center space-x-2 text-orange-500 font-medium hover:opacity-80"
+          >
+            <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-white">
+              <Move className="w-4 h-4" />
+            </div>
+            <span>Add Location</span>
+          </button>
+        ) : (
+          <input
+            type="text"
+            placeholder="Add location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="w-full mt-2 rounded-2xl bg-gray-100 px-5 py-3 placeholder-gray-500 text-gray-800 focus:outline-none"
+          />
+        )}
+      </div>
+
+      {/* Telegram Field */}
+      <div>
+        <p className="text-sm font-medium mb-1">Telegram</p>
+        <input
+          type="text"
+          placeholder="Add link or @username"
+          value={telegram}
+          onChange={(e) => setTelegram(e.target.value)}
+          className="w-full rounded-2xl bg-gray-100 px-5 py-3 placeholder-gray-500 text-gray-800 focus:outline-none"
+        />
+      </div>
+    </div>
+  );
+}

@@ -19,7 +19,6 @@ const allProducts = [
     title: 'Coho Hoodie in brown',
     description: 'Coho Hoodie in brown...',
     productPrice: 45,
-
   },
   {
     id: 3,
