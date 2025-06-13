@@ -104,7 +104,6 @@ export default function AuthNavbar() {
             onClick={() => router.push("/")}
             className="text-2xl cursor-pointer h-[40px] "
           />
-
           <nav className="hidden md:flex gap-6 text-sm text-gray-800">
             <Link
               href={`/category/${categoryMap.fashion}`} className="hover:text-orange-500">
