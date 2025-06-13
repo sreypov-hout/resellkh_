@@ -12,8 +12,9 @@ export default function MainLayout({ children }) {
     <>
   
         <AuthNavbar />
-        
+          <main className="pt-[35px] md:pt-[30px] lg:pt-0"> 
         {children}
+        </main>
         <Footer />
      
     </>

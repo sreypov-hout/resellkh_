@@ -115,12 +115,12 @@ export default function AuthNavbar() {
               Accessories
             </Link>
             <Link href={`/category/${categoryMap.sport}`} className="hover:text-orange-500">
-              Sport
+              Sports
             </Link>
-            <Link href={`/category/${categoryMap.beauty}`} className="hover:text-orange-500">
+            <Link href={`/category/${categoryMap.beauty}`} className="hover:text-orange-500 md:hidden lg:block">
               Beauty
             </Link>
-            <Link href={`/category/${categoryMap.book}`} className="hover:text-orange-500">
+            <Link href={`/category/${categoryMap.book}`} className="hover:text-orange-500 md:hidden lg:block">
               Book
             </Link>
             <div className="relative" ref={categoryRef}>
@@ -321,10 +321,29 @@ export default function AuthNavbar() {
             )}
           </div>
         </div>
-        <div className="flex flex-col lg:flex-row gap-3 mt-2">
-          <SearchBar />
-          <LocationDropdown />
-        </div>
+        <div className="flex flex-col lg:flex-row gap-3 mt-2 w-full">
+  {/* Mobile & Tablet: stacked layout */}
+  <div className="block lg:hidden w-full space-y-3">
+    <LocationDropdown />
+    <SearchBar />
+  </div>
+
+   {/* Desktop: side by side */}
+  <div className="hidden lg:flex gap-3 w-full items-start">
+    {/* Make SearchBar 2x wider than LocationDropdown */}
+    <div className="w-[66%]">
+      <SearchBar />
+    </div>
+    <div className="w-[34%]">
+      <LocationDropdown />
+    </div>
+  </div>
+
+</div>
+
+
+        
+
       </div>
 
       <ImageScanModal open={scanOpen} onClose={() => setScanOpen(false)} />

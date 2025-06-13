@@ -38,7 +38,7 @@ export default function LocationDropdown() {
   };
 
   return (
-    <div ref={wrapperRef} className="relative w-full lg:w-[800px]">
+    <div ref={wrapperRef} className="relative w-full lg:w-auto">
       {/* Main Button */}
       <div
         onClick={() => setDropdownOpen((prev) => !prev)}
