@@ -178,7 +178,7 @@ export default function EditProfilePage() {
                   />
 
                   {/* Business Address */}
-                  <section className="mb-6">
+                  <section className="mb-6 mt-5">
                     <h2 className="text-black font-semibold text-lg mb-3">
                       Business address
                     </h2>
