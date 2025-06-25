@@ -1,31 +1,115 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { BiCategoryAlt } from "react-icons/bi";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import SearchBar from "./navbar/SearchBar";
-import LocationDropdown from "./navbar/LocationDropdown";
-import ImageScanModal from "./navbar/ImageScanModal";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
+import LocationDropdown from "./navbar/LocationDropdown";
+import SearchBar from "./navbar/SearchBar";
+import ImageScanModal from "./navbar/ImageScanModal";
 import ConfirmLogout from "./navbar/Confirmlogout";
-import { useRef, useEffect } from "react";
-import { usePathname } from "next/navigation";
 
-// {
-//   user = { name: "Bou Leakhena", avatar: "/girl 2.jpg" },
-// }
+// Helper to read a cookie by name
+function getCookie(name) {
+  const cookieString = document.cookie;
+  const cookies = cookieString.split("; ");
+  for (const cookie of cookies) {
+    const [cookieName, cookieValue] = cookie.split("=");
+    if (cookieName === name) return decodeURIComponent(cookieValue);
+  }
+  return null;
+}
+
 export default function AuthNavbar() {
   const [user, setUser] = useState(null);
-  const [scanOpen, setScanOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const profileRef = useRef(null);
-  const router = useRouter();
-  const pathname = usePathname();
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const profileRef = useRef(null);
   const categoryRef = useRef(null);
 
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Replace this URL with your backend endpoint that returns user profile
+  const USER_PROFILE_API = "https://your-backend.com/api/v1/users/me";
+
+  async function fetchUserProfile(token) {
+    try {
+      const res = await fetch(USER_PROFILE_API, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch profile");
+
+      const profileData = await res.json();
+
+      setUser({
+        name: profileData.name,
+        avatar: profileData.avatar || "/default-avatar.png",
+        role: profileData.role,
+        email: profileData.email,
+      });
+    } catch (err) {
+      console.error("Fetch profile error:", err);
+      setUser(null);
+    }
+  }
+
+  function clearAuth() {
+    document.cookie = "authToken=; path=/; max-age=0";
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("authTokenExpiry");
+    setUser(null);
+    window.dispatchEvent(new Event("storage"));
+  }
+
+  function handleSignOut() {
+    clearAuth();
+    signOut({ callbackUrl: "/" });
+  }
+
+  useEffect(() => {
+    const token = getCookie("authToken");
+    if (token) {
+      fetchUserProfile(token);
+    } else {
+      setUser(null);
+    }
+
+    function onStorage() {
+      const newToken = getCookie("authToken");
+      if (newToken) {
+        fetchUserProfile(newToken);
+      } else {
+        setUser(null);
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        setCategoryOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setProfileOpen(false);
+    setShowLogoutModal(false);
+  }, [pathname]);
+
+  // Map categories for easy use
   const categoryMap = {
     fashion: 1,
     accessories: 2,
@@ -38,62 +122,6 @@ export default function AuthNavbar() {
     vehicle: 9,
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
-
-      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
-        setCategoryOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
-    const checkToken = () => {
-      const token = localStorage.getItem("authToken");
-      if (token) {
-        const mockUser = {
-          name: "Bou Leakhena",
-          avatar: "/girl 2.jpg",
-        };
-        setUser(mockUser);
-      } else {
-        setUser(null);
-      }
-    };
-
-    checkToken();
-    window.addEventListener("storage", checkToken);
-
-    return () => window.removeEventListener("storage", checkToken);
-  }, []);
-
-  // Close profile dropdown and logout modal on route change
-  useEffect(() => {
-    setProfileOpen(false);
-    setShowLogoutModal(false);
-  }, [pathname]);
-
-  // Close dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
-    };
-
-    if (profileOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-  }, []);
-
   return (
     <div className="w-full sticky top-0 z-[200] bg-white px-[7%] py-4">
       <div className="max-w-screen-full mx-auto flex flex-col gap-3">
@@ -102,39 +130,26 @@ export default function AuthNavbar() {
             src="/images/auth/logo.jpg"
             alt="ResellKH Logo"
             onClick={() => router.push("/")}
-            className="text-2xl cursor-pointer h-[40px] "
+            className="text-2xl cursor-pointer h-[40px]"
           />
+
           <nav className="hidden md:flex gap-6 text-sm text-gray-800">
-            <Link
-              href={`/category/${categoryMap.fashion}`}
-              className="hover:text-orange-500"
-            >
+            <Link href={`/category/${categoryMap.fashion}`} className="hover:text-orange-500">
               Fashion
             </Link>
-            <Link
-              href={`/category/${categoryMap.accessories}`}
-              className="hover:text-orange-500"
-            >
+            <Link href={`/category/${categoryMap.accessories}`} className="hover:text-orange-500">
               Accessories
             </Link>
-            <Link
-              href={`/category/${categoryMap.sport}`}
-              className="hover:text-orange-500"
-            >
+            <Link href={`/category/${categoryMap.sport}`} className="hover:text-orange-500">
               Sports
             </Link>
-            <Link
-              href={`/category/${categoryMap.beauty}`}
-              className="hover:text-orange-500 md:hidden lg:block"
-            >
+            <Link href={`/category/${categoryMap.beauty}`} className="hover:text-orange-500 md:hidden lg:block">
               Beauty
             </Link>
-            <Link
-              href={`/category/${categoryMap.book}`}
-              className="hover:text-orange-500 md:hidden lg:block"
-            >
+            <Link href={`/category/${categoryMap.book}`} className="hover:text-orange-500 md:hidden lg:block">
               Book
             </Link>
+
             <div className="relative" ref={categoryRef}>
               <button
                 onClick={() => setCategoryOpen(!categoryOpen)}
@@ -159,28 +174,16 @@ export default function AuthNavbar() {
 
               {categoryOpen && (
                 <div className="absolute z-50 mt-2 w-48 bg-white border rounded-xl shadow-lg py-2">
-                  <Link
-                    href={`/category/${categoryMap.home}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
+                  <Link href={`/category/${categoryMap.home}`} className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
                     Home
                   </Link>
-                  <Link
-                    href={`/category/${categoryMap.sportskids}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
+                  <Link href={`/category/${categoryMap.sportskids}`} className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
                     Sports & Kids
                   </Link>
-                  <Link
-                    href={`/category/${categoryMap.electronic}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
+                  <Link href={`/category/${categoryMap.electronic}`} className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
                     Electronic
                   </Link>
-                  <Link
-                    href={`/category/${categoryMap.vehicle}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
+                  <Link href={`/category/${categoryMap.vehicle}`} className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
                     Vehicle
                   </Link>
                 </div>
@@ -188,20 +191,13 @@ export default function AuthNavbar() {
             </div>
           </nav>
 
-          {/* Icons + Avatar + Sell */}
           <div className="flex items-center gap-4 text-gray-700 text-sm">
             {!user ? (
               <>
-                <Link
-                  href="/register"
-                  className="hover:text-orange-500 font-medium"
-                >
+                <Link href="/register" className="hover:text-orange-500 font-medium">
                   Register
                 </Link>
-                <Link
-                  href="/login"
-                  className="hover:text-orange-500 font-medium"
-                >
+                <Link href="/login" className="hover:text-orange-500 font-medium">
                   Log in
                 </Link>
                 <button
@@ -213,10 +209,7 @@ export default function AuthNavbar() {
               </>
             ) : (
               <>
-                <Link
-                  href="/favourites"
-                  className="cursor-pointer hover:text-orange-500"
-                >
+                <Link href="/favourites" className="cursor-pointer hover:text-orange-500">
                   {/* Favourites Icon */}
                   <svg
                     width="20"
@@ -232,30 +225,18 @@ export default function AuthNavbar() {
                   </svg>
                 </Link>
 
-                <Link
-                  href="/notifications"
-                  className="cursor-pointer hover:text-orange-500"
-                >
+                <Link href="/notifications" className="cursor-pointer hover:text-orange-500">
                   <div className="relative">
                     {/* Notification Icon */}
                     <svg
-                      className="w-6 h-6 stroke-[1.5] stroke-gray-900" // control stroke width and color here
+                      className="w-6 h-6 stroke-[1.5] stroke-gray-900"
                       viewBox="0 0 30 30"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
                     >
-                      <path
-                        d="M15.0243 3.63745C10.8868 3.63745 7.52426 6.99995 7.52426 11.1375V14.75C7.52426 15.5125 7.19926 16.6749 6.81176 17.3249L5.37426 19.7125C4.48676 21.1875 5.09926 22.825 6.72426 23.375C12.1118 25.175 17.9243 25.175 23.3118 23.375C24.8243 22.875 25.4868 21.0875 24.6618 19.7125L23.2243 17.3249C22.8493 16.6749 22.5243 15.5125 22.5243 14.75V11.1375C22.5243 7.01245 19.1493 3.63745 15.0243 3.63745Z"
-                        fill="none"
-                      />
-                      <path
-                        d="M17.3379 4.00005C16.9504 3.88755 16.5504 3.80005 16.1379 3.75005C14.9379 3.60005 13.7879 3.68755 12.7129 4.00005C13.0754 3.07505 13.9754 2.42505 15.0254 2.42505C16.0754 2.42505 16.9754 3.07505 17.3379 4.00005Z"
-                        fill="none"
-                      />
-                      <path
-                        d="M18.7754 23.825C18.7754 25.8875 17.0879 27.575 15.0254 27.575C14.0004 27.575 13.0504 27.15 12.3754 26.475C11.7004 25.8 11.2754 24.85 11.2754 23.825"
-                        fill="none"
-                      />
+                      <path d="M15.0243 3.63745C10.8868 3.63745 7.52426 6.99995 7.52426 11.1375V14.75C7.52426 15.5125 7.19926 16.6749 6.81176 17.3249L5.37426 19.7125C4.48676 21.1875 5.09926 22.825 6.72426 23.375C12.1118 25.175 17.9243 25.175 23.3118 23.375C24.8243 22.875 25.4868 21.0875 24.6618 19.7125L23.2243 17.3249C22.8493 16.6749 22.5243 15.5125 22.5243 14.75V11.1375C22.5243 7.01245 19.1493 3.63745 15.0243 3.63745Z" fill="none" />
+                      <path d="M17.3379 4.00005C16.9504 3.88755 16.5504 3.80005 16.1379 3.75005C14.9379 3.60005 13.7879 3.68755 12.7129 4.00005C13.0754 3.07505 13.9754 2.42505 15.0254 2.42505C16.0754 2.42505 16.9754 3.07505 17.3379 4.00005Z" fill="none" />
+                      <path d="M18.7754 23.825C18.7754 25.8875 17.0879 27.575 15.0254 27.575C14.0004 27.575 13.0504 27.15 12.3754 26.475C11.7004 25.8 11.2754 24.85 11.2754 23.825" fill="none" />
                     </svg>
                     <span className="absolute left-3 -top-0 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
                   </div>
@@ -273,162 +254,93 @@ export default function AuthNavbar() {
                   />
                   {profileOpen && (
                     <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-30">
-                      <Link href="/profile/sellerId" className="cursor-pointer">
-                        <div className="flex items-center gap-3 px-4 py-3 border-b">
-                          <Image
-                            src={user.avatar}
-                            alt="User Avatar"
-                            width={40}
-                            height={40}
-                            className="rounded-full object-cover"
-                          />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {user.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              View your profile
-                            </p>
-                          </div>
-                        </div>
+                      <Link href="/profile" className="block px-4 py-3 border-b text-gray-900">
+                        {user.name}
                       </Link>
                       <button
                         onClick={() => {
                           setProfileOpen(false);
                           setShowLogoutModal(true);
                         }}
-                        className="w-full px-4 py-3 rounded-b-xl flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="w-full px-4 py-3 text-left text-gray-700 hover:bg-gray-100"
                       >
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="stroke-[1.5] stroke-gray-900"
-                        >
-                          <path
-                            d="M8.89844 7.56023C9.20844 3.96023 11.0584 2.49023 15.1084 2.49023H15.2384C19.7084 2.49023 21.4984 4.28023 21.4984 8.75023V15.2702C21.4984 19.7402 19.7084 21.5302 15.2384 21.5302H15.1084C11.0884 21.5302 9.23844 20.0802 8.90844 16.5402"
-                            fill="none"
-                          />
-                          <path d="M15.0011 12H3.62109" fill="none" />
-                          <path
-                            d="M5.85 8.65039L2.5 12.0004L5.85 15.3504"
-                            fill="none"
-                          />
-                        </svg>
-                        <span className="ps-2">Log out</span>
+                        Log out
                       </button>
                     </div>
                   )}
                 </div>
-
-                <button
-                  onClick={() => router.push("/sell")}
-                  className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm hover:bg-orange-600"
-                >
-                  Sell
-                </button>
               </>
             )}
           </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-3 w-full">
-          {/* Mobile & Tablet: stacked layout */}
+          {/* Mobile & Tablet stacked */}
           <div className="block lg:hidden w-full h-[100px] md:h-[80px] space-y-2">
-            <nav className="flex justify-center py-2  md:hidden lg:hidden gap-6 text-sm text-gray-800">
-            <Link
-              href={`/category/${categoryMap.fashion}`}
-              className="hover:text-orange-500"
-            >
-              Fashion
-            </Link>
-            <Link
-              href={`/category/${categoryMap.accessories}`}
-              className="hover:text-orange-500"
-            >
-              Accessories
-            </Link>
-            <Link
-              href={`/category/${categoryMap.sport}`}
-              className="hover:text-orange-500"
-            >
-              Sports
-            </Link>
-            
-            <div className="relative" ref={categoryRef}>
-              <button
-                onClick={() => setCategoryOpen(!categoryOpen)}
-                className="group flex items-center gap-1 text-gray-800 hover:text-orange-500"
-              >
-                {/* Icon + Label */}
-                <svg
-                  className="w-5 h-5 group-hover:text-orange-500 transition-colors duration-200"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M5.99829 4.75C5.99829 4.33579 6.33408 4 6.74829 4H17.2483C17.6625 4 17.9983 4.33579 17.9983 4.75C17.9983 5.16421 17.6625 5.5 17.2483 5.5H6.74829C6.33408 5.5 5.99829 5.16421 5.99829 4.75ZM5.99829 10C5.99829 9.58579 6.33408 9.25 6.74829 9.25H17.2483C17.6625 9.25 17.9983 9.58579 17.9983 10C17.9983 10.4142 17.6625 10.75 17.2483 10.75H6.74829C6.33408 10.75 5.99829 10.4142 5.99829 10ZM5.99829 15.25C5.99829 14.8358 6.33408 14.5 6.74829 14.5H17.2483C17.6625 14.5 17.9983 14.8358 17.9983 15.25C17.9983 15.6642 17.6625 16 17.2483 16H6.74829C6.33408 16 5.99829 15.6642 5.99829 15.25Z" />
-                  <path d="M1.98828 4.75C1.98828 4.19772 2.436 3.75 2.98828 3.75H2.99828C3.55057 3.75 3.99828 4.19772 3.99828 4.75V4.76C3.99828 5.31228 3.55057 5.76 2.99828 5.76H2.98828C2.436 5.76 1.98828 5.31228 1.98828 4.76V4.75Z" />
-                  <path d="M1.98828 15.25C1.98828 14.6977 2.436 14.25 2.98828 14.25H2.99828C3.55057 14.25 3.99828 14.6977 3.99828 15.25V15.26C3.99828 15.8123 3.55057 16.26 2.99828 16.26H2.98828C2.436 16.26 1.98828 15.8123 1.98828 15.26V15.25Z" />
-                  <path d="M1.98828 10C1.98828 9.44772 2.436 9 2.98828 9H2.99828C3.55057 9 3.99828 9.44772 3.99828 10V10.01C3.99828 10.5623 3.55057 11.01 2.99828 11.01H2.98828C2.436 11.01 1.98828 10.5623 1.98828 10.01V10Z" />
-                </svg>
-                <span className="group-hover:text-orange-500 transition-colors duration-200">
-                  All Categories
-                </span>
-              </button>
+            <nav className="flex justify-center py-2 md:hidden lg:hidden gap-6 text-sm text-gray-800">
+              <Link href={`/category/${categoryMap.fashion}`} className="hover:text-orange-500">
+                Fashion
+              </Link>
+              <Link href={`/category/${categoryMap.accessories}`} className="hover:text-orange-500">
+                Accessories
+              </Link>
+              <Link href={`/category/${categoryMap.sport}`} className="hover:text-orange-500">
+                Sports
+              </Link>
 
-              {categoryOpen && (
-                <div className="absolute z-50 mt-2 w-[165px] bg-white border rounded-xl shadow-lg py-2">
-                  <Link
-                    href={`/category/${categoryMap.home}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+              <div className="relative" ref={categoryRef}>
+                <button
+                  onClick={() => setCategoryOpen(!categoryOpen)}
+                  className="group flex items-center gap-1 text-gray-800 hover:text-orange-500"
+                >
+                  {/* Icon + Label */}
+                  <svg
+                    className="w-5 h-5 group-hover:text-orange-500 transition-colors duration-200"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    Beauty
-                  </Link>
-                  <Link
-                    href={`/category/${categoryMap.home}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Book
-                  </Link>
-                  <Link
-                    href={`/category/${categoryMap.home}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    href={`/category/${categoryMap.sportskids}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Sports & Kids
-                  </Link>
-                  <Link
-                    href={`/category/${categoryMap.electronic}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Electronic
-                  </Link>
-                  <Link
-                    href={`/category/${categoryMap.vehicle}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Vehicle
-                  </Link>
-                </div>
-              )}
-            </div>
-          </nav>
+                    <path d="M5.99829 4.75C5.99829 4.33579 6.33408 4 6.74829 4H17.2483C17.6625 4 17.9983 4.33579 17.9983 4.75C17.9983 5.16421 17.6625 5.5 17.2483 5.5H6.74829C6.33408 5.5 5.99829 5.16421 5.99829 4.75ZM5.99829 10C5.99829 9.58579 6.33408 9.25 6.74829 9.25H17.2483C17.6625 9.25 17.9983 9.58579 17.9983 10C17.9983 10.4142 17.6625 10.75 17.2483 10.75H6.74829C6.33408 10.75 5.99829 10.4142 5.99829 10ZM5.99829 15.25C5.99829 14.8358 6.33408 14.5 6.74829 14.5H17.2483C17.6625 14.5 17.9983 14.8358 17.9983 15.25C17.9983 15.6642 17.6625 16 17.2483 16H6.74829C6.33408 16 5.99829 15.6642 5.99829 15.25Z" />
+                    <path d="M1.98828 4.75C1.98828 4.19772 2.436 3.75 2.98828 3.75H2.99828C3.55057 3.75 3.99828 4.19772 3.99828 4.75V4.76C3.99828 5.31228 3.55057 5.76 2.99828 5.76H2.98828C2.436 5.76 1.98828 5.31228 1.98828 4.76V4.75Z" />
+                    <path d="M1.98828 15.25C1.98828 14.6977 2.436 14.25 2.98828 14.25H2.99828C3.55057 14.25 3.99828 14.6977 3.99828 15.25V15.26C3.99828 15.8123 3.55057 16.26 2.99828 16.26H2.98828C2.436 16.26 1.98828 15.8123 1.98828 15.26V15.25Z" />
+                    <path d="M1.98828 10C1.98828 9.44772 2.436 9 2.98828 9H2.99828C3.55057 9 3.99828 9.44772 3.99828 10V10.01C3.99828 10.5623 3.55057 11.01 2.99828 11.01H2.98828C2.436 11.01 1.98828 10.5623 1.98828 10.01V10Z" />
+                  </svg>
+                  <span className="group-hover:text-orange-500 transition-colors duration-200">
+                    All Categories
+                  </span>
+                </button>
+
+                {categoryOpen && (
+                  <div className="absolute z-50 mt-2 w-48 bg-white border rounded-xl shadow-lg py-2">
+                    <Link href={`/category/${categoryMap.beauty}`} className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                      Beauty
+                    </Link>
+                    <Link href={`/category/${categoryMap.book}`} className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                      Book
+                    </Link>
+                    <Link href={`/category/${categoryMap.home}`} className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                      Home
+                    </Link>
+                    <Link href={`/category/${categoryMap.sportskids}`} className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                      Sports & Kids
+                    </Link>
+                    <Link href={`/category/${categoryMap.electronic}`} className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                      Electronic
+                    </Link>
+                    <Link href={`/category/${categoryMap.vehicle}`} className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                      Vehicle
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </nav>
+
             <LocationDropdown />
             <SearchBar />
-            
           </div>
 
-          {/* Desktop: side by side */}
+          {/* Desktop side by side */}
           <div className="hidden lg:flex gap-3 w-full items-start">
-            {/* Make SearchBar 2x wider than LocationDropdown */}
             <div className="w-[66%]">
               <SearchBar />
             </div>
@@ -437,31 +349,20 @@ export default function AuthNavbar() {
             </div>
           </div>
         </div>
-      </div>
 
-      <ImageScanModal open={scanOpen} onClose={() => setScanOpen(false)} />
-      {/* <ConfirmLogout
-        isOpen={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        onConfirm={() => {
-          localStorage.removeItem("authToken");
-          setShowLogoutModal(false);
-          router.push("/login");
-        }}
-        title="Are you sure that you want to log out?"
-      /> */}
-      <ConfirmLogout
-        isOpen={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        onConfirm={() => {
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("authTokenExpiry"); // if using expiry
-          setShowLogoutModal(false);
-          setUser(null); // clear user state
-          router.push("/");
-        }}
-        title="Are you sure that you want to log out?"
-      />
+        <ImageScanModal open={scanOpen} onClose={() => setScanOpen(false)} />
+
+        <ConfirmLogout
+          isOpen={showLogoutModal}
+          onClose={() => setShowLogoutModal(false)}
+          onConfirm={() => {
+            clearAuth();
+            setShowLogoutModal(false);
+            router.push("/");
+          }}
+          title="Are you sure that you want to log out?"
+        />
+      </div>
     </div>
   );
 }
