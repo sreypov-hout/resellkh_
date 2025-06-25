@@ -28,32 +28,31 @@ export default function LoginForm() {
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", // <<<<<<<<<< IMPORTANT for cookie auth
           body: JSON.stringify({ email, password }),
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        setError(errData.message || "Login failed. Please try again.");
+        setError(data.message || "Login failed. Please try again.");
         setLoading(false);
         return;
       }
 
-      const data = await response.json();
+      // ✅ Store data in localStorage
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
 
-      // Token is stored in HttpOnly cookie, no need to save it in localStorage
-      
-      // If backend sets a readable cookie for userRole, you can optionally read it here:
-      const cookies = document.cookie.split("; ").reduce((acc, current) => {
-        const [name, value] = current.split("=");
-        acc[name] = value;
-        return acc;
-      }, {});
-      const userRole = cookies.userRole;
-      console.log("User role from cookie:", userRole);
+      if (data.role) {
+        localStorage.setItem("userRole", data.role);
+      }
 
-      // Redirect after successful login
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
       router.push("/");
     } catch (err) {
       console.error("Login error:", err);
@@ -67,16 +66,27 @@ export default function LoginForm() {
     <div className="min-h-screen flex items-center justify-center px-6 bg-white">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl w-full items-center">
         <div className="hidden md:flex justify-center">
-          <Image src="/images/auth/log in.jpg" alt="Login Illustration" width={400} height={400} />
+          <Image
+            src="/images/auth/log in.jpg"
+            alt="Login Illustration"
+            width={400}
+            height={400}
+          />
         </div>
 
         <div className="w-full max-w-md mx-auto">
           <div className="flex justify-center mb-6">
-            <img src="/images/auth/logo.jpg" alt="logo" className="w-[130px]" />
+            <img
+              src="/images/auth/logo.jpg"
+              alt="logo"
+              className="w-[130px]"
+            />
           </div>
 
           {error && (
-            <p className="text-red-500 text-center mb-4 font-semibold">{error}</p>
+            <p className="text-red-500 text-center mb-4 font-semibold">
+              {error}
+            </p>
           )}
 
           <form className="space-y-5" onSubmit={handleLogin}>

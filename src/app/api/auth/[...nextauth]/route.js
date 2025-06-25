@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import axios from "axios";
+
 export const authOptions = {
   providers: [
     GoogleProvider({
@@ -11,13 +12,11 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
-  },
-  jwt: {
-    secret: process.env.NEXTAUTH_SECRET,
+    maxAge: 30 * 24 * 60 * 60, 
   },
   callbacks: {
     async jwt({ token, account, profile }) {
+      // This block only runs on first sign-in
       if (account && profile) {
         try {
           const response = await axios.post(
@@ -30,8 +29,8 @@ export const authOptions = {
           );
 
           const data = response.data?.data ?? response.data;
-          if (!data) throw new Error("No data found in backend response");
 
+          // Store backend response in token
           token.accessToken = data.token;
           token.role = data.role;
           token.userId = data.userId;
@@ -46,16 +45,23 @@ export const authOptions = {
     },
 
     async session({ session, token }) {
-      console.log("Session callback", { session, token });
+      // Merge JWT token into session object
       session.accessToken = token.accessToken;
       session.role = token.role;
       session.userId = token.userId;
       session.email = token.email;
       session.firstName = token.firstName;
       session.lastName = token.lastName;
+
       return session;
     },
   },
+  pages: {
+    signIn: "/login", // Optional: redirect to custom login page
+    error: "/login",  // Optional: show login error
+  },
 };
+
 const handler = NextAuth(authOptions);
+
 export { handler as GET, handler as POST };
