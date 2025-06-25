@@ -162,7 +162,7 @@ export default function OTPVerification() {
         </button>
 
         <p className="text-sm text-gray-600">
-          Didn’t receive the OTP?{" "}
+          Didn’t receive the OTP?
           <button
             onClick={handleResend}
             disabled={timer > 0 || isResending}

@@ -20,6 +20,30 @@ export default function OTPVerification() {
     }
   }, [timer]);
 
+  const handleResend = () => {
+    if (timer <= 0) {
+      setTimer(60);
+      toast.success("OTP resent.");
+      fetch("https://exchange-solely-finest-makers.trycloudflare.com/api/v1/auths/resend-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+        .then(res => {
+          if (!res.ok) throw new Error("Failed to resend OTP");
+          return res.json();
+        })
+        .then(() => {
+          toast.success(`OTP sent to ${email}`);
+        })
+        .catch(() => {
+          toast.error("Failed to resend OTP. Please try again.");
+        });
+    } else {
+      toast.error("Please wait for the timer to expire before resending.");
+    }
+  };
+
   const handleChange = (value, index) => {
     if (/^\d?$/.test(value)) {
       const newOtp = [...otp];
@@ -42,47 +66,57 @@ export default function OTPVerification() {
     }
   };
 
-  const handleVerify = async () => {
-    const code = otp.join("");
-
-    if (code.length !== 6) {
-      toast.error("Please enter all 6 digits.");
-      return;
-    }
-
-    if (!email) {
-      toast.error("Email is missing.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const res = await fetch("https://exchange-solely-finest-makers.trycloudflare.com/api/v1/auths/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp: code }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || "Verification failed");
-
-      toast.success(`Verified ${email} successfully`, { position: "top-center" });
-      router.push("/login");
-    } catch (error) {
-      toast.error(error.message || "Verification failed. Please try again.");
-    } finally {
-      setLoading(false);
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace" && otp[index] === "") {
+      if (index > 0) {
+        const prev = document.getElementById(`otp-${index - 1}`);
+        if (prev) prev.focus();
+      }
     }
   };
-  const handleKeyDown = (e, index) => {
-  if (e.key === "Backspace" && otp[index] === "") {
-    if (index > 0) {
-      const prev = document.getElementById(`otp-${index - 1}`);
-      if (prev) prev.focus();
+
+  const handleVerify = async () => {
+  const code = otp.join("");
+
+  if (code.length !== 6) {
+    toast.error("Please enter all 6 digits.");
+    return;
+  }
+
+  if (!email) {
+    toast.error("Email is missing.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const res = await fetch("https://exchange-solely-finest-makers.trycloudflare.com/api/v1/auths/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp: code }),
+    });
+
+    const text = await res.text();  // read body once as text
+
+    let data;
+    try {
+      data = JSON.parse(text);  // try parse as JSON
+    } catch {
+      data = { message: text };  // fallback to raw text message
     }
+
+    if (!res.ok) throw new Error(data.message || "Verification failed");
+
+    toast.success(`Verified ${email} successfully`, { position: "top-center" });
+    router.push("/login");
+  } catch (error) {
+    toast.error(error.message || "Verification failed. Please try again.");
+  } finally {
+    setLoading(false);
   }
 };
+
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row items-center justify-center bg-white px-4 sm:px-8 md:px-12 lg:px-[170px] py-10 gap-10">
@@ -113,19 +147,19 @@ export default function OTPVerification() {
         {/* OTP Inputs */}
         <div className="flex justify-center gap-3">
           {otp.map((digit, idx) => (
-        <input
-          key={idx}
-          id={`otp-${idx}`}
-          type="text"
-          inputMode="numeric"
-          maxLength="1"
-          value={digit}
-          onChange={(e) => handleChange(e.target.value, idx)}
-          onKeyDown={(e) => handleKeyDown(e, idx)}
-          onPaste={idx === 0 ? handlePaste : undefined}
-          className="w-12 h-12 border-b-2 text-center text-xl outline-none focus:border-orange-500 transition"
-        />
-      ))}
+            <input
+              key={idx}
+              id={`otp-${idx}`}
+              type="text"
+              inputMode="numeric"
+              maxLength="1"
+              value={digit}
+              onChange={(e) => handleChange(e.target.value, idx)}
+              onKeyDown={(e) => handleKeyDown(e, idx)}
+              onPaste={idx === 0 ? handlePaste : undefined}
+              className="w-12 h-12 border-b-2 text-center text-xl outline-none focus:border-orange-500 transition"
+            />
+          ))}
         </div>
 
         <p className="text-orange-500 text-sm font-medium">
@@ -143,12 +177,7 @@ export default function OTPVerification() {
         <p className="text-sm text-gray-600">
           Didn’t receive the OTP?{" "}
           <button
-            onClick={() => {
-              if (timer <= 0) setTimer(60);
-              toast.success("OTP resent.");
-              // Optionally call backend API to resend OTP here
-            }}
-            disabled={timer > 0}
+            onClick={handleResend}
             className="font-semibold text-orange-500 hover:underline disabled:opacity-50"
           >
             Resend OTP

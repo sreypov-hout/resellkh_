@@ -84,7 +84,8 @@ export default function Register() {
         if (response.ok) {
           localStorage.setItem("authToken", "mocked-token");
           window.dispatchEvent(new Event("storage"));
-          router.push("/verifyOTP");
+          router.push(`/verifyOTP?email=${form.email}`);
+
         } else if (response.status === 401) {
           setSubmitError("Unauthorized: Make sure the /register endpoint is public.");
         } else {
