@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Input from "@/components/ui/Input";
 import { signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { data: session } = useSession();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -40,7 +42,7 @@ export default function LoginForm() {
         return;
       }
 
-      // ✅ Store data in localStorage
+
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
@@ -61,6 +63,37 @@ export default function LoginForm() {
       setLoading(false);
     }
   };
+
+  
+
+  const handleGoogleLogin = async () => {
+    await signIn("google", { callbackUrl: "/" });
+  };
+useEffect(() => {
+  if (typeof window === "undefined") return; // 🛡️ Guard against server-side
+
+  if (
+    session?.accessToken &&
+    session?.userId &&
+    session?.email &&
+    session?.role
+  ) {
+    console.log("Storing Google session data to localStorage");
+
+    localStorage.setItem("token", session.accessToken);
+    localStorage.setItem("userId", session.userId);
+    localStorage.setItem("email", session.email);
+    localStorage.setItem("role", session.role);
+    localStorage.setItem("firstName", session.firstName);
+    localStorage.setItem("lastName", session.lastName);
+  }
+}, [session]);
+
+useEffect(() => {
+  console.log("🔎 Google session:", session);
+}, [session]);
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-white">
@@ -143,7 +176,7 @@ export default function LoginForm() {
 
             <button
               type="button"
-              onClick={() => signIn("google", { callbackUrl: "/" })}
+              onClick={handleGoogleLogin}
               className="w-full flex items-center justify-center gap-3 border border-gray-900 p-3 rounded-full hover:bg-gray-50 transition"
             >
               <img src="/google-20.png" alt="Google" className="w-5 h-5" />
