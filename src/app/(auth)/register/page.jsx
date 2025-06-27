@@ -64,7 +64,7 @@ export default function Register() {
       setLoading(true);
       setSubmitError("");
       try {
-        const response = await fetch('https://exchange-solely-finest-makers.trycloudflare.com/api/v1/auths/register', {
+        const response = await fetch('https://phil-whom-hide-lynn.trycloudflare.com/api/v1/auths/register', {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
