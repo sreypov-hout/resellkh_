@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { jwtDecode } from 'jwt-decode'; // Corrected named import for jwt-decode
+import { jwtDecode } from 'jwt-decode';
 import { isToday, isWithinInterval, parseISO, formatDistanceToNowStrict } from 'date-fns';
 
 // Helper function to get the start of 'today' and '7 days ago' for robust filtering
@@ -10,18 +10,17 @@ const getIntervals = () => {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Start of current day
   const sevenDaysAgo = new Date(now);
-  sevenDaysAgo.setDate(now.getDate() - 7); // Exactly 7 days ago from now (might include today if it's the 7th day)
-  // For "last week" meaning "past 7 days *excluding today*", adjust the end to just before today
+  sevenDaysAgo.setDate(now.getDate() - 7); // Exactly 7 days ago from now
   const endOfYesterday = new Date(startOfToday);
   endOfYesterday.setDate(startOfToday.getDate() - 1); // End of the day before today
 
   return { startOfToday, sevenDaysAgo, endOfYesterday };
 };
 
-export default function NotificationsPage() { // Changed component name back to NotificationsPage for clarity
+export default function NotificationsPage() {
   const [allNotifications, setAllNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // State to store any fetch errors
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
 
   const fetchNotifications = async () => {
@@ -30,41 +29,95 @@ export default function NotificationsPage() { // Changed component name back to 
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        // If no token, we can't fetch. Log error and set message.
-        console.warn('No authentication token found. User needs to log in.');
+        console.warn('Authentication: No token found. User needs to log in.');
         throw new Error('Authentication required: Please log in to view notifications.');
       }
 
-      const decoded = jwtDecode(token);
-      // Use nullish coalescing for userId for safer access
+      let decoded;
+      try {
+        decoded = jwtDecode(token);
+      } catch (jwtError) {
+        console.error('JWT Decode Error:', jwtError);
+        throw new Error('Invalid authentication token. Please log in again.');
+      }
+
       const userId = decoded?.id ?? decoded?.userId;
 
       if (!userId) {
         throw new Error('User ID not found in token. Token might be invalid or malformed.');
       }
 
-      // --- API Endpoint: Make sure this is correct for your backend ---
       const apiUrl = `https://consumers-journalist-locate-keep.trycloudflare.com/api/v1/notifications/${userId}`;
-      console.log(`Fetching notifications from: ${apiUrl}`); // Debugging API call
+      console.log(`Attempting to fetch notifications from: ${apiUrl}`);
 
       const res = await fetch(apiUrl, {
         headers: {
-          'Authorization': `Bearer ${token}` // Include token in headers for authorization
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json' // Good practice to include
         }
       });
 
+      // Check for HTTP errors (e.g., 404, 500, 401, 403)
       if (!res.ok) {
-        // Attempt to parse a more specific error message from the response body
-        const errorData = await res.json().catch(() => ({})); // Catch JSON parsing errors
+        let errorData = {};
+        try {
+          errorData = await res.json(); // Try to parse JSON error message
+        } catch (parseError) {
+          // If response is not JSON (e.g., plain text 500 error)
+          errorData.message = await res.text();
+        }
         const errorMessage = errorData.message || res.statusText || `HTTP error! Status: ${res.status}`;
+        console.error('API HTTP Error Response:', { status: res.status, body: errorData });
         throw new Error(`Failed to fetch notifications: ${errorMessage}`);
       }
 
-      const data = await res.json();
-      setAllNotifications(data);
+      // Attempt to parse the response as JSON
+      let responseData;
+      try {
+        responseData = await res.json();
+      } catch (parseError) {
+        // Handle cases where API returns non-JSON but successful status (e.g., empty string)
+        console.error('Failed to parse API response as JSON:', parseError, 'Raw response:', await res.text());
+        throw new Error('Received unparseable response from server.');
+      }
+
+      // --- CRITICAL FIX: Robust Data Handling ---
+      let notificationsArray = [];
+
+      if (Array.isArray(responseData)) {
+        // Scenario 1: API returns a direct array (ideal)
+        notificationsArray = responseData;
+        console.log('API returned a direct array of notifications.');
+      } else if (typeof responseData === 'object' && responseData !== null) {
+        // Scenario 2: API returns an object that might contain the array
+        // Check common property names like 'data', 'notifications', 'items', 'results'
+        if (Array.isArray(responseData.data)) {
+          notificationsArray = responseData.data;
+          console.log('API returned an object with a "data" array.');
+        } else if (Array.isArray(responseData.notifications)) {
+          notificationsArray = responseData.notifications;
+          console.log('API returned an object with a "notifications" array.');
+        } else if (Object.keys(responseData).length === 0) {
+          // Scenario 3: API returns an empty object {}
+          console.warn('API returned an empty object, treating as no notifications.');
+          notificationsArray = [];
+        } else {
+          // Scenario 4: API returned an object, but we couldn't find the array within expected properties
+          console.error('API returned an object in unexpected format:', responseData);
+          throw new Error('Server response format is unexpected. No notification array found.');
+        }
+      } else {
+        // Scenario 5: API returned something completely unexpected (e.g., null, undefined, string, number)
+        console.error('API returned data in completely unexpected format:', responseData);
+        throw new Error('Received unexpected data format from server. Please try again.');
+      }
+
+      setAllNotifications(notificationsArray);
+
     } catch (err) {
-      console.error('Error fetching notifications:', err);
-      setError(err.message); // Set the user-friendly error message
+      console.error('Full fetch process error:', err);
+      setError(err.message);
+      setAllNotifications([]); // Ensure it's an empty array on any error to prevent further `.filter` issues
     } finally {
       setLoading(false);
     }
@@ -72,23 +125,23 @@ export default function NotificationsPage() { // Changed component name back to 
 
   useEffect(() => {
     fetchNotifications();
-    // Dependency array is empty so it runs once on mount.
-    // If you need to re-fetch on user ID change or token change, add them here.
   }, []);
 
-  // Filter notifications based on activeTab
-  const filtered = allNotifications.filter((n) =>
-    activeTab === 'all' ? true : n.unread
-  );
+  // Ensure allNotifications is always an array before filtering (defensive programming)
+  const filtered = Array.isArray(allNotifications)
+    ? allNotifications.filter((n) => activeTab === 'all' ? true : n.unread)
+    : [];
 
   const { startOfToday, sevenDaysAgo, endOfYesterday } = getIntervals();
 
+  // Ensure `n.timestamp` exists and is parsable before using date-fns
   const today = filtered.filter(
-    (n) => n.timestamp && isToday(parseISO(n.timestamp))
+    (n) => n.timestamp && !isNaN(parseISO(n.timestamp).getTime()) && isToday(parseISO(n.timestamp))
   );
 
   const lastWeek = filtered.filter(
     (n) => n.timestamp &&
+           !isNaN(parseISO(n.timestamp).getTime()) && // Ensure timestamp is a valid date
            !isToday(parseISO(n.timestamp)) && // Exclude today's notifications
            isWithinInterval(parseISO(n.timestamp), { start: sevenDaysAgo, end: endOfYesterday })
   );
@@ -118,13 +171,13 @@ export default function NotificationsPage() { // Changed component name back to 
     );
   }
 
-  // Handle case where no notifications are found after successful loading
+  // Handle case where no notifications are found after successful loading and no errors
   if (allNotifications.length === 0 && !loading && !error) {
     return (
       <section className="w-full px-[7%] py-6">
         <div className="bg-white border border-gray-300 rounded-[24px] p-6 sm:p-10 shadow-sm text-center text-gray-600">
           <h1 className="text-xl sm:text-2xl font-semibold mb-4">Notifications</h1>
-          <p>You have no notifications.</p>
+          <p>You have no notifications to display.</p>
         </div>
       </section>
     );
@@ -158,7 +211,6 @@ export default function NotificationsPage() { // Changed component name back to 
                 id={`tab-${tab}`}
                 aria-controls={`panel-${tab}`}
               >
-                {/* Only show badge if count is greater than 0 */}
                 {count > 0 && (
                   <span className="bg-orange-500 text-black text-[10px] sm:text-xs px-2 py-0.5 rounded-full">
                     {count}
@@ -170,7 +222,7 @@ export default function NotificationsPage() { // Changed component name back to 
           })}
         </div>
 
-        {/* Sections: Filtered `data` is passed to reflect `activeTab` */}
+        {/* Sections: filtered `data` passed to reflect `activeTab` */}
         <Section title="Today" data={today} />
         <Section title="Last week" data={lastWeek} />
 
@@ -186,25 +238,22 @@ export default function NotificationsPage() { // Changed component name back to 
 }
 
 function Section({ title, data }) {
-  // Only render the section if there's data for it
   if (!data || data.length === 0) return null;
 
   return (
     <div className="mb-8">
       <h2 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-        {/* Using a more accessible Unicode character or an actual icon component */}
-        <span role="img" aria-label="Clock icon">🕒</span> {title}
+        <span role="img" aria-label="Time-based section">🕒</span> {title}
       </h2>
       <div className="space-y-4">
         {data.map((item) => (
           <div
             key={item.id}
-            className={`flex items-start gap-3 sm:gap-5 ${item.unread ? 'font-bold' : ''}`} // Optional: Highlight unread items
+            className={`flex items-start gap-3 sm:gap-5 ${item.unread ? 'font-bold' : ''}`}
           >
-            {/* Using item.avatar if available, otherwise the fallback image */}
             <Image
               src={item.avatar || '/image-notifications.png'}
-              alt={item.type ? `${item.type} notification avatar` : 'Notification avatar'} // More descriptive alt text
+              alt={item.type ? `${item.type} notification avatar` : 'Notification avatar'}
               width={48}
               height={48}
               className="w-12 h-12 rounded-full object-cover flex-shrink-0"
@@ -221,8 +270,8 @@ function Section({ title, data }) {
                   </p>
                 </div>
                 <span className="text-xs text-gray-500 whitespace-nowrap mt-2 sm:mt-0">
-                  {/* Format timestamp for display if it exists, otherwise provide a fallback */}
-                  {item.timestamp
+                  {/* Format timestamp for display if it exists and is valid, otherwise fallback */}
+                  {item.timestamp && !isNaN(parseISO(item.timestamp).getTime())
                     ? formatDistanceToNowStrict(parseISO(item.timestamp), { addSuffix: true })
                     : 'Unknown time'}
                 </span>

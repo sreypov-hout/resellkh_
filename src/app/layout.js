@@ -35,6 +35,7 @@ import { Poppins } from "next/font/google";
 import { BookmarkProvider } from '@/context/BookmarkContext';
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
+import TokenStorage from '@/components/TokenStorage';
 
 
 // Load Google Fonts
@@ -53,6 +54,7 @@ export default function RootLayout({ children }) {
         <SessionProvider>
           <BookmarkProvider>
             <Toaster position="right-bottom" reverseOrder={false} />
+            <TokenStorage />
             {children}
           </BookmarkProvider>
         </SessionProvider>

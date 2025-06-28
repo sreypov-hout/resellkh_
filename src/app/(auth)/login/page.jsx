@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Input from "@/components/ui/Input";
 import { signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { data: session } = useSession();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,32 +30,31 @@ export default function LoginForm() {
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", // <<<<<<<<<< IMPORTANT for cookie auth
           body: JSON.stringify({ email, password }),
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        setError(errData.message || "Login failed. Please try again.");
+        setError(data.message || "Login failed. Please try again.");
         setLoading(false);
         return;
       }
 
-      const data = await response.json();
 
-      // Token is stored in HttpOnly cookie, no need to save it in localStorage
-      
-      // If backend sets a readable cookie for userRole, you can optionally read it here:
-      const cookies = document.cookie.split("; ").reduce((acc, current) => {
-        const [name, value] = current.split("=");
-        acc[name] = value;
-        return acc;
-      }, {});
-      const userRole = cookies.userRole;
-      console.log("User role from cookie:", userRole);
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
 
-      // Redirect after successful login
+      if (data.role) {
+        localStorage.setItem("userRole", data.role);
+      }
+
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
       router.push("/");
     } catch (err) {
       console.error("Login error:", err);
@@ -63,20 +64,62 @@ export default function LoginForm() {
     }
   };
 
+  
+
+  const handleGoogleLogin = async () => {
+    await signIn("google", { callbackUrl: "/" });
+  };
+useEffect(() => {
+  if (typeof window === "undefined") return; // 🛡️ Guard against server-side
+
+  if (
+    session?.accessToken &&
+    session?.userId &&
+    session?.email &&
+    session?.role
+  ) {
+    console.log("Storing Google session data to localStorage");
+
+    localStorage.setItem("token", session.accessToken);
+    localStorage.setItem("userId", session.userId);
+    localStorage.setItem("email", session.email);
+    localStorage.setItem("role", session.role);
+    localStorage.setItem("firstName", session.firstName);
+    localStorage.setItem("lastName", session.lastName);
+  }
+}, [session]);
+
+useEffect(() => {
+  console.log("🔎 Google session:", session);
+}, [session]);
+
+
+
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-white">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl w-full items-center">
         <div className="hidden md:flex justify-center">
-          <Image src="/images/auth/log in.jpg" alt="Login Illustration" width={400} height={400} />
+          <Image
+            src="/images/auth/log in.jpg"
+            alt="Login Illustration"
+            width={400}
+            height={400}
+          />
         </div>
 
         <div className="w-full max-w-md mx-auto">
           <div className="flex justify-center mb-6">
-            <img src="/images/auth/logo.jpg" alt="logo" className="w-[130px]" />
+            <img
+              src="/images/auth/logo.jpg"
+              alt="logo"
+              className="w-[130px]"
+            />
           </div>
 
           {error && (
-            <p className="text-red-500 text-center mb-4 font-semibold">{error}</p>
+            <p className="text-red-500 text-center mb-4 font-semibold">
+              {error}
+            </p>
           )}
 
           <form className="space-y-5" onSubmit={handleLogin}>
@@ -133,7 +176,7 @@ export default function LoginForm() {
 
             <button
               type="button"
-              onClick={() => signIn("google", { callbackUrl: "/" })}
+              onClick={handleGoogleLogin}
               className="w-full flex items-center justify-center gap-3 border border-gray-900 p-3 rounded-full hover:bg-gray-50 transition"
             >
               <img src="/google-20.png" alt="Google" className="w-5 h-5" />
