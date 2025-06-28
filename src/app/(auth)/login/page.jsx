@@ -24,7 +24,7 @@ export default function LoginForm() {
 
     try {
       const response = await fetch(
-        "https://exchange-solely-finest-makers.trycloudflare.com/api/v1/auths/login",
+        "https://phil-whom-hide-lynn.trycloudflare.com/api/v1/auths/login",
         {
           method: "POST",
           headers: {
