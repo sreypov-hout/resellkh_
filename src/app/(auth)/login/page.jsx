@@ -1,12 +1,12 @@
 "use client";
 
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Input from "@/components/ui/Input";
-import { signIn } from "next-auth/react";
-import { useSession } from "next-auth/react";
+import { signIn, useSession, getSession } from "next-auth/react";
+import TokenStorage from "@/components/TokenStorage";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -15,7 +15,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const { data: session } = useSession();
+  const { status } = useSession();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,77 +23,52 @@ export default function LoginForm() {
     setError("");
 
     try {
+      // Step 1: Call your backend to validate credentials
       const response = await fetch(
-        "https://exchange-solely-finest-makers.trycloudflare.com/api/v1/auths/login",
+        "https://phil-whom-hide-lynn.trycloudflare.com/api/v1/auths/login",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         }
       );
 
-      const data = await response.json();
+      const text = await response.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
 
       if (!response.ok) {
-        setError(data.message || "Login failed. Please try again.");
-        setLoading(false);
-        return;
+        throw new Error(data.message || "Login failed");
       }
 
+      // Step 2: Call NextAuth signIn (CredentialsProvider)
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
 
-      if (data.token) {
-        localStorage.setItem("token", data.token);
+      if (result?.error) {
+        throw new Error(result.error);
       }
 
-      if (data.role) {
-        localStorage.setItem("userRole", data.role);
-      }
-
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-
+      // Step 3: Refresh session to trigger TokenStorage
+      await getSession();
       router.push("/");
     } catch (err) {
-      console.error("Login error:", err);
-      setError("An unexpected error occurred. Please try again.");
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  
-
-  const handleGoogleLogin = async () => {
-    await signIn("google", { callbackUrl: "/" });
+  const handleGoogleLogin = () => {
+    signIn("google", { callbackUrl: "/" });
   };
-useEffect(() => {
-  if (typeof window === "undefined") return; // 🛡️ Guard against server-side
-
-  if (
-    session?.accessToken &&
-    session?.userId &&
-    session?.email &&
-    session?.role
-  ) {
-    console.log("Storing Google session data to localStorage");
-
-    localStorage.setItem("token", session.accessToken);
-    localStorage.setItem("userId", session.userId);
-    localStorage.setItem("email", session.email);
-    localStorage.setItem("role", session.role);
-    localStorage.setItem("firstName", session.firstName);
-    localStorage.setItem("lastName", session.lastName);
-  }
-}, [session]);
-
-useEffect(() => {
-  console.log("🔎 Google session:", session);
-}, [session]);
-
-
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-white">
@@ -109,17 +84,11 @@ useEffect(() => {
 
         <div className="w-full max-w-md mx-auto">
           <div className="flex justify-center mb-6">
-            <img
-              src="/images/auth/logo.jpg"
-              alt="logo"
-              className="w-[130px]"
-            />
+            <img src="/images/auth/logo.jpg" alt="logo" className="w-[130px]" />
           </div>
 
           {error && (
-            <p className="text-red-500 text-center mb-4 font-semibold">
-              {error}
-            </p>
+            <p className="text-red-500 text-center mb-4 font-semibold">{error}</p>
           )}
 
           <form className="space-y-5" onSubmit={handleLogin}>
@@ -130,6 +99,7 @@ useEffect(() => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
+              required
             />
 
             <div className="relative">
@@ -140,11 +110,13 @@ useEffect(() => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-[38px] text-gray-500 text-xl"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <HiOutlineEyeOff /> : <HiOutlineEye />}
               </button>
@@ -197,6 +169,7 @@ useEffect(() => {
           </form>
         </div>
       </div>
+      <TokenStorage />
     </div>
   );
 }
