@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
-
-import SearchBar from "./navbar/SearchBar";
 import LocationDropdown from "./navbar/LocationDropdown";
+import SearchBar from "./navbar/SearchBar";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import ImageScanModal from "./navbar/ImageScanModal";
 import ConfirmLogout from "./navbar/Confirmlogout";
 import { signOut } from "next-auth/react";
@@ -34,80 +32,83 @@ export default function AuthNavbar() {
     vehicle: 9,
   };
 
-
+  // Close profile dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false);
       }
-      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
-        setCategoryOpen(false);
-      }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
+  // Fetch user profile from localStorage and backend
   useEffect(() => {
-  const checkLogin = async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          if (!parsedUser?.id) {
-            setUser(null);
-            return;
-          }
-          const res = await fetch(`https://exchange-solely-finest-makers.trycloudflare.com//api/v1/profile/${parsedUser.id}`);
-          if (!res.ok) {
-            console.error("Failed to fetch user profile");
-            setUser(null);
-            return;
-          }
-          const result = await res.json();
-          if (result.payload) {
-            setUser({
-              id: result.payload.userId || parsedUser.id,
-              name: parsedUser.name || "User",
-              avatar: result.payload.profileImage || "/default-avatar.jpg",
-            });
-          } else {
-            setUser(null);
-          }
-        } catch (err) {
-          console.error("Error parsing user or fetching profile:", err);
-          setUser(null);
-        }
-      } else {
-        setUser({
-          name: "Bou Leakhena",
-          avatar: "/girl 2.jpg",
-        });
+    const updateUserFromStorage = async () => {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+      const firstName = localStorage.getItem("firstName");
+      const lastName = localStorage.getItem("lastName");
+      const profileImage = localStorage.getItem("profileImage");
+
+      if (!token || !userId) {
+        setUser(null);
+        return;
       }
-    } else {
-      setUser(null);
-    }
-  };
 
-  checkLogin();
-  window.addEventListener("storage", checkLogin);
-  return () => window.removeEventListener("storage", checkLogin);
-}, []);
+      try {
+        const res = await fetch(
+          `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-  // Close profile dropdown & logout modal on route change
+        if (!res.ok) {
+          console.error("Failed to fetch user profile");
+          setUser(null);
+          return;
+        }
+
+        const json = await res.json();
+
+        setUser({
+          id: userId,
+          name: `${firstName || ""} ${lastName || ""}`.trim() || "User",
+          avatar: json.payload?.profileImage || profileImage || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
+        });
+      } catch (err) {
+        console.error("Error fetching user profile:", err);
+        setUser(null);
+      }
+    };
+
+    updateUserFromStorage();
+
+    // Optional: listen for auth-change event to update user on login/logout
+    window.addEventListener("auth-change", updateUserFromStorage);
+    return () => window.removeEventListener("auth-change", updateUserFromStorage);
+  }, []);
+
+  // Close profile dropdown on route change
   useEffect(() => {
     setProfileOpen(false);
-    setShowLogoutModal(false);
   }, [pathname]);
 
-  const handlelogout = () => {
+  const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("userRole");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("email");
+    localStorage.removeItem("role");
+    localStorage.removeItem("firstName");
+    localStorage.removeItem("lastName");
+    localStorage.removeItem("profileImage");
+    setShowLogoutModal(false);
+    setUser(null);
     signOut({ callbackUrl: "/" });
   };
 
@@ -286,8 +287,8 @@ export default function AuthNavbar() {
                           <img
                             src={user.avatar}
                             alt="User Avatar"
-                            width={40}
-                            height={40}
+                            width={50}
+                            height={50}
                             className="rounded-full object-cover"
                           />
                           <div>
@@ -303,7 +304,7 @@ export default function AuthNavbar() {
                       <button
                         onClick={() => {
                           setProfileOpen(false);
-                          handlelogout();
+                          handleLogout();
                         }}
                         className="w-full px-4 py-3 rounded-b-xl flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100"
                       >

@@ -6,6 +6,8 @@ import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import { useGoogleLogin } from "@react-oauth/google";
 import { signIn } from "next-auth/react";
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 
 export default function Register() {
   const router = useRouter();
@@ -24,6 +26,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { data: session, status } = useSession();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -75,14 +78,12 @@ export default function Register() {
         let result = {};
         try {
           result = await response.json();
-          console.log("Response JSON:", result);
         } catch {
           console.error("Failed to parse response as JSON");
           result = { message: "Failed to parse server response" };  
         }
 
         if (response.ok) {
-          localStorage.setItem("authToken", "mocked-token");
           window.dispatchEvent(new Event("storage"));
           router.push(`/verifyOTP?email=${form.email}`);
 
@@ -99,6 +100,27 @@ export default function Register() {
       }
     }
   };
+  const handleGoogleLogin = () => {
+      signIn("google", { callbackUrl: "/" });
+    };
+  
+    // Store Google session data to localStorage once authenticated
+    useEffect(() => {
+      if (status === "authenticated" && session) {
+        // Your backend token is in session.accessToken
+        if (session.accessToken) {
+          console.log("Storing Google session data to localStorage", session);
+          localStorage.setItem("token", session.accessToken);
+          localStorage.setItem("userId", session.userId || "");
+          localStorage.setItem("email", session.email || "");
+          localStorage.setItem("role", session.role || "");
+          localStorage.setItem("firstName", session.firstName || "");
+          localStorage.setItem("lastName", session.lastName || "");
+        } else {
+          console.warn("Session accessToken is missing");
+        }
+      }
+    }, [status, session]);
 
  
 
@@ -219,7 +241,7 @@ export default function Register() {
         </div>
       <button
         type="button"
-        onClick={() => signIn("google", { callbackUrl: "/" })}
+       onClick={handleGoogleLogin}
         className="w-full flex items-center justify-center gap-3 border border-gray-900 p-3 rounded-full hover:bg-gray-50 transition"
       >
         <img src="/google-20.png" alt="Google" className="w-5 h-5" />

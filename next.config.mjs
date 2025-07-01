@@ -1,13 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'gateway.pinata.cloud',
-        port: '',
-        pathname: '/ipfs/**',
-      },
+   images: {
+    domains: [
+      'cloudflare-ipfs.com',
+      'gateway.pinata.cloud', // if still using this
+      'lh3.googleusercontent.com' // for Google avatars
     ],
   },
 };
