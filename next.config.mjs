@@ -1,10 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    images: {
-     domains: [
-      
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'gateway.pinata.cloud',
+        port: '',
+        pathname: '/ipfs/**',
+      },
     ],
-     // Add this line if it's not there, or add 'images.unsplash.com' to the array
   },
 };
 
