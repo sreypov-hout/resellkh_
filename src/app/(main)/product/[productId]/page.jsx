@@ -1,7 +1,4 @@
-// src/app/(main)/product/[productId]/page.jsx
-
-// adjust path if needed
-
+import { getProductById } from '@/components/services/getProduct.service';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductDetails from '@/components/product/ProductDetails';
 import SellerInfo from '@/components/product/SellerInfo';
@@ -10,11 +7,21 @@ import MoreFromSeller from '@/components/product/MoreFromSeller';
 import OtherProducts from '@/components/product/OtherProducts';
 import ContactSellerHeader from '@/components/product/ContactSellerHeader';
 import Link from 'next/link';
-import { getProductById } from '@/service/getProduct.service';
-export default async function ProductPage({ params }) {
-  const productId = params.productId;
 
-  const productData = await getProductById(productId); // ✅ using your service
+export const dynamic = 'force-dynamic'; // Ensure SSR updates on every request
+
+export default async function ProductPage({ params }) {
+  const productId = params?.productId;
+
+  if (!productId) {
+    return (
+      <div className="text-center py-20 text-red-500">
+        Invalid product ID.
+      </div>
+    );
+  }
+
+  const productData = await getProductById(productId);
 
   if (!productData) {
     return (
@@ -40,6 +47,7 @@ export default async function ProductPage({ params }) {
         <span className="text-orange-500 cursor-default">Detail</span>
       </div>
 
+      {/* Main Product Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         <ProductGallery product={productData} />
         <ProductDetails product={productData} />
@@ -47,15 +55,20 @@ export default async function ProductPage({ params }) {
 
       <ContactSellerHeader />
 
+      {/* Seller Info & Reviews */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <div>
           <SellerInfo sellerId={productData.userId} />
         </div>
         <div className="lg:col-span-2">
-          <Reviews productId={productData.productId} />
+          <Reviews
+            sellerId={productData.userId}
+            productId={productData.productId}
+          />
         </div>
       </div>
 
+      {/* More from this seller & similar products */}
       <MoreFromSeller sellerId={productData.userId} />
       <OtherProducts categoryId={productData.mainCategoryId} />
     </div>
