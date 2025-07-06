@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from "react";
 import ProductCart from "../domain/ProductCart";
+import { productService } from "../services/allProduct.service";
 
 // Skeleton loader component
 const SkeletonCard = () => (
@@ -11,8 +12,6 @@ const SkeletonCard = () => (
     <div className="h-4 bg-gray-200 rounded w-1/2" />
   </div>
 );
-
-const API_URL = "https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products";
 
 export default function RecommendedList() {
   const [items, setItems] = useState([]);
@@ -29,15 +28,8 @@ export default function RecommendedList() {
       setLoading(true);
       setError(null);
       try {
-        const token = localStorage.getItem("token");
-
-        const res = await fetch(API_URL, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-
-        if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-        const data = await res.json();
-        setItems(data.payload || []);
+        const products = await productService.fetchRecommendedProducts();
+        setItems(products);
       } catch (err) {
         setError(err.message);
       } finally {

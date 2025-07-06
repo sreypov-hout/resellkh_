@@ -20,16 +20,18 @@ export default function AuthNavbar() {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const categoryRef = useRef(null);
 
+  // Corrected category mapping to match backend IDs
   const categoryMap = {
-    fashion: 1,
-    accessories: 2,
-    sport: 3,
-    beauty: 4,
-    book: 5,
+    accessories: 1,
+    beauty: 2,
+    equipment_bag_shoes: 3,
+    book: 4,
+    fashion: 5,
     home: 6,
-    sportskids: 7,
+    sports_kids: 7,
     electronic: 8,
     vehicle: 9,
+    other: 10
   };
 
   // Close profile dropdown on outside click
@@ -37,6 +39,9 @@ export default function AuthNavbar() {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false);
+      }
+      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        setCategoryOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -137,10 +142,10 @@ export default function AuthNavbar() {
               Accessories
             </Link>
             <Link
-              href={`/category/${categoryMap.sport}`}
+              href={`/category/${categoryMap.equipment_bag_shoes}`}
               className="hover:text-orange-500"
             >
-              Sports
+              Equipment & Shoes
             </Link>
             <Link
               href={`/category/${categoryMap.beauty}`}
@@ -159,7 +164,6 @@ export default function AuthNavbar() {
                 onClick={() => setCategoryOpen(!categoryOpen)}
                 className="group flex items-center gap-1 text-gray-800 hover:text-orange-500"
               >
-                {/* Icon + Label */}
                 <svg
                   className="w-5 h-5 group-hover:text-orange-500 transition-colors duration-200"
                   fill="currentColor"
@@ -185,7 +189,7 @@ export default function AuthNavbar() {
                     Home
                   </Link>
                   <Link
-                    href={`/category/${categoryMap.sportskids}`}
+                    href={`/category/${categoryMap.sports_kids}`}
                     className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
                   >
                     Sports & Kids
@@ -202,12 +206,17 @@ export default function AuthNavbar() {
                   >
                     Vehicle
                   </Link>
+                  <Link
+                    href={`/category/${categoryMap.other}`}
+                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                  >
+                    Other
+                  </Link>
                 </div>
               )}
             </div>
           </nav>
 
-          {/* Icons + Avatar + Sell */}
           <div className="flex items-center gap-4 text-gray-700 text-sm">
             {!user ? (
               <>
@@ -226,10 +235,7 @@ export default function AuthNavbar() {
               </>
             ) : (
               <>
-                {/* Favourites icon */}
                 <Link href="/favourites" className="cursor-pointer hover:text-orange-500">
-                  {/* SVG icon as you had */}
-                  {/* ... same svg code here ... */}
                   <svg
                     width="20"
                     height="20"
@@ -244,7 +250,6 @@ export default function AuthNavbar() {
                   </svg>
                 </Link>
 
-                {/* Notification icon */}
                 <Link href="/notifications" className="cursor-pointer hover:text-orange-500">
                   <div className="relative">
                     <svg
@@ -270,7 +275,6 @@ export default function AuthNavbar() {
                   </div>
                 </Link>
 
-                {/* Avatar Dropdown */}
                 <div className="relative" ref={profileRef}>
                   <img
                     src={user.avatar}
@@ -282,7 +286,7 @@ export default function AuthNavbar() {
                   />
                   {profileOpen && (
                     <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-30">
-                      <Link href="/profile/sellerId" className="cursor-pointer">
+                      <Link href={`/profile/${user.id}`} className="cursor-pointer">
                         <div className="flex items-center gap-3 px-4 py-3 border-b">
                           <img
                             src={user.avatar}
@@ -302,10 +306,7 @@ export default function AuthNavbar() {
                         </div>
                       </Link>
                       <button
-                        onClick={() => {
-                          setProfileOpen(false);
-                          handleLogout();
-                        }}
+                        onClick={() => setShowLogoutModal(true)}
                         className="w-full px-4 py-3 rounded-b-xl flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         <svg
@@ -344,100 +345,101 @@ export default function AuthNavbar() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-3 w-full">
-          {/* Mobile & Tablet: stacked layout */}
           <div className="block lg:hidden w-full h-[100px] md:h-[80px] space-y-2">
-            <nav className="flex justify-center py-2  md:hidden lg:hidden gap-6 text-sm text-gray-800">
-            <Link
-              href={`/category/${categoryMap.fashion}`}
-              className="hover:text-orange-500"
-            >
-              Fashion
-            </Link>
-            <Link
-              href={`/category/${categoryMap.accessories}`}
-              className="hover:text-orange-500"
-            >
-              Accessories
-            </Link>
-            <Link
-              href={`/category/${categoryMap.sport}`}
-              className="hover:text-orange-500"
-            >
-              Sports
-            </Link>
-            
-            <div className="relative" ref={categoryRef}>
-              <button
-                onClick={() => setCategoryOpen(!categoryOpen)}
-                className="group flex items-center gap-1 text-gray-800 hover:text-orange-500"
+            <nav className="flex justify-center py-2 md:hidden lg:hidden gap-6 text-sm text-gray-800">
+              <Link
+                href={`/category/${categoryMap.fashion}`}
+                className="hover:text-orange-500"
               >
-                {/* Icon + Label */}
-                <svg
-                  className="w-5 h-5 group-hover:text-orange-500 transition-colors duration-200"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
+                Fashion
+              </Link>
+              <Link
+                href={`/category/${categoryMap.accessories}`}
+                className="hover:text-orange-500"
+              >
+                Accessories
+              </Link>
+              <Link
+                href={`/category/${categoryMap.equipment_bag_shoes}`}
+                className="hover:text-orange-500"
+              >
+                Equipment
+              </Link>
+              
+              <div className="relative" ref={categoryRef}>
+                <button
+                  onClick={() => setCategoryOpen(!categoryOpen)}
+                  className="group flex items-center gap-1 text-gray-800 hover:text-orange-500"
                 >
-                  <path d="M5.99829 4.75C5.99829 4.33579 6.33408 4 6.74829 4H17.2483C17.6625 4 17.9983 4.33579 17.9983 4.75C17.9983 5.16421 17.6625 5.5 17.2483 5.5H6.74829C6.33408 5.5 5.99829 5.16421 5.99829 4.75ZM5.99829 10C5.99829 9.58579 6.33408 9.25 6.74829 9.25H17.2483C17.6625 9.25 17.9983 9.58579 17.9983 10C17.9983 10.4142 17.6625 10.75 17.2483 10.75H6.74829C6.33408 10.75 5.99829 10.4142 5.99829 10ZM5.99829 15.25C5.99829 14.8358 6.33408 14.5 6.74829 14.5H17.2483C17.6625 14.5 17.9983 14.8358 17.9983 15.25C17.9983 15.6642 17.6625 16 17.2483 16H6.74829C6.33408 16 5.99829 15.6642 5.99829 15.25Z" />
-                  <path d="M1.98828 4.75C1.98828 4.19772 2.436 3.75 2.98828 3.75H2.99828C3.55057 3.75 3.99828 4.19772 3.99828 4.75V4.76C3.99828 5.31228 3.55057 5.76 2.99828 5.76H2.98828C2.436 5.76 1.98828 5.31228 1.98828 4.76V4.75Z" />
-                  <path d="M1.98828 15.25C1.98828 14.6977 2.436 14.25 2.98828 14.25H2.99828C3.55057 14.25 3.99828 14.6977 3.99828 15.25V15.26C3.99828 15.8123 3.55057 16.26 2.99828 16.26H2.98828C2.436 16.26 1.98828 15.8123 1.98828 15.26V15.25Z" />
-                  <path d="M1.98828 10C1.98828 9.44772 2.436 9 2.98828 9H2.99828C3.55057 9 3.99828 9.44772 3.99828 10V10.01C3.99828 10.5623 3.55057 11.01 2.99828 11.01H2.98828C2.436 11.01 1.98828 10.5623 1.98828 10.01V10Z" />
-                </svg>
-                <span className="group-hover:text-orange-500 transition-colors duration-200">
-                  All Categories
-                </span>
-              </button>
+                  <svg
+                    className="w-5 h-5 group-hover:text-orange-500 transition-colors duration-200"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M5.99829 4.75C5.99829 4.33579 6.33408 4 6.74829 4H17.2483C17.6625 4 17.9983 4.33579 17.9983 4.75C17.9983 5.16421 17.6625 5.5 17.2483 5.5H6.74829C6.33408 5.5 5.99829 5.16421 5.99829 4.75ZM5.99829 10C5.99829 9.58579 6.33408 9.25 6.74829 9.25H17.2483C17.6625 9.25 17.9983 9.58579 17.9983 10C17.9983 10.4142 17.6625 10.75 17.2483 10.75H6.74829C6.33408 10.75 5.99829 10.4142 5.99829 10ZM5.99829 15.25C5.99829 14.8358 6.33408 14.5 6.74829 14.5H17.2483C17.6625 14.5 17.9983 14.8358 17.9983 15.25C17.9983 15.6642 17.6625 16 17.2483 16H6.74829C6.33408 16 5.99829 15.6642 5.99829 15.25Z" />
+                    <path d="M1.98828 4.75C1.98828 4.19772 2.436 3.75 2.98828 3.75H2.99828C3.55057 3.75 3.99828 4.19772 3.99828 4.75V4.76C3.99828 5.31228 3.55057 5.76 2.99828 5.76H2.98828C2.436 5.76 1.98828 5.31228 1.98828 4.76V4.75Z" />
+                    <path d="M1.98828 15.25C1.98828 14.6977 2.436 14.25 2.98828 14.25H2.99828C3.55057 14.25 3.99828 14.6977 3.99828 15.25V15.26C3.99828 15.8123 3.55057 16.26 2.99828 16.26H2.98828C2.436 16.26 1.98828 15.8123 1.98828 15.26V15.25Z" />
+                    <path d="M1.98828 10C1.98828 9.44772 2.436 9 2.98828 9H2.99828C3.55057 9 3.99828 9.44772 3.99828 10V10.01C3.99828 10.5623 3.55057 11.01 2.99828 11.01H2.98828C2.436 11.01 1.98828 10.5623 1.98828 10.01V10Z" />
+                  </svg>
+                  <span className="group-hover:text-orange-500 transition-colors duration-200">
+                    All Categories
+                  </span>
+                </button>
 
-              {categoryOpen && (
-                <div className="absolute z-50 mt-2 w-[165px] bg-white border rounded-xl shadow-lg py-2">
-                  <Link
-                    href={`/category/${categoryMap.home}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Beauty
-                  </Link>
-                  <Link
-                    href={`/category/${categoryMap.home}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Book
-                  </Link>
-                  <Link
-                    href={`/category/${categoryMap.home}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    href={`/category/${categoryMap.sportskids}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Sports & Kids
-                  </Link>
-                  <Link
-                    href={`/category/${categoryMap.electronic}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Electronic
-                  </Link>
-                  <Link
-                    href={`/category/${categoryMap.vehicle}`}
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                  >
-                    Vehicle
-                  </Link>
-                </div>
-              )}
-            </div>
-          </nav>
+                {categoryOpen && (
+                  <div className="absolute z-50 mt-2 w-[165px] bg-white border rounded-xl shadow-lg py-2">
+                    <Link
+                      href={`/category/${categoryMap.beauty}`}
+                      className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                    >
+                      Beauty
+                    </Link>
+                    <Link
+                      href={`/category/${categoryMap.book}`}
+                      className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                    >
+                      Book
+                    </Link>
+                    <Link
+                      href={`/category/${categoryMap.home}`}
+                      className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                    >
+                      Home
+                    </Link>
+                    <Link
+                      href={`/category/${categoryMap.sports_kids}`}
+                      className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                    >
+                      Sports & Kids
+                    </Link>
+                    <Link
+                      href={`/category/${categoryMap.electronic}`}
+                      className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                    >
+                      Electronic
+                    </Link>
+                    <Link
+                      href={`/category/${categoryMap.vehicle}`}
+                      className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                    >
+                      Vehicle
+                    </Link>
+                    <Link
+                      href={`/category/${categoryMap.other}`}
+                      className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                    >
+                      Other
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </nav>
             <LocationDropdown />
             <SearchBar />
-            
           </div>
 
-          {/* Desktop: side by side */}
           <div className="hidden lg:flex gap-3 w-full items-start">
-            {/* Make SearchBar 2x wider than LocationDropdown */}
             <div className="w-[66%]">
               <SearchBar />
             </div>
@@ -449,26 +451,10 @@ export default function AuthNavbar() {
       </div>
 
       <ImageScanModal open={scanOpen} onClose={() => setScanOpen(false)} />
-      {/* <ConfirmLogout
-        isOpen={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        onConfirm={() => {
-          localStorage.removeItem("authToken");
-          setShowLogoutModal(false);
-          router.push("/login");
-        }}
-        title="Are you sure that you want to log out?"
-      /> */}
       <ConfirmLogout
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
-        onConfirm={() => {
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("authTokenExpiry"); // if using expiry
-          setShowLogoutModal(false);
-          setUser(null); // clear user state
-          router.push("/");
-        }}
+        onConfirm={handleLogout}
         title="Are you sure that you want to log out?"
       />
     </div>
