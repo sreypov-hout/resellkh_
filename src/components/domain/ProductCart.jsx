@@ -6,6 +6,7 @@ import { useBookmark } from "@/context/BookmarkContext";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function ProductCart({
   id,
@@ -17,9 +18,9 @@ export default function ProductCart({
   discountText = null,
 }) {
   const { toggleBookmark, isBookmarked } = useBookmark();
+  const { data: session } = useSession();
   const bookmarked = isBookmarked(id);
   const router = useRouter();
-
   const [isAnimating, setIsAnimating] = useState(false);
 
   const getDiscountPercent = () => {
@@ -32,6 +33,21 @@ export default function ProductCart({
 
   const handleToggle = (e) => {
     e.stopPropagation(); // Prevent redirect
+
+    // Redirect to login if not authenticated
+    if (!session) {
+      router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+      toast("Please login to save favorites", {
+        icon: "🔒",
+        style: { 
+          borderRadius: "8px", 
+          background: "#fff", 
+          color: "#333",
+          padding: "8px 16px",
+        },
+      });
+      return;
+    }
 
     toggleBookmark({
       id,
@@ -120,12 +136,17 @@ export default function ProductCart({
             )}
           </div>
           <div
-            className={`cursor-pointer transition-transform duration-300 ${
+            className={`cursor-pointer relative group transition-transform duration-300 ${
               isAnimating ? "scale-125" : "scale-100"
             } ${bookmarked ? "text-orange-500" : "text-gray-400"}`}
             onClick={(e) => handleToggle(e)}
           >
             {bookmarked ? <FaBookmark size={18} /> : <FaRegBookmark size={18} />}
+            {!session && (
+              <span className="absolute hidden group-hover:block -top-8 -left-4 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                Login to save
+              </span>
+            )}
           </div>
         </div>
       </div>

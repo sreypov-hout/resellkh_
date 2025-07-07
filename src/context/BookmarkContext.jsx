@@ -6,6 +6,7 @@ import {
   addToFavourites,
   removeFromFavourites,
 } from "@/components/services/bookMark.service";
+import { toast } from "react-hot-toast";
 
 const BookmarkContext = createContext();
 
@@ -15,14 +16,47 @@ export const BookmarkProvider = ({ children }) => {
   const [hasNewBookmark, setHasNewBookmark] = useState(false);
   const { data: session, status } = useSession();
 
+  // Enhanced data transformation
+  const transformBookmark = (item) => {
+    // Handle API response format
+    if (item.product) {
+      return {
+        id: item.productId,
+        imageUrl: item.product.fileUrls?.[0] || "/images/placeholder-product.jpg",
+        title: item.product.productName || "Untitled Product",
+        description: item.product.description || "No description available",
+        price: item.product.productPrice?.toString() || "0",
+        originalPrice: item.product.originalPrice?.toString() || null,
+        discountPercent: item.product.discountPercent || 0,
+        condition: item.product.condition,
+        location: item.product.location,
+        allImages: item.product.fileUrls || []
+      };
+    }
+    // Handle local storage format
+    return {
+      id: item.id,
+      imageUrl: item.imageUrl || "/images/placeholder-product.jpg",
+      title: item.title || "Untitled Product",
+      description: item.description || "No description available",
+      price: item.price?.toString() || "0",
+      originalPrice: item.originalPrice?.toString() || null,
+      discountPercent: item.discountPercent || 0,
+      condition: item.condition,
+      location: item.location,
+      allImages: item.allImages || []
+    };
+  };
+
   // Initialize bookmarks
   useEffect(() => {
     const initializeBookmarks = async () => {
       try {
-        // 1. Always load from localStorage first (for instant UI)
+        // 1. Load from localStorage first
         const localBookmarks = JSON.parse(
           localStorage.getItem("bookmarks") || "[]"
-        );
+        ).map(transformBookmark);
+
         setBookmarks(localBookmarks);
 
         // 2. If authenticated, sync with API
@@ -33,32 +67,26 @@ export const BookmarkProvider = ({ children }) => {
               session.accessToken
             );
 
-            const transformed = apiBookmarks.map(item => ({
-              id: item.productId,
-              imageUrl: item.product?.imageUrl || "",
-              title: item.product?.title || "",
-              description: item.product?.description || "",
-              price: item.product?.price?.toString() || "0",
-              originalPrice: item.product?.originalPrice?.toString() || null,
-              discountPercent: item.product?.discountPercent || null,
-            }));
+            const transformedApiBookmarks = apiBookmarks.map(transformBookmark);
 
             // Merge bookmarks (API takes precedence)
             const merged = [
-              ...transformed,
+              ...transformedApiBookmarks,
               ...localBookmarks.filter(
-                local => !transformed.some(api => api.id === local.id)
+                local => !transformedApiBookmarks.some(api => api.id === local.id)
               ),
             ];
 
             setBookmarks(merged);
             localStorage.setItem("bookmarks", JSON.stringify(merged));
           } catch (apiError) {
-            console.error("API sync failed, using local bookmarks", apiError);
+            console.log("Using local bookmarks due to sync error:", apiError.message);
+            // Silently fail - we already have local bookmarks
           }
         }
       } catch (error) {
-        console.error("Bookmark initialization failed", error);
+        console.error("Bookmark initialization failed:", error);
+        toast.error("Failed to load favorites");
       } finally {
         setIsReady(true);
       }
@@ -82,29 +110,30 @@ export const BookmarkProvider = ({ children }) => {
       if (existing) {
         newBookmarks = bookmarks.filter(item => item.id !== product.id);
         if (status === "authenticated") {
-          await removeFromFavourites(product.id, session.user.id, session.accessToken);
+          await removeFromFavourites(
+            product.id, 
+            session.user.id, 
+            session.accessToken
+          );
+          toast.success("Removed from favorites");
         }
       } else {
-        newBookmarks = [...bookmarks, {
-          ...product,
-          price: product.price?.toString() || "0",
-          originalPrice: product.originalPrice?.toString() || null
-        }];
+        newBookmarks = [...bookmarks, transformBookmark(product)];
         if (status === "authenticated") {
           await addToFavourites({
             productId: product.id,
             userId: session.user.id
           }, session.accessToken);
+          toast.success("Added to favorites");
         }
-        // Set flag when new bookmark is added
         setHasNewBookmark(true);
-        // Clear the notification after 3 seconds
         setTimeout(() => setHasNewBookmark(false), 3000);
       }
 
       setBookmarks(newBookmarks);
     } catch (error) {
-      console.error("Bookmark toggle failed", error);
+      console.error("Bookmark toggle failed:", error);
+      toast.error(error.message || "Failed to update favorites");
       throw error;
     }
   };

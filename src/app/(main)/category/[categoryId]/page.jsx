@@ -7,9 +7,22 @@ import Cart from "@/components/profile/someComponent/Cart";
 import { getProductsByCategoryId } from "@/components/services/productCategory.service";
 
 const categoryNames = {
+  1: "accessories",
+  2: "beauty",
+  3: "equipment_bag_shoes",
+  4: "book",
+  5: "fashion",
+  6: "home",
+  7: "sports_kids",
+  8: "electronic",
+  9: "vehicle",
+  10: "other"
+};
+
+const categoryDisplayNames = {
   1: "Accessories",
   2: "Beauty",
-  3: "Equipment Bag & Shoes",
+  3: "Equipment, Bag & Shoes",
   4: "Book",
   5: "Fashion",
   6: "Home",
@@ -36,7 +49,6 @@ export default function CategoryPage() {
         setProducts(productsData);
       } catch (err) {
         setError(err.message);
-        // If unauthorized, you might want to redirect to login
         if (err.message.includes('401')) {
           window.location.href = '/login';
         }
@@ -45,7 +57,6 @@ export default function CategoryPage() {
       }
     };
 
-    // Only fetch if we're on the client side
     if (typeof window !== 'undefined') {
       fetchProducts();
     }
@@ -53,7 +64,7 @@ export default function CategoryPage() {
 
   const itemsToShow = products.slice(0, visibleCount);
   const handleViewMore = () => setVisibleCount((prev) => prev + 10);
-  const categoryName = categoryNames[parsedCategoryId] || "All Items";
+  const categoryName = categoryDisplayNames[parsedCategoryId] || "All Items";
 
   if (loading) {
     return (

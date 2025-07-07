@@ -31,7 +31,6 @@ export default function SearchBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // API fetching for suggestions (no changes needed here)
   useEffect(() => {
     if (query.trim() === '') {
       setResults([]);
@@ -39,12 +38,15 @@ export default function SearchBar() {
       setError(null);
       return;
     }
+    
     const controller = new AbortController();
     const signal = controller.signal;
+    
     const debounceTimer = setTimeout(() => {
       setLoading(true);
       setResults([]);
       setError(null);
+      
       const searchUrl = `${API_URL}?search=${encodeURIComponent(query)}`;
       fetch(searchUrl, { signal })
         .then((res) => {
@@ -54,7 +56,9 @@ export default function SearchBar() {
           return res.json();
         })
         .then((data) => {
-          setResults(data.payload || []);
+          // Limit results to 10 items
+          const limitedResults = data.payload ? data.payload.slice(0, 10) : [];
+          setResults(limitedResults);
         })
         .catch((err) => {
           if (err.name === 'AbortError') {
@@ -68,6 +72,7 @@ export default function SearchBar() {
           setLoading(false);
         });
     }, 300);
+    
     return () => {
       clearTimeout(debounceTimer);
       controller.abort();
@@ -84,29 +89,24 @@ export default function SearchBar() {
     setScanOpen(true);
   };
 
-  // When a user clicks a SUGGESTION
   const handleResultClick = (productName) => {
     setQuery('');
     setResults([]);
-    // This navigates to the results page
     router.push(`/result-search?query=${encodeURIComponent(productName)}`);
   };
 
-  // 1. Add a new function to handle form submission (e.g., pressing Enter)
   const handleSearchSubmit = (event) => {
-    event.preventDefault(); // Prevent the browser from reloading the page
+    event.preventDefault();
     if (query.trim()) {
-      // Navigate to the results page with the current query
       router.push(`result-search?query=${encodeURIComponent(query)}`);
-      setQuery(''); // Optionally clear the search bar
-      setResults([]); // Close suggestions
+      setQuery('');
+      setResults([]);
     }
   };
 
   return (
     <div ref={wrapperRef} className="relative w-full">
       {!scanOpen && (
-        // 2. Wrap the search elements in a <form> tag
         <form 
           onSubmit={handleSearchSubmit} 
           className="absolute w-full rounded-2xl bg-[#f2edef] shadow-sm border border-gray-200"
@@ -131,10 +131,10 @@ export default function SearchBar() {
               <path d="M19 12H5" stroke="#171717" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          {/* Suggestions Dropdown */}
+          
+          {/* Suggestions Dropdown - Limited to 10 results */}
           {query.trim().length > 0 && (
-            <div className="border-t border-gray-300 text-sm text-gray-800">
-              {/* ... suggestion rendering logic ... */}
+            <div className="border-t border-gray-300 text-sm text-gray-800 max-h-60 overflow-y-auto">
               {loading && <div className="px-5 py-2 text-gray-500">Searching...</div>}
               {error && <div className="px-5 py-2 text-red-500">{error}</div>}
               {!loading && !error && results.length > 0 && (
@@ -149,6 +149,9 @@ export default function SearchBar() {
                     </li>
                   ))}
                 </ul>
+              )}
+              {!loading && results.length === 0 && query.trim().length > 0 && (
+                <div className="px-5 py-2 text-gray-500">No results found</div>
               )}
             </div>
           )}
