@@ -91,67 +91,38 @@ export default function EditProfilePage({ sellerId }) {
     fetchProfile();
   }, [sellerId]);
 
+  const validateTelegramUsername = (username) => {
+  const cleaned = username.startsWith('@') ? username.slice(1) : username;
+  const regex = /^[a-zA-Z0-9_]{5,32}$/;
+  return regex.test(cleaned);
+};
+  
+
   const handleChange = (field) => (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: e.target.value,
-    }));
-  };
-
-  const handleSave = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("No token found. Please log in.");
-      return;
+    // Handle both direct values and event objects
+    let value;
+    if (e && e.target) {
+      value = e.target.value; // Standard input event
+    } else {
+      value = e; // Direct value (from dropdown)
     }
 
-    const formDataToSend = new FormData();
-    formDataToSend.append("userId", sellerId);
-    formDataToSend.append("gender", formData.gender || "");
-    formDataToSend.append("phoneNumber", formData.mobile || "");
-    formDataToSend.append("birthday", formData.birthday || "");
-    formDataToSend.append("address", formData.address || "");
-    formDataToSend.append("telegramUrl", formData.telegram || "");
-    formDataToSend.append("slogan", formData.bio || "");
-    formDataToSend.append("userName", formData.username || "");
-    formDataToSend.append("firstName", formData.firstName || "");
-    formDataToSend.append("lastName", formData.lastName || "");
+    // Ensure we always use a string value
+    const stringValue = typeof value === 'string' ? value : String(value);
 
-    if (formData.profileImage) {
-      formDataToSend.append("profileImage", formData.profileImage);
-    }
-    if (formData.coverImage) {
-      formDataToSend.append("coverImage", formData.coverImage);
-    }
-
-    const toastId = toast.loading("Saving profile...");
-
-    try {
-      const res = await fetch("https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/edit", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formDataToSend,
-      });
-
-      const data = await res.json();
-      toast.dismiss(toastId);
-
-      if (res.ok && data.status === 200) {
-        toast.success("Profile updated successfully!");
-        router.push(`/profile/${sellerId}`);
-        
-      } else {
-        toast.error(data.message || "Failed to update profile.");
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [field]: stringValue,
+      };
+      if (field === "location") {
+        updated.address = stringValue;
       }
-    } catch (err) {
-      toast.dismiss(toastId);
-      console.error("Error updating profile:", err);
-      toast.error("Something went wrong.");
-    }
-   
+      return updated;
+    });
   };
+
+  
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -159,6 +130,10 @@ export default function EditProfilePage({ sellerId }) {
       const imageURL = URL.createObjectURL(file);
       setSelectedImage(imageURL);
       setFormData((prev) => ({ ...prev, profileImage: file }));
+    } else {
+      setSelectedImage("/default-avatar.png");
+      setFormData((prev) => ({ ...prev, profileImage: null }));
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -168,30 +143,133 @@ export default function EditProfilePage({ sellerId }) {
       const imageURL = URL.createObjectURL(file);
       setSelectedCoverImage(imageURL);
       setFormData((prev) => ({ ...prev, coverImage: file }));
+    } else {
+      setSelectedCoverImage("/cover.jpg");
+      setFormData((prev) => ({ ...prev, coverImage: null }));
+      if (coverInputRef.current) coverInputRef.current.value = "";
     }
   };
+
+const handleSave = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    toast.error("No token found. Please log in.");
+    return;
+  }
+
+  const formDataToSend = new FormData();
+ formDataToSend.append("userId", sellerId);
+    formDataToSend.append("gender", formData.gender || "");
+    formDataToSend.append("phoneNumber", formData.mobile || "");
+    formDataToSend.append("birthday", formData.birthday || "");
+    formDataToSend.append("address", formData.address || "");
+    const cleanTelegram = formData.telegram.startsWith("@")
+  ? formData.telegram.slice(1)
+  : formData.telegram;
+
+formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
+    formDataToSend.append("slogan", formData.bio || "");
+    formDataToSend.append("userName", formData.username || "");
+    formDataToSend.append("firstName", formData.firstName || "");
+    formDataToSend.append("lastName", formData.lastName || "");
+
+    if (formData.profileImage instanceof File) {
+      formDataToSend.append("profileImage", formData.profileImage);
+    } else if (formData.profileImage === null) {
+      formDataToSend.append("removeProfileImage", "true");
+    }
+
+    if (formData.coverImage instanceof File) {
+      formDataToSend.append("coverImage", formData.coverImage);
+    } else if (formData.coverImage === null) {
+      formDataToSend.append("removeCoverImage", "true");
+    }
+
+  const toastId = toast.loading("Saving profile...");
+
+  try {
+    const res = await fetch("https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/edit", {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formDataToSend,
+    });
+
+    const data = await res.json();
+    toast.dismiss(toastId);
+
+    if (res.ok && data.status === 200) {
+      // Update localStorage with new profile data
+      localStorage.setItem("firstName", formData.firstName);
+      localStorage.setItem("lastName", formData.lastName);
+      localStorage.setItem("userName", formData.username);
+      
+      // Handle profile image update
+      if (formData.profileImage instanceof File) {
+        // For new images, we'll use the blob URL temporarily
+        localStorage.setItem("profileImage", selectedImage);
+      } else if (formData.profileImage === null) {
+        localStorage.setItem("profileImage", "/default-avatar.png");
+      }
+
+      // Update the user data in localStorage
+      const updatedUser = {
+        id: sellerId,
+        name: `${formData.firstName || ""} ${formData.lastName || ""}`.trim() || "User",
+        avatar: selectedImage,
+        username: formData.username
+      };
+      localStorage.setItem("userData", JSON.stringify(updatedUser));
+
+      // Dispatch event to notify navbar of the update
+      window.dispatchEvent(new CustomEvent("profile-updated", {
+        detail: updatedUser
+      }));
+
+      toast.success("Profile updated successfully!");
+      router.push(`/profile/${sellerId}`);
+    } else {
+      toast.error(data.message || "Failed to update profile.");
+    }
+  } catch (err) {
+    toast.dismiss(toastId);
+    console.error("Error updating profile:", err);
+    toast.error("Something went wrong.");
+  }
+};
+
 
   if (loading) return <p className="text-center py-10">Loading profile...</p>;
   if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
 
   return (
     <div className="mx-auto px-[7%] mb-20">
-      {/* Cover with edit button */}
       <div className="relative w-full h-[180px] rounded-2xl overflow-hidden group">
-        <Image src={selectedCoverImage} alt="Cover" fill className="object-cover" />
+        <Image 
+          src={selectedCoverImage} 
+          alt="Cover" 
+          fill 
+          className="object-cover" 
+          priority
+        />
         <input
           type="file"
           ref={coverInputRef}
           onChange={handleCoverChange}
           accept="image/*"
           className="hidden"
+          key={selectedCoverImage}
         />
-        <button
-          onClick={() => coverInputRef.current?.click()}
-          className="absolute top-3 right-3 bg-white/80 hover:bg-white text-sm px-3 py-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          Edit Cover
-        </button>
+        <div className="absolute top-3 right-3 flex gap-2">
+          <button
+            onClick={() => coverInputRef.current?.click()}
+            className="bg-white/80 hover:bg-white text-sm px-3 py-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            Edit Cover
+          </button>
+          
+        </div>
       </div>
 
       <div className="w-full px-6 -mt-20 relative z-10">
@@ -205,13 +283,16 @@ export default function EditProfilePage({ sellerId }) {
           </div>
 
           <div className="flex items-center gap-6 mb-10 mx-auto max-w-4xl">
-            <Image
-              src={selectedImage || "/default-avatar.png"}
-              alt="avatar"
-              width={120}
-              height={120}
-              className="rounded-full border-4 border-white object-cover"
-            />
+            <div className="relative">
+              <Image
+                src={selectedImage}
+                alt="avatar"
+                width={120}
+                height={120}
+                className="rounded-full border-4 border-white object-cover"
+              />
+             
+            </div>
             <div>
               <p className="text-sm text-gray-700 mb-2">{formData.bio}</p>
               <input
@@ -220,12 +301,13 @@ export default function EditProfilePage({ sellerId }) {
                 onChange={handleFileChange}
                 accept="image/*"
                 className="hidden"
+                key={selectedImage}
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="text-sm border px-4 py-1 rounded hover:bg-gray-100"
               >
-                Update a photo
+                Update photo
               </button>
             </div>
           </div>
@@ -239,7 +321,11 @@ export default function EditProfilePage({ sellerId }) {
             </Section>
 
             <Section title="Location">
-              <CustomDropdown value={formData.location} options={provinceOptions} onChange={handleChange("location")} />
+              <CustomDropdown 
+                value={formData.location} 
+                options={provinceOptions} 
+                onChange={(value) => handleChange("location")(value)}
+              />
             </Section>
 
             <Section title="Business address">
@@ -251,9 +337,22 @@ export default function EditProfilePage({ sellerId }) {
               </Link>
             </Section>
 
-            <Section title="Telegram URL">
-              <Input placeholder="Your telegram URL" value={formData.telegram} onChange={handleChange("telegram")} />
-            </Section>
+          <Section title="Telegram Username">
+          <Input
+            placeholder="@yourusername"
+            value={formData.telegram}
+            onChange={(e) => {
+              const input = e.target.value.trim();
+              if (input === "" || validateTelegramUsername(input)) {
+                handleChange("telegram")(
+                  input.startsWith("@") ? input : `@${input}`
+                );
+              } else {
+                toast.error("Invalid Telegram username.");
+              }
+            }}
+          />
+        </Section>
 
             <Section title="Private Information">
               <p className="text-xs text-gray-500 mb-4 flex items-center gap-1">
@@ -270,7 +369,11 @@ export default function EditProfilePage({ sellerId }) {
               </p>
               <Input label="Mobile number" value={formData.mobile} onChange={handleChange("mobile")} />
               <h2 className="block text-sm font-bold text-black mb-1">Gender</h2>
-              <CustomDropdown value={formData.gender} options={["Male", "Female", "Other"]} onChange={handleChange("gender")} />
+              <CustomDropdown 
+                value={formData.gender} 
+                options={["Male", "Female", "Other"]} 
+                onChange={(value) => handleChange("gender")(value)}
+              />
               <Input label="Birthday" type="date" value={formData.birthday} onChange={handleChange("birthday")} />
             </Section>
 
@@ -278,7 +381,6 @@ export default function EditProfilePage({ sellerId }) {
               <button
                 onClick={handleSave}
                 className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full text-sm"
-                
               >
                 Save Changes
               </button>
@@ -290,7 +392,6 @@ export default function EditProfilePage({ sellerId }) {
   );
 }
 
-// Reusable section wrapper
 function Section({ title, children }) {
   return (
     <section className="mb-6">
@@ -300,14 +401,13 @@ function Section({ title, children }) {
   );
 }
 
-// Input
 function Input({ label, value, onChange, placeholder = "", type = "text" }) {
   return (
     <div className="mb-4">
       {label && <label className="block text-sm font-semibold mb-1">{label}</label>}
       <input
         type={type}
-        value={value}
+        value={value || ""}
         onChange={onChange}
         placeholder={placeholder}
         className="w-full border h-[45px] rounded-[24px] border-gray-900 px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
@@ -316,19 +416,18 @@ function Input({ label, value, onChange, placeholder = "", type = "text" }) {
   );
 }
 
-// Textarea
 function Textarea({ value, onChange, maxLength, placeholder = "" }) {
   return (
     <div className="pt-3">
       <textarea
-        value={value}
+        value={value || ""}
         onChange={onChange}
         maxLength={maxLength}
         placeholder={placeholder}
         rows={4}
         className="w-full border border-gray-900 rounded-[24px] px-3 py-4 pr-12 pb-6 text-sm resize-none focus:outline-none focus:border-orange-400"
       />
-      <p className="text-right text-xs text-gray-400 mt-1">{value.length}/{maxLength}</p>
+      <p className="text-right text-xs text-gray-400 mt-1">{(value || "").length}/{maxLength}</p>
     </div>
   );
 }

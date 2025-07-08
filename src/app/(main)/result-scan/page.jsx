@@ -203,7 +203,7 @@ export default function ResultScanPage() {
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ea580c] mb-4"></div>
           <p>Searching for similar products...</p>
         </div>
       ) : scanResults.length > 0 ? (
@@ -212,7 +212,7 @@ export default function ResultScanPage() {
             <h2 className="text-xl font-semibold">Similar Products</h2>
             <button 
               onClick={handleTryAgain}
-              className="text-purple-600 hover:text-purple-800 flex items-center gap-1"
+              className="text-[#ea580c] hover:text-[#d95f0e] flex items-center gap-1"
             >
               <ArrowPathIcon className="w-4 h-4" />
               Refresh results

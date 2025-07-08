@@ -21,7 +21,7 @@ export default function AuthNavbar() {
   const desktopCategoryRef = useRef(null);
   const mobileCategoryRef = useRef(null);
 
-  // Corrected category mapping to match backend IDs
+  // Category mapping
   const categoryMap = {
     accessories: 1,
     beauty: 2,
@@ -51,7 +51,7 @@ export default function AuthNavbar() {
     { name: "Other", key: "other" },
   ];
 
-  // Close profile and category dropdowns on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -70,55 +70,72 @@ export default function AuthNavbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch user profile from localStorage and backend
+  // Load and manage user profile data
   useEffect(() => {
-    const updateUserFromStorage = async () => {
-      const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("userId");
-      const firstName = localStorage.getItem("firstName");
-      const lastName = localStorage.getItem("lastName");
-      const profileImage = localStorage.getItem("profileImage");
-
-      if (!token || !userId) {
-        setUser(null);
-        return;
+    const loadUserData = () => {
+      // First try to get from localStorage cache
+      const cachedUser = localStorage.getItem("cachedUser");
+      if (cachedUser) {
+        try {
+          const parsedUser = JSON.parse(cachedUser);
+          setUser(parsedUser);
+        } catch (e) {
+          console.error("Error parsing cached user data", e);
+        }
       }
 
-      try {
-        const res = await fetch(
-          `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!res.ok) {
-          console.error("Failed to fetch user profile");
+      // Then fetch fresh data from API
+      const fetchUserProfile = async () => {
+        const token = localStorage.getItem("token");
+        const userId = localStorage.getItem("userId");
+        
+        if (!token || !userId) {
           setUser(null);
           return;
         }
 
-        const json = await res.json();
+        try {
+          const res = await fetch(
+            `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/${userId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
 
-        setUser({
-          id: userId,
-          name: `${firstName || ""} ${lastName || ""}`.trim() || "User",
-          avatar: json.payload?.profileImage || profileImage || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
-        });
-      } catch (err) {
-        console.error("Error fetching user profile:", err);
-        setUser(null);
-      }
+          if (res.ok) {
+            const data = await res.json();
+            const userProfile = {
+              id: userId,
+              name: `${data.payload?.firstName || ""} ${data.payload?.lastName || ""}`.trim() || "User",
+              avatar: data.payload?.profileImage || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
+            };
+            
+            // Update cache and state
+            localStorage.setItem("cachedUser", JSON.stringify(userProfile));
+            setUser(userProfile);
+          }
+        } catch (err) {
+          console.error("Error fetching user profile:", err);
+        }
+      };
+
+      fetchUserProfile();
     };
 
-    updateUserFromStorage();
+    loadUserData();
 
-    // Optional: listen for auth-change event to update user on login/logout
-    window.addEventListener("auth-change", updateUserFromStorage);
-    return () => window.removeEventListener("auth-change", updateUserFromStorage);
+    // Set up event listeners
+    const handleProfileUpdate = () => loadUserData();
+    window.addEventListener("profile-updated", handleProfileUpdate);
+    window.addEventListener("auth-change", loadUserData);
+    
+    return () => {
+      window.removeEventListener("profile-updated", handleProfileUpdate);
+      window.removeEventListener("auth-change", loadUserData);
+    };
   }, []);
 
   // Close profile dropdown on route change
@@ -127,6 +144,7 @@ export default function AuthNavbar() {
   }, [pathname]);
 
   const handleLogout = () => {
+    // Clear all user-related data
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("email");
@@ -134,6 +152,8 @@ export default function AuthNavbar() {
     localStorage.removeItem("firstName");
     localStorage.removeItem("lastName");
     localStorage.removeItem("profileImage");
+    localStorage.removeItem("cachedUser");
+    
     setShowLogoutModal(false);
     setUser(null);
     signOut({ callbackUrl: "/" });

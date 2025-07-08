@@ -15,6 +15,8 @@ export default function DealMethod({
   const [showLocationInput, setShowLocationInput] = useState(false);
   // const [latLng, setLatLng] = useState({ lat: null, lng: null });
   const [mapVisible, setMapVisible] = useState(false);
+  const [telegramInput, setTelegramInput] = useState('');
+  const [telegramLink, setTelegramLink] = useState('');
 
   const handleLocationPick = async ({ lat, lng }) => {
   setLatLng({ lat, lng });
@@ -24,12 +26,23 @@ export default function DealMethod({
   try {
     const res = await fetch(`/api/reverse-geocode?lat=${lat}&lon=${lng}`);
     const data = await res.json();
-    setLocation(data.display_name); // បង្ហាញអាសយដ្ឋាន
+    setLocation(data.display_name); 
   } catch (error) {
     console.error("Error fetching address:", error);
-    setLocation(`${lat.toFixed(6)}, ${lng.toFixed(6)}`); // fallback ប្រសិនបើ error
+    setLocation(`${lat.toFixed(6)}, ${lng.toFixed(6)}`); 
   }
 };
+
+
+  const handleTelegramChange = (e) => {
+    const input = e.target.value.trim();
+    setTelegramInput(input);
+
+    // Remove "@" if present and generate link
+    const username = input.startsWith('@') ? input.slice(1) : input;
+    setTelegramLink(`https://t.me/${username}`);
+  };
+
 
 
   return (
@@ -85,8 +98,8 @@ export default function DealMethod({
         <input
           type="text"
           placeholder="Add link or @username"
-          value={telegram}
-          onChange={(e) => setTelegram(e.target.value)}
+          value={telegramInput}
+          onChange={handleTelegramChange}
           className="w-full rounded-2xl bg-[#f1edef] px-5 py-3 placeholder-gray-500 text-gray-800 focus:outline-none"
         />
       </div>
