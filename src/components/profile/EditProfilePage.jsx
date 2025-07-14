@@ -7,6 +7,7 @@ import { Move } from "lucide-react";
 import CustomDropdown from "./someComponent/CustomDropdown";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { encryptId } from "@/utils/encryption";
 
 const provinceOptions = [
   "Phnom Penh", "Banteay Meanchey", "Battambang", "Kampong Cham",
@@ -35,12 +36,21 @@ export default function EditProfilePage({ sellerId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
-
   const fileInputRef = useRef(null);
   const coverInputRef = useRef(null);
-
   const [selectedImage, setSelectedImage] = useState("/default-avatar.png");
   const [selectedCoverImage, setSelectedCoverImage] = useState("/cover.jpg");
+
+  // Get encrypted profile URL
+  const getEncryptedProfileUrl = () => {
+    try {
+      const encrypted = encryptId(sellerId.toString());
+      return `/profile/${encodeURIComponent(encrypted)}`;
+    } catch (error) {
+      console.error("Encryption failed:", error);
+      return `/profile/${sellerId}`; // Fallback to unencrypted
+    }
+  };
 
   useEffect(() => {
     async function fetchProfile() {
@@ -62,19 +72,20 @@ export default function EditProfilePage({ sellerId }) {
         const data = await res.json();
         if (data.status === 200 && data.payload) {
           const p = data.payload;
-          setFormData((prev) => ({
-            ...prev,
+          setFormData({
             username: p.userName || "",
             firstName: p.firstName || "",
             lastName: p.lastName || "",
             bio: p.slogan || "",
             location: p.address || "",
             address: p.address || "",
-            telegram: p.telegramUrl || "",
+            telegram: p.telegramUrl ? extractTelegramUsername(p.telegramUrl) : "",
             mobile: p.phoneNumber || "",
             gender: p.gender || "",
             birthday: p.birthday || "",
-          }));
+            profileImage: null,
+            coverImage: null,
+          });
           setSelectedImage(p.profileImage || "/default-avatar.png");
           setSelectedCoverImage(p.coverImage || "/cover.jpg");
         } else {
@@ -91,48 +102,41 @@ export default function EditProfilePage({ sellerId }) {
     fetchProfile();
   }, [sellerId]);
 
-  const validateTelegramUsername = (username) => {
-  const cleaned = username.startsWith('@') ? username.slice(1) : username;
-  const regex = /^[a-zA-Z0-9_]{5,32}$/;
-  return regex.test(cleaned);
-};
-  
-
-  const handleChange = (field) => (e) => {
-    // Handle both direct values and event objects
-    let value;
-    if (e && e.target) {
-      value = e.target.value; // Standard input event
-    } else {
-      value = e; // Direct value (from dropdown)
+  function extractTelegramUsername(url) {
+    try {
+      const u = new URL(url);
+      return u.pathname.replace("/", "");
+    } catch {
+      return url;
     }
+  }
 
-    // Ensure we always use a string value
-    const stringValue = typeof value === 'string' ? value : String(value);
-
-    setFormData((prev) => {
-      const updated = {
-        ...prev,
-        [field]: stringValue,
-      };
-      if (field === "location") {
-        updated.address = stringValue;
-      }
-      return updated;
-    });
+  const validateTelegramUsername = (username) => {
+    if (!username) return false;
+    const cleanUsername = username.trim().startsWith('@') 
+      ? username.trim().slice(1) 
+      : username.trim();
+    const regex = /^[a-zA-Z][a-zA-Z0-9_]{4,31}$/;
+    return regex.test(cleanUsername);
   };
 
-  
+  const handleChange = (field) => (e) => {
+    const value = e?.target?.value ?? e;
+    setFormData(prev => ({
+      ...prev, 
+      [field]: value,
+      ...(field === "location" ? { address: value } : {})
+    }));
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageURL = URL.createObjectURL(file);
-      setSelectedImage(imageURL);
-      setFormData((prev) => ({ ...prev, profileImage: file }));
+      setSelectedImage(URL.createObjectURL(file));
+      setFormData(prev => ({ ...prev, profileImage: file }));
     } else {
       setSelectedImage("/default-avatar.png");
-      setFormData((prev) => ({ ...prev, profileImage: null }));
+      setFormData(prev => ({ ...prev, profileImage: null }));
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -140,34 +144,39 @@ export default function EditProfilePage({ sellerId }) {
   const handleCoverChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageURL = URL.createObjectURL(file);
-      setSelectedCoverImage(imageURL);
-      setFormData((prev) => ({ ...prev, coverImage: file }));
+      setSelectedCoverImage(URL.createObjectURL(file));
+      setFormData(prev => ({ ...prev, coverImage: file }));
     } else {
       setSelectedCoverImage("/cover.jpg");
-      setFormData((prev) => ({ ...prev, coverImage: null }));
+      setFormData(prev => ({ ...prev, coverImage: null }));
       if (coverInputRef.current) coverInputRef.current.value = "";
     }
   };
 
-const handleSave = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    toast.error("No token found. Please log in.");
-    return;
-  }
+  const handleSave = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("No token found. Please log in.");
+      return;
+    }
 
-  const formDataToSend = new FormData();
- formDataToSend.append("userId", sellerId);
+    if (formData.telegram && !validateTelegramUsername(formData.telegram)) {
+      toast.error("Invalid Telegram username. Must be 5-32 characters and only contain letters, numbers, or underscores.");
+      return;
+    }
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("userId", sellerId);
     formDataToSend.append("gender", formData.gender || "");
     formDataToSend.append("phoneNumber", formData.mobile || "");
     formDataToSend.append("birthday", formData.birthday || "");
     formDataToSend.append("address", formData.address || "");
-    const cleanTelegram = formData.telegram.startsWith("@")
-  ? formData.telegram.slice(1)
-  : formData.telegram;
 
-formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
+    const cleanTelegram = formData.telegram.startsWith("@") 
+      ? formData.telegram.slice(1) 
+      : formData.telegram;
+    formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
+
     formDataToSend.append("slogan", formData.bio || "");
     formDataToSend.append("userName", formData.username || "");
     formDataToSend.append("firstName", formData.firstName || "");
@@ -185,60 +194,49 @@ formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
       formDataToSend.append("removeCoverImage", "true");
     }
 
-  const toastId = toast.loading("Saving profile...");
+    const toastId = toast.loading("Saving profile...");
 
-  try {
-    const res = await fetch("https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/edit", {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formDataToSend,
-    });
+    try {
+      const res = await fetch("https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/edit", {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formDataToSend,
+      });
 
-    const data = await res.json();
-    toast.dismiss(toastId);
+      const data = await res.json();
+      toast.dismiss(toastId);
 
-    if (res.ok && data.status === 200) {
-      // Update localStorage with new profile data
-      localStorage.setItem("firstName", formData.firstName);
-      localStorage.setItem("lastName", formData.lastName);
-      localStorage.setItem("userName", formData.username);
-      
-      // Handle profile image update
-      if (formData.profileImage instanceof File) {
-        // For new images, we'll use the blob URL temporarily
-        localStorage.setItem("profileImage", selectedImage);
-      } else if (formData.profileImage === null) {
-        localStorage.setItem("profileImage", "/default-avatar.png");
+      if (res.ok && data.status === 200) {
+        localStorage.setItem("firstName", formData.firstName);
+        localStorage.setItem("lastName", formData.lastName);
+        localStorage.setItem("userName", formData.username);
+
+        const imageToStore = formData.profileImage instanceof File 
+          ? selectedImage 
+          : "/default-avatar.png";
+        localStorage.setItem("profileImage", imageToStore);
+
+        const updatedUser = {
+          id: sellerId,
+          name: `${formData.firstName || ""} ${formData.lastName || ""}`.trim() || "User",
+          avatar: selectedImage,
+          username: formData.username,
+        };
+        localStorage.setItem("userData", JSON.stringify(updatedUser));
+
+        window.dispatchEvent(new CustomEvent("profile-updated", { detail: updatedUser }));
+
+        toast.success("Profile updated successfully!");
+        router.push(getEncryptedProfileUrl());
+      } else {
+        toast.error(data.message || "Failed to update profile.");
       }
-
-      // Update the user data in localStorage
-      const updatedUser = {
-        id: sellerId,
-        name: `${formData.firstName || ""} ${formData.lastName || ""}`.trim() || "User",
-        avatar: selectedImage,
-        username: formData.username
-      };
-      localStorage.setItem("userData", JSON.stringify(updatedUser));
-
-      // Dispatch event to notify navbar of the update
-      window.dispatchEvent(new CustomEvent("profile-updated", {
-        detail: updatedUser
-      }));
-
-      toast.success("Profile updated successfully!");
-      router.push(`/profile/${sellerId}`);
-    } else {
-      toast.error(data.message || "Failed to update profile.");
+    } catch (err) {
+      toast.dismiss(toastId);
+      console.error("Error updating profile:", err);
+      toast.error("Something went wrong.");
     }
-  } catch (err) {
-    toast.dismiss(toastId);
-    console.error("Error updating profile:", err);
-    toast.error("Something went wrong.");
-  }
-};
-
+  };
 
   if (loading) return <p className="text-center py-10">Loading profile...</p>;
   if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
@@ -246,11 +244,11 @@ formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
   return (
     <div className="mx-auto px-[7%] mb-20">
       <div className="relative w-full h-[180px] rounded-2xl overflow-hidden group">
-        <Image 
-          src={selectedCoverImage} 
-          alt="Cover" 
-          fill 
-          className="object-cover" 
+        <Image
+          src={selectedCoverImage}
+          alt="Cover"
+          fill
+          className="object-cover w-[100%] h-[100%] rounded-2xl"
           priority
         />
         <input
@@ -268,7 +266,6 @@ formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
           >
             Edit Cover
           </button>
-          
         </div>
       </div>
 
@@ -277,7 +274,7 @@ formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
           <h1 className="text-lg font-bold mb-1">Edit Profile</h1>
 
           <div className="flex items-center text-gray-500 mb-5">
-            <Link href={`/profile/${sellerId}`} className="hover:text-black">Profile</Link>
+            <Link href={getEncryptedProfileUrl()} className="hover:text-black">Profile</Link>
             <span className="mx-2">&gt;</span>
             <span className="text-orange-500">Edit profile</span>
           </div>
@@ -291,7 +288,6 @@ formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
                 height={120}
                 className="rounded-full border-4 border-white object-cover"
               />
-             
             </div>
             <div>
               <p className="text-sm text-gray-700 mb-2">{formData.bio}</p>
@@ -321,10 +317,10 @@ formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
             </Section>
 
             <Section title="Location">
-              <CustomDropdown 
-                value={formData.location} 
-                options={provinceOptions} 
-                onChange={(value) => handleChange("location")(value)}
+              <CustomDropdown
+                value={formData.location}
+                options={provinceOptions}
+                onChange={handleChange("location")}
               />
             </Section>
 
@@ -337,26 +333,35 @@ formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
               </Link>
             </Section>
 
-          <Section title="Telegram Username">
-          <Input
-            placeholder="@yourusername"
-            value={formData.telegram}
-            onChange={(e) => {
-              const input = e.target.value.trim();
-              if (input === "" || validateTelegramUsername(input)) {
-                handleChange("telegram")(
-                  input.startsWith("@") ? input : `@${input}`
-                );
-              } else {
-                toast.error("Invalid Telegram username.");
-              }
-            }}
-          />
-        </Section>
+            <Section title="Telegram Username">
+              <Input
+                placeholder="@yourusername"
+                value={formData.telegram}
+                onChange={(e) => {
+                  let raw = e.target.value.trim();
+                  const username = raw.startsWith("@") ? raw.slice(1) : raw;
+                  const formatted = `@${username}`;
+                  handleChange("telegram")(formatted);
+
+                  if (username.length < 5) return;
+
+                  const isValid = username.length <= 32 && /^[a-zA-Z0-9_]+$/.test(username);
+                  if (!isValid) {
+                    toast.dismiss();
+                    toast.error("Invalid Telegram username. Must be 5–32 characters and only contain letters, numbers, or underscores.");
+                  }
+                }}
+              />
+            </Section>
 
             <Section title="Private Information">
               <p className="text-xs text-gray-500 mb-4 flex items-center gap-1">
-                <svg className="inline-block w-8 md:w-5 lg:w-5" viewBox="0 0 27 24" fill="none">
+                <svg
+                  className="inline-block w-8 md:w-5 lg:w-5"
+                  viewBox="0 0 27 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <path
                     d="M18.2765 10.5V6.75C18.2765 4.26472 16.0448 2.25 13.2919 2.25C10.539 2.25 8.30739 4.26472 8.30739 6.75V10.5M7.47664 21.75H19.1072C20.4836 21.75 21.5995 20.7426 21.5995 19.5V12.75C21.5995 11.5074 20.4836 10.5 19.1072 10.5H7.47664C6.1002 10.5 4.98438 11.5074 4.98438 12.75V19.5C4.98438 20.7426 6.1002 21.75 7.47664 21.75Z"
                     stroke="#0F172A"
@@ -369,10 +374,10 @@ formDataToSend.append("telegramUrl", `https://t.me/${cleanTelegram}`);
               </p>
               <Input label="Mobile number" value={formData.mobile} onChange={handleChange("mobile")} />
               <h2 className="block text-sm font-bold text-black mb-1">Gender</h2>
-              <CustomDropdown 
-                value={formData.gender} 
-                options={["Male", "Female", "Other"]} 
-                onChange={(value) => handleChange("gender")(value)}
+              <CustomDropdown
+                value={formData.gender}
+                options={["Male", "Female", "Other"]}
+                onChange={handleChange("gender")}
               />
               <Input label="Birthday" type="date" value={formData.birthday} onChange={handleChange("birthday")} />
             </Section>

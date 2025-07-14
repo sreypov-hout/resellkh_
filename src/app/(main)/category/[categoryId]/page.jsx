@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Cart from "@/components/profile/someComponent/Cart";
 import { getProductsByCategoryId } from "@/components/services/productCategory.service";
+import ProductCart from "@/components/domain/ProductCart";
 
 const categoryNames = {
   1: "accessories",
@@ -139,7 +139,7 @@ export default function CategoryPage() {
                 </span>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
+              <div className="grid grid-cols-2 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 justify-items-center">
                 {itemsToShow.map((item) => {
                   const price =
                     item.discountPercent && !isNaN(item.discountPercent)
@@ -147,7 +147,7 @@ export default function CategoryPage() {
                       : item.productPrice;
 
                   return (
-                    <Cart
+                    <ProductCart
                       key={item.productId}
                       id={item.productId}
                       imageUrl={item.fileUrls?.[0] || "/images/default-product.png"}

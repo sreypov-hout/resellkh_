@@ -8,6 +8,8 @@ import Link from "next/link";
 import ImageScanModal from "./navbar/ImageScanModal";
 import ConfirmLogout from "./navbar/Confirmlogout";
 import { signOut } from "next-auth/react";
+import { encryptId } from "@/utils/encryption";
+import { Store, LayoutDashboard, ShoppingCart } from "lucide-react"; // Import necessary icons
 
 export default function AuthNavbar() {
   const [user, setUser] = useState(null);
@@ -20,6 +22,7 @@ export default function AuthNavbar() {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const desktopCategoryRef = useRef(null);
   const mobileCategoryRef = useRef(null);
+  const [cartItemCount, setCartItemCount] = useState(0); // Initialize cartItemCount state
 
   // Category mapping
   const categoryMap = {
@@ -32,7 +35,7 @@ export default function AuthNavbar() {
     sports_kids: 7,
     electronic: 8,
     vehicle: 9,
-    other: 10
+    other: 10,
   };
 
   const topCategories = [
@@ -70,15 +73,17 @@ export default function AuthNavbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Load and manage user profile data
+  // Load and manage user profile data and cart count
   useEffect(() => {
-    const loadUserData = () => {
+    const loadUserData = async () => {
       // First try to get from localStorage cache
       const cachedUser = localStorage.getItem("cachedUser");
       if (cachedUser) {
         try {
           const parsedUser = JSON.parse(cachedUser);
           setUser(parsedUser);
+          // Set cart item count from cached user data if available
+          setCartItemCount(parsedUser.cartItemCount || 0);
         } catch (e) {
           console.error("Error parsing cached user data", e);
         }
@@ -88,9 +93,10 @@ export default function AuthNavbar() {
       const fetchUserProfile = async () => {
         const token = localStorage.getItem("token");
         const userId = localStorage.getItem("userId");
-        
+
         if (!token || !userId) {
           setUser(null);
+          setCartItemCount(0); // Reset cart count if no user
           return;
         }
 
@@ -109,20 +115,66 @@ export default function AuthNavbar() {
             const data = await res.json();
             const userProfile = {
               id: userId,
-              name: `${data.payload?.firstName || ""} ${data.payload?.lastName || ""}`.trim() || "User",
-              avatar: data.payload?.profileImage || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
+              name:
+                `${data.payload?.firstName || ""} ${
+                  data.payload?.lastName || ""
+                }`.trim() || "User",
+              avatar:
+                data.payload?.profileImage ||
+                "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
+              isSellerFormCompleted: data.payload?.is_seller || false, // Ensure this property is set
+              // Assuming cart count comes from the profile API, replace `data.payload?.cartItemCount` with the actual field name
+              cartItemCount: data.payload?.cartItemCount || 0,
             };
-            
+
             // Update cache and state
             localStorage.setItem("cachedUser", JSON.stringify(userProfile));
             setUser(userProfile);
+            setCartItemCount(userProfile.cartItemCount);
+          } else {
+            console.error("Failed to fetch user profile:", res.statusText);
+            setUser(null);
+            setCartItemCount(0);
           }
         } catch (err) {
           console.error("Error fetching user profile:", err);
+          setUser(null);
+          setCartItemCount(0);
         }
       };
 
+    // You might want to fetch cart count from a separate endpoint if it's not part of the profile API
+    const fetchCartCount = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        try {
+            const res = await fetch(
+                "https://phil-whom-hide-lynn.trycloudflare.com/api/v1/cart/count", // Replace with your actual cart count API endpoint
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (res.ok) {
+                const data = await res.json();
+                setCartItemCount(data.payload?.count || 0); // Adjust based on your API response
+            } else {
+                console.error("Failed to fetch cart count:", res.statusText);
+                setCartItemCount(0);
+            }
+        } catch (err) {
+            console.error("Error fetching cart count:", err);
+            setCartItemCount(0);
+        }
+    };
+
+
       fetchUserProfile();
+      fetchCartCount(); // Fetch cart count when user data is loaded/updated
     };
 
     loadUserData();
@@ -131,16 +183,19 @@ export default function AuthNavbar() {
     const handleProfileUpdate = () => loadUserData();
     window.addEventListener("profile-updated", handleProfileUpdate);
     window.addEventListener("auth-change", loadUserData);
-    
+    window.addEventListener("cart-updated", loadUserData); // Listen for custom event when cart changes
+
     return () => {
       window.removeEventListener("profile-updated", handleProfileUpdate);
       window.removeEventListener("auth-change", loadUserData);
+      window.removeEventListener("cart-updated", loadUserData);
     };
   }, []);
 
   // Close profile dropdown on route change
   useEffect(() => {
     setProfileOpen(false);
+    setCategoryOpen(false); // Also close category dropdown on route change
   }, [pathname]);
 
   const handleLogout = () => {
@@ -153,10 +208,37 @@ export default function AuthNavbar() {
     localStorage.removeItem("lastName");
     localStorage.removeItem("profileImage");
     localStorage.removeItem("cachedUser");
-    
+
     setShowLogoutModal(false);
     setUser(null);
+    setCartItemCount(0); // Reset cart count on logout
     signOut({ callbackUrl: "/" });
+  };
+
+  const handleBecomeSellerClick = () => {
+    setProfileOpen(false);
+    router.push("/seller/register");
+  };
+
+  const handleSellerDashboardClick = () => {
+    setProfileOpen(false);
+    router.push("/seller/dashboard");
+  };
+
+  // UPDATED ENCRYPTION FUNCTION
+  const getEncryptedProfileId = (id) => {
+    try {
+      if (!id) return "";
+
+      // Encrypt and make URL-safe
+      const encrypted = encryptId(id.toString());
+
+      // Double encode to handle special characters in URL
+      return encodeURIComponent(encrypted);
+    } catch (error) {
+      console.error("Profile ID encryption failed:", error);
+      return ""; // Return empty string to fail visibly
+    }
   };
 
   return (
@@ -233,10 +315,16 @@ export default function AuthNavbar() {
           <div className="flex items-center gap-4 text-gray-700 text-sm">
             {!user ? (
               <>
-                <Link href="/register" className="hover:text-orange-500 font-medium">
+                <Link
+                  href="/register"
+                  className="hover:text-orange-500 font-medium"
+                >
                   Register
                 </Link>
-                <Link href="/login" className="hover:text-orange-500 font-medium">
+                <Link
+                  href="/login"
+                  className="hover:text-orange-500 font-medium"
+                >
                   Log in
                 </Link>
                 <button
@@ -248,7 +336,25 @@ export default function AuthNavbar() {
               </>
             ) : (
               <>
-                <Link href="/favourites" className="cursor-pointer hover:text-orange-500">
+                {/* Shopping Cart Icon with Badge */}
+                <Link
+                  href="/buy/payment" // Link to your cart page
+                  className="cursor-pointer hover:text-orange-500"
+                >
+                  <div className="relative">
+                    <ShoppingCart className="w-6 h-6 stroke-[1.5] stroke-gray-900" />
+                    {cartItemCount > 0 && (
+                      <span className="absolute -top-1 -right-1.5 w-4 h-4 flex items-center justify-center bg-orange-500 text-white text-xs font-bold rounded-full">
+                        {cartItemCount}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+
+                <Link
+                  href="/favourites"
+                  className="cursor-pointer hover:text-orange-500"
+                >
                   <svg
                     width="20"
                     height="20"
@@ -263,7 +369,10 @@ export default function AuthNavbar() {
                   </svg>
                 </Link>
 
-                <Link href="/notifications" className="cursor-pointer hover:text-orange-500">
+                <Link
+                  href="/notifications"
+                  className="cursor-pointer hover:text-orange-500"
+                >
                   <div className="relative">
                     <svg
                       className="w-6 h-6 stroke-[1.5] stroke-gray-900"
@@ -297,9 +406,12 @@ export default function AuthNavbar() {
                     className="rounded-full object-cover cursor-pointer"
                     onClick={() => setProfileOpen((prev) => !prev)}
                   />
-                  {profileOpen && (
+                  {profileOpen && user && (
                     <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-30">
-                      <Link href={`/profile/${user.id}`} className="cursor-pointer">
+                      <Link
+                        href={`/profile/${getEncryptedProfileId(user.id)}`}
+                        className="cursor-pointer"
+                      >
                         <div className="flex items-center gap-3 px-4 py-3 border-b">
                           <img
                             src={user.avatar}
@@ -318,6 +430,25 @@ export default function AuthNavbar() {
                           </div>
                         </div>
                       </Link>
+
+                      {true ? (
+                        <button
+                          onClick={handleSellerDashboardClick}
+                          className="w-full px-4 py-3 flex items-center gap-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-b transition-all duration-200"
+                        >
+                          <LayoutDashboard className="w-5 h-5 text-orange-500" />
+                          <span className="ps-2">Seller Dashboard</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleBecomeSellerClick}
+                          className="w-full px-4 py-3 flex items-center gap-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-b transition-all duration-200 group"
+                        >
+                          <Store className="w-5 h-5 text-orange-500 group-hover:text-orange-600" />
+                          <span className="ps-2">Become a Seller</span>
+                        </button>
+                      )}
+
                       <button
                         onClick={() => setShowLogoutModal(true)}
                         className="w-full px-4 py-3 rounded-b-xl flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -382,31 +513,30 @@ export default function AuthNavbar() {
                     viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path d="M5.99829 4.75C5.99829 4.33579 6.33408 4 6.74829 4H17.2483C17.6625 4 17.9983 4.33579 17.9983 4.75C17.9983 5.16421 17.6625 5.5 17.2483 5.5H6.74829C6.33408 5.5 5.99829 5.16421 5.99829 4.75ZM5.99829 10C5.99829 9.58579 6.33408 9.25 6.74829 9.25H17.2483C17.6625 9.25 17.9983 9.58579 17.9983 10C17.9983 10.4142 17.6625 10.75 17.2483 10.75H6.74829C6.33408 10.75 5.99829 10.4142 5.99829 10ZM5.99829 15.25C5.99829 14.8358 6.33408 14.5 6.74829 14.5H17.2483C17.6625 14.5 17.9983 14.8358 17.9983 15.25C17.9983 15.6642 pisos
-                      17.6625 16 17.2483 16H6.74829C6.33408 16 5.99829 15.6642 5.99829 15.25Z" />
-                    <path d="M1.98828 4.75C1.98828 4.19772 2.436 3.75 2.98828 3.75H2.99828C3.55057 3.75 3.99828 4.19772 3.99828 4.75V4.76C3.99828 5.31228 3.55057 5.76 2.99828 5.76H2.98828C2.436 5.76 1.98828 5.31228 1.98828 4.76V4.75Z" />
-                    <path d="M1.98828 15.25C1.98828 14.6977 2.436 14.25 2.98828 14.25H2.99828C3.55057 14.25 3.99828 14.6977 3.99828 15.25V15.26C3.99828 15.8123 3.55057 16.26 2.99828 16.26H2.98828C2.436 16.26 1.98828 15.8123 1.98828 15.26V15.25Z" />
-                    <path d="M1.98828 10C1.98828 9.44772 2.436 9 2.98828 9H2.99828C3.55057 9 3.99828 9.44772 3.99828 10V10.01C3.99828 10.5623 3.55057 11.01 2.99828 11.01H2.98828C2.436 11.01 1.98828 10.5623 1.98828 10.01V10Z" />
-                  </svg>
-                  <span className="group-hover:text-orange-500 transition-colors duration-200">
-                    All Categories
-                  </span>
-                </button>
+                    <path d="M5.99829 4.75C5.99829 4.33579 6.33408 4 6.74829 4H17.2483C17.6625 4 17.9983 4.33579 17.9983 4.75C17.9983 5.16421 17.6625 5.5 17.2483 5.5H6.74829C6.33408 5.5 5.99829 5.16421 5.99829 4.75ZM5.99829 10C5.99829 9.58579 6.33408 9.25 6.74829 9.25H17.2483C17.6625 9.25 17.9983 9.58579 17.9983 10C17.9983 10.4142 17.6625 10.75 17.2483 10.75H6.74829C6.33408 10.75 5.99829 10.4142 5.99829 10ZM5.99829 15.25C5.99829 14.8358 6.33408 14.5 6.74829 14.5H17.2483C17.6625 14.5 17.9983 14.8358 17.9983 15.25C17.9983 15.6642 17.6625 16 17.2483 16H6.74829C6.33408 16 5.99829 15.6642 5.99829 15.25Z" />
+                  <path d="M1.98828 4.75C1.98828 4.19772 2.436 3.75 2.98828 3.75H2.99828C3.55057 3.75 3.99828 4.19772 3.99828 4.75V4.76C3.99828 5.31228 3.55057 5.76 2.99828 5.76H2.98828C2.436 5.76 1.98828 5.31228 1.98828 4.76V4.75Z" />
+                  <path d="M1.98828 15.25C1.98828 14.6977 2.436 14.25 2.98828 14.25H2.99828C3.55057 14.25 3.99828 14.6977 3.99828 15.25V15.26C3.99828 15.8123 3.55057 16.26 2.99828 16.26H2.98828C2.436 16.26 1.98828 15.8123 1.98828 15.26V15.25Z" />
+                  <path d="M1.98828 10C1.98828 9.44772 2.436 9 2.98828 9H2.99828C3.55057 9 3.99828 9.44772 3.99828 10V10.01C3.99828 10.5623 3.55057 11.01 2.99828 11.01H2.98828C2.436 11.01 1.98828 10.5623 1.98828 10.01V10Z" />
+                </svg>
+                <span className="group-hover:text-orange-500 transition-colors duration-200">
+                  All Categories
+                </span>
+              </button>
 
-                {categoryOpen && (
-                  <div className="absolute z-50 mt-2 w-48 bg-white border rounded-xl shadow-lg py-2">
-                    {dropdownCategories.map((cat) => (
-                      <Link
-                        key={cat.key}
-                        href={`/category/${categoryMap[cat.key]}`}
-                        className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                      >
-                        {cat.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {categoryOpen && (
+                <div className="absolute z-50 mt-2 w-48 bg-white border rounded-xl shadow-lg py-2">
+                  {dropdownCategories.map((cat) => (
+                    <Link
+                      key={cat.key}
+                      href={`/category/${categoryMap[cat.key]}`}
+                      className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                    >
+                      {cat.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
             </nav>
             <LocationDropdown />
             <SearchBar />

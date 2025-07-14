@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import ProfileBanner from "@/components/profile/ProfileBanner";
 import ProfileTabs from "@/components/profile/ProfileTabs";
+import { decryptId } from "@/utils/encryption"; // ✅ Import decryption util
 
 export default function SellerProfileClient({ sellerId }) {
   const searchParams = useSearchParams();
@@ -15,31 +16,58 @@ export default function SellerProfileClient({ sellerId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ✅ Decrypt once, memoized
+  const numericSellerId = useMemo(() => {
+    try {
+      const decoded = decodeURIComponent(sellerId); // Decode URL-safe string
+      const decrypted = decryptId(decoded);
+      console.log("Encrypted sellerId from URL:", sellerId);
+      console.log("Decrypted numeric sellerId:", decrypted);
+      return decrypted;
+    } catch (err) {
+      console.error("Failed to decode or decrypt sellerId:", err);
+      return null;
+    }
+  }, [sellerId]);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
+
+    if (!numericSellerId) {
+      setError("Invalid seller ID");
+      setLoading(false);
+      return;
+    }
 
     async function fetchData() {
       setLoading(true);
       try {
-        // Fetch profile info
+        // ✅ Use decrypted sellerId in both API calls
         const profileRes = await fetch(
-          `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/${sellerId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/${numericSellerId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (!profileRes.ok) throw new Error("Failed to load profile data");
         const profileData = await profileRes.json();
 
-        // Fetch rating summary
         const ratingRes = await fetch(
-          `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/ratings/summary/${sellerId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/ratings/summary/${numericSellerId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (!ratingRes.ok) throw new Error("Failed to load rating summary");
         const ratingData = await ratingRes.json();
 
         if (profileData?.payload) {
           setUserData({
-            id: sellerId,
+            id: numericSellerId,
             name: `${profileData.payload.firstName || ""} ${profileData.payload.lastName || ""}`.trim(),
             avatar: profileData.payload.profileImage || null,
             cover: profileData.payload.coverImage || null,
@@ -54,14 +82,14 @@ export default function SellerProfileClient({ sellerId }) {
         }
       } catch (err) {
         setError(err.message);
-        console.error(err);
+        console.error("Error fetching profile or rating:", err);
       } finally {
         setLoading(false);
       }
     }
 
     fetchData();
-  }, [sellerId]);
+  }, [numericSellerId]);
 
   if (loading) return <div className="p-8 text-center">Loading profile...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
@@ -75,7 +103,11 @@ export default function SellerProfileClient({ sellerId }) {
         rating={ratingSummary.rating}
         reviewsCount={ratingSummary.reviewsCount}
       />
-      <ProfileTabs sellerId={sellerId} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <ProfileTabs
+        sellerId={numericSellerId}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
     </div>
   );
 }

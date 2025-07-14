@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Cart from "@/components/profile/someComponent/Cart";
+import ProductCart from "../domain/ProductCart";
 
 // Skeleton Card Component
 const SkeletonCard = () => (
@@ -215,7 +215,7 @@ export default function ListingsWithFilter({ userId }) {
 
             <div className="text-sm font-medium text-gray-700 mb-2">Item Condition</div>
             <div className="space-y-1 mb-3">
-              {["new", "like", "lightly", "used", "heavily"].map((c) => (
+              {["Brand New", "Like New", "Lightly Used", "Well Used", "Heavily Used"].map((c) => (
                 <label key={c} className="block">
                   <input
                     type="radio"
@@ -224,14 +224,14 @@ export default function ListingsWithFilter({ userId }) {
                     checked={condition === c}
                     onChange={() => setCondition(c)}
                   />{" "}
-                  {c.charAt(0).toUpperCase() + c.slice(1)} used
+                  {c.charAt(0).toUpperCase() + c.slice(1)} 
                 </label>
               ))}
             </div>
 
             <div className="text-sm font-medium text-gray-700 mb-2">Listings status</div>
             <div className="space-y-1 mb-3">
-              {["public", "private", "draft", "sold", "on sale"].map((s) => (
+              {["draft", "sold out", "on sale"].map((s) => (
                 <label key={s} className="block">
                   <input
                     type="radio"
@@ -291,7 +291,7 @@ export default function ListingsWithFilter({ userId }) {
               const firstImageUrl = item.fileUrls?.[0] || "/images/default-product.png";
 
               return (
-                <Cart
+                <ProductCart
                   key={item.productId}
                   id={item.productId}
                   imageUrl={firstImageUrl}

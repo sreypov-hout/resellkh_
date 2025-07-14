@@ -14,6 +14,8 @@ const ProductDetails = ({ product }) => {
     discountPercent,
     condition,
     categoryName,
+    productStatus,
+    location,
     description = '',
   } = product;
 
@@ -59,8 +61,15 @@ const ProductDetails = ({ product }) => {
           <span className="font-medium text-gray-700 w-24">Category:</span>
           <span className="text-gray-600">{categoryName}</span>
         </div>
+        <div className="flex items-center">
+          <span className="font-medium text-gray-700 w-24">Status:</span>
+          <span className="text-gray-600">{productStatus}</span>
+        </div>
+        <div className="flex items-center">
+          <span className="font-medium text-gray-700 w-24">Location:</span>
+          <span className="text-gray-600">{location}</span>
+        </div>
       </div>
-
       <div>
         <h3 className="font-bold text-gray-900 mb-3">Description</h3>
         <p className="text-gray-600 leading-relaxed">{displayedDescription}</p>
