@@ -1,42 +1,44 @@
+// src/app/(main)/buy/payment/page.jsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image"; // Import next/image for the empty cart image
-import OrderSummary from "@/components/buy/OrderSummary"; // Ensure this path is correct
-import ShoppingCart from "@/components/buy/Order"; // Ensure this path is correct
+import Image from "next/image";
+// Corrected import paths using aliases as per jsconfig.json
+import OrderSummary from "@/components/buy/OrderSummary";
+import Order from "@/components/buy/Order"; // This is your 'ShoppingCart' component
 
-// --- NEW/MODIFIED: Skeleton Component for the cart page ---
+// --- Skeleton Component for the cart page ---
 const CartPageSkeleton = () => (
   <main className="bg-gray-50 min-h-screen font-sans">
     <div className="container mx-auto px-4 py-8 lg:py-12">
-      <div className="flex flex-col lg:flex-row lg:space-x-8 animate-pulse"> {/* animate-pulse for the loading effect */}
+      <div className="flex flex-col lg:flex-row lg:space-x-8 animate-pulse">
         {/* Order Summary Skeleton (left side) */}
         <div className="w-full lg:w-1/2 bg-white p-6 lg:p-8 rounded-xl shadow-lg">
-          <div className="h-8 bg-gray-200 rounded w-3/4 mb-6"></div> {/* Placeholder for title */}
+          <div className="h-8 bg-gray-200 rounded w-3/4 mb-6"></div>
           <div className="divide-y divide-gray-200">
-            {[1, 2, 3].map((i) => ( // Placeholder for a few cart items
+            {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center py-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-md flex-shrink-0 mr-4"></div> {/* Image placeholder */}
+                <div className="w-20 h-20 bg-gray-200 rounded-md flex-shrink-0 mr-4"></div>
                 <div className="flex-grow space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div> {/* Product name placeholder */}
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div> {/* Price placeholder */}
-                  <div className="h-3 bg-gray-200 rounded w-1/4"></div> {/* Quantity placeholder */}
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/4"></div>
                 </div>
-                <div className="w-6 h-6 bg-gray-200 rounded-full ml-4"></div> {/* Remove button placeholder */}
+                <div className="w-6 h-6 bg-gray-200 rounded-full ml-4"></div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Shopping Cart (Order) Skeleton (right side) */}
+        {/* Order (Shopping Cart) Skeleton (right side) */}
         <div className="w-full lg:w-1/2 bg-white p-6 lg:p-8 rounded-xl shadow-lg mt-8 lg:mt-0">
-          <div className="h-8 bg-gray-200 rounded w-3/4 mb-6"></div> {/* Placeholder for title */}
+          <div className="h-8 bg-gray-200 rounded w-3/4 mb-6"></div>
           <div className="space-y-4">
-            <div className="h-10 bg-gray-200 rounded"></div> {/* Placeholder for an input field */}
-            <div className="h-10 bg-gray-200 rounded"></div> {/* Another input field */}
-            <div className="h-10 bg-gray-200 rounded"></div> {/* Yet another input field */}
-            <div className="h-10 bg-gray-200 rounded w-1/2"></div> {/* A smaller input field */}
-            <div className="h-12 bg-orange-300 rounded w-full mt-6"></div> {/* Placeholder for a primary button */}
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-12 bg-orange-300 rounded w-full mt-6"></div>
           </div>
         </div>
       </div>
@@ -46,10 +48,11 @@ const CartPageSkeleton = () => (
 // --- END NEW Skeleton Component ---
 
 
-export default function BuyPage() {
-  const [items, setItems] = useState([]);
+export default function PaymentPage() {
+  const [items, setItems] = useState([]); // All items in the cart, managed by this page
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedItemsForOrder, setSelectedItemsForOrder] = useState([]); // Items passed to the Order component
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -77,7 +80,7 @@ export default function BuyPage() {
         }
 
         const data = await response.json();
-        
+
         const transformedItems = data.payload.map(cartItem => ({
           cartId: cartItem.cartId,
           userId: cartItem.userId,
@@ -88,6 +91,8 @@ export default function BuyPage() {
           condition: cartItem.product?.condition,
           fileUrls: cartItem.product?.fileUrls || [],
           quantity: cartItem.quantity,
+          // Add any other relevant product/cart item fields from your API response here
+          // that OrderItem or OrderSummary might need (e.g., storeName, originalPrice etc.)
         }));
 
         setItems(transformedItems);
@@ -100,12 +105,23 @@ export default function BuyPage() {
     };
 
     fetchCartItems();
-  }, []); 
+  }, []);
 
+  // Handler for when an item is successfully removed via API call in OrderItem
   const handleRemoveItem = (productIdToRemove) => {
     setItems((currentItems) =>
       currentItems.filter((item) => item.productId !== productIdToRemove)
     );
+    // Also remove from selectedItemsForOrder if it was there
+    setSelectedItemsForOrder(prevSelected => prevSelected.filter(item => item.productId !== productIdToRemove));
+  };
+
+  // Handler for when "Checkout Selected" is clicked in OrderSummary
+  const handleCheckoutSelected = (selectedItems) => {
+    // This function is called by OrderSummary with the items that are currently selected.
+    // We store these in `selectedItemsForOrder` state, which will then trigger
+    // the conditional rendering of the `Order` component.
+    setSelectedItemsForOrder(selectedItems);
   };
 
   if (loading) {
@@ -115,7 +131,7 @@ export default function BuyPage() {
   if (error) {
     return (
       <main className="bg-gray-50 min-h-screen font-sans flex items-center justify-center">
-        <p>Error: {error.message}</p>
+        <p className="text-red-600 text-lg">Error: {error.message}</p>
       </main>
     );
   }
@@ -124,7 +140,7 @@ export default function BuyPage() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center min-h-screen">
         <Image
-          src="/images/story set/no listings.jpg"
+          src="/images/story set/no listings.jpg" // Ensure this path is correct in your public folder
           alt="No Listings"
           width={350}
           height={350}
@@ -139,8 +155,21 @@ export default function BuyPage() {
     <main className="bg-gray-50 min-h-screen font-sans">
       <div className="container mx-auto px-4 py-8 lg:py-12">
         <div className="flex flex-col lg:flex-row lg:space-x-8">
-          <OrderSummary items={items} onRemove={handleRemoveItem} />
-          <ShoppingCart items={items} />
+          {/* OrderSummary receives all items and manages its own internal selection state */}
+          <OrderSummary
+            initialItems={items} // Pass all items here
+            onRemove={handleRemoveItem}
+            onCheckoutSelected={handleCheckoutSelected} // This callback sets which items go to Order
+          />
+          {/* Order component is conditionally rendered and receives only the selected items */}
+          {selectedItemsForOrder.length > 0 ? (
+            <Order items={selectedItemsForOrder} />
+          ) : (
+            // Optionally, display a message or another component if no items are selected for order
+            <div className="w-full lg:w-1/2 p-6 lg:p-8 bg-white rounded-xl shadow-lg mt-8 lg:mt-0 flex items-center justify-center text-gray-500 text-center">
+                <p>Select items from the left to proceed to order.</p>
+            </div>
+          )}
         </div>
       </div>
     </main>

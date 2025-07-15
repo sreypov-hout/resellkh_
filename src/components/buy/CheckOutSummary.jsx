@@ -1,8 +1,8 @@
+// src/app/components/buy/CheckOutSummary.jsx
 "use client";
 
 import React from "react";
 
-// This component displays the total price breakdown and checkout button.
 const CheckoutSummary = ({
   subtotal,
   delivery,
@@ -12,18 +12,29 @@ const CheckoutSummary = ({
   phone,
   address,
 }) => {
+  // Helper for currency formatting (USD - $)
+  const formatCurrency = (amount) => {
+    const numericAmount = typeof amount === 'number' ? amount : 0;
+    return new Intl.NumberFormat('en-US', { // Changed to 'en-US' locale
+      style: 'currency',
+      currency: 'USD', // Changed to 'USD'
+      minimumFractionDigits: 2, // USD typically uses 2 decimal places
+      maximumFractionDigits: 2,
+    }).format(numericAmount);
+  };
+
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm w-full">
       {/* Customer Info */}
       <div className="space-y-3 text-gray-600 border-t border-gray-200 pt-4 text-sm">
         <div className="flex justify-between">
-          <span>Full Name:</span> {fullName}
+          <span>Full Name:</span> <span className="font-medium text-gray-800">{fullName}</span>
         </div>
         <div className="flex justify-between">
-          <span>Phone Number:</span> {phone}
+          <span>Phone Number:</span> <span className="font-medium text-gray-800">{phone}</span>
         </div>
         <div className="flex justify-between">
-          <span>Address:</span> {address}
+          <span>Address:</span> <span className="font-medium text-gray-800">{address}</span>
         </div>
       </div>
 
@@ -32,29 +43,29 @@ const CheckoutSummary = ({
         <div className="flex justify-between">
           <span>Subtotal:</span>
           <span className="font-medium text-gray-800">
-            ${subtotal.toFixed(2)}
+            {formatCurrency(subtotal)}
           </span>
         </div>
         <div className="flex justify-between">
           <span>Delivery:</span>
           <span className="font-medium text-gray-800">
-            ${delivery.toFixed(2)}
+            {formatCurrency(delivery)}
           </span>
         </div>
       </div>
 
       <div className="flex justify-between font-medium text-xl text-gray-800 mt-4 border-t border-gray-200 pt-4">
         <span>Total:</span>
-        <span>${total.toFixed(2)}</span>
+        <span>{formatCurrency(total)}</span>
       </div>
 
       {/* Checkout Button */}
       <div className="flex justify-end mt-8">
         <button
-          onClick={onCheckout}
+          onClick={onCheckout} // This will trigger the actual API call in Order.jsx
           className="bg-orange-500 text-white font-medium py-3 px-8 rounded-lg hover:bg-orange-600 transition transform hover:scale-105 flex items-center"
         >
-          Checkout
+          Confirm Payment
           <svg
             className="w-5 h-5 ml-2"
             fill="none"

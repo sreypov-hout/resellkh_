@@ -1,10 +1,11 @@
+// src/app/components/buy/Order.jsx
 "use client";
 
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import CheckoutSummary from "./CheckOutSummary";
+import CheckoutSummary from "./CheckOutSummary"; // Relative import is fine here
 
-const Order = ({ items }) => {
+const Order = ({ items: selectedItemsForCheckout }) => {
   const router = useRouter();
   const [showCheckout, setShowCheckout] = useState(false);
 
@@ -18,22 +19,24 @@ const Order = ({ items }) => {
   const [nameError, setNameError] = useState("");
   const [addressError, setAddressError] = useState("");
 
+  // Calculate subtotal from the items passed to this component (which are assumed to be selected)
   const subtotal = useMemo(() => {
-    return items.reduce(
+    return selectedItemsForCheckout.reduce(
       (sum, item) => sum + item.productPrice * item.quantity,
       0
     );
-  }, [items]);
+  }, [selectedItemsForCheckout]);
 
-  const deliveryFee = 2.0;
+  const deliveryFee = 2.0; // Fixed delivery fee (adjust as needed)
   const total = subtotal + deliveryFee;
 
   const totalItems = useMemo(() => {
-    return items.reduce((sum, item) => sum + item.quantity, 0);
-  }, [items]);
+    return selectedItemsForCheckout.reduce((sum, item) => sum + item.quantity, 0);
+  }, [selectedItemsForCheckout]);
 
   const validatePhone = (number) => /^\d{8,10}$/.test(number);
   const validateText = (text) => text.length >= 3 && text.length <= 30;
+  const validateAddress = (text) => text.length >= 5;
 
   const handleOrderClick = () => {
     let valid = true;
@@ -52,29 +55,80 @@ const Order = ({ items }) => {
       setNameError("");
     }
 
-    // if (!validateText(address)) {
-    //   setAddressError('Address must be between 3 and 30 characters');
-    //   valid = false;
-    // } else {
-    //   setAddressError('');
-    // }
+    if (!validateAddress(address)) {
+      setAddressError('Address must be at least 5 characters');
+      valid = false;
+    } else {
+      setAddressError('');
+    }
 
     if (valid) {
       setShowCheckout(true);
     }
   };
 
-  const handleFinalCheckout = () => {
-    router.push("/buy/payment");
+  const handleFinalCheckout = async () => {
+    // Collect the selected product IDs and quantities
+    const productsToCheckout = selectedItemsForCheckout.map(item => ({
+      productId: item.productId,
+      quantity: item.quantity
+    }));
+
+    try {
+      const token = localStorage.getItem("token"); // Get token from localStorage
+      const userId = localStorage.getItem("userId"); // Assuming userId is also available
+
+      if (!token || !userId) {
+        alert("Authentication required. Please log in.");
+        return;
+      }
+
+      // Prepare the payload for the API call
+      const orderPayload = {
+        userId: userId, // The user placing the order
+        deliveryAddress: address,
+        deliveryContact: phone,
+        fullName: fullName,
+        products: productsToCheckout, // Array of { productId, quantity }
+        paymentMethod: "Cash on Delivery", // Or dynamic if you have multiple options
+        // You might want to include total price calculation on the backend for security
+      };
+
+      console.log("Sending order payload:", orderPayload);
+
+      const response = await fetch("https://phil-whom-hide-lynn.trycloudflare.com/api/v1/order/create", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': '*/*',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderPayload)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown order creation error' }));
+        throw new Error(`Failed to create order: ${errorData.message || response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      console.log("Order created successfully:", responseData);
+      alert("Order placed successfully!");
+      // Optionally clear local cart or refetch it after successful order
+      router.push("/success-page"); // Redirect to a success page or order history
+    } catch (error) {
+      console.error("Error creating order:", error);
+      alert(`Error placing order: ${error.message}`);
+    }
   };
 
   return (
     <div className="w-full lg:w-1/2 p-6 lg:p-8">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
-          {showCheckout ? "Checkout" : "Order"}
+          {showCheckout ? "Confirm Checkout" : "Order Information"}
         </h2>
-        <span className="text-gray-500 font-medium">{totalItems} Items</span>
+        <span className="text-gray-500 font-medium">{totalItems} Items Selected</span>
       </div>
 
       {showCheckout ? (
@@ -94,20 +148,20 @@ const Order = ({ items }) => {
               <div className="flex justify-between">
                 <span>Subtotal:</span>
                 <span className="font-medium text-gray-800">
-                  ${subtotal.toFixed(2)}
+                  ${subtotal.toFixed(2)} {/* Directly changed to $ */}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery:</span>
                 <span className="font-medium text-gray-800">
-                  ${deliveryFee.toFixed(2)}
+                  ${deliveryFee.toFixed(2)} {/* Directly changed to $ */}
                 </span>
               </div>
             </div>
 
             <div className="flex justify-between font-medium text-lg text-gray-800 pt-4">
               <span>Total:</span>
-              <span>${total.toFixed(2)}</span>
+              <span>${total.toFixed(2)}</span> {/* Directly changed to $ */}
             </div>
 
             <div className="mt-6 space-y-4">
@@ -116,13 +170,13 @@ const Order = ({ items }) => {
                   htmlFor="shipping"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Delivery
+                  Delivery Option
                 </label>
                 <select
                   id="shipping"
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:outline-none focus:ring-orange-500 focus:border-orange-500 transition"
                 >
-                  <option>Grab Delivery - $2.00</option>
+                  <option>Grab Delivery - $2.00</option> {/* Changed to $ */}
                   <option>Bus Delivery - $2.00</option>
                   <option>Express Delivery - $2.00</option>
                 </select>
@@ -204,7 +258,7 @@ const Order = ({ items }) => {
               onClick={handleOrderClick}
               className="w-1/2 bg-orange-600 text-white font-medium py-3 rounded-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105"
             >
-              Order
+              Confirm Order Details
             </button>
           </div>
         </>
