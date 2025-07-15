@@ -16,9 +16,7 @@ export const BookmarkProvider = ({ children }) => {
   const [hasNewBookmark, setHasNewBookmark] = useState(false);
   const { data: session, status } = useSession();
 
-  // Enhanced data transformation
   const transformBookmark = (item) => {
-    // Handle API response format
     if (item.product) {
       return {
         id: item.productId,
@@ -30,10 +28,9 @@ export const BookmarkProvider = ({ children }) => {
         discountPercent: item.product.discountPercent || 0,
         condition: item.product.condition,
         location: item.product.location,
-        allImages: item.product.fileUrls || []
+        allImages: item.product.fileUrls || [],
       };
     }
-    // Handle local storage format
     return {
       id: item.id,
       imageUrl: item.imageUrl || "/images/placeholder-product.jpg",
@@ -44,22 +41,25 @@ export const BookmarkProvider = ({ children }) => {
       discountPercent: item.discountPercent || 0,
       condition: item.condition,
       location: item.location,
-      allImages: item.allImages || []
+      allImages: item.allImages || [],
     };
   };
 
-  // Initialize bookmarks
   useEffect(() => {
     const initializeBookmarks = async () => {
       try {
-        // 1. Load from localStorage first
-        const localBookmarks = JSON.parse(
-          localStorage.getItem("bookmarks") || "[]"
-        ).map(transformBookmark);
+        const localBookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]")
+          .map(transformBookmark);
+
+        // Handle unauthenticated state by clearing bookmarks
+        if (status === "unauthenticated") {
+          setBookmarks([]);
+          localStorage.removeItem("bookmarks");
+          return;
+        }
 
         setBookmarks(localBookmarks);
 
-        // 2. If authenticated, sync with API
         if (status === "authenticated") {
           try {
             const apiBookmarks = await fetchFavouritesByUserId(
@@ -69,7 +69,6 @@ export const BookmarkProvider = ({ children }) => {
 
             const transformedApiBookmarks = apiBookmarks.map(transformBookmark);
 
-            // Merge bookmarks (API takes precedence)
             const merged = [
               ...transformedApiBookmarks,
               ...localBookmarks.filter(
@@ -81,7 +80,6 @@ export const BookmarkProvider = ({ children }) => {
             localStorage.setItem("bookmarks", JSON.stringify(merged));
           } catch (apiError) {
             console.log("Using local bookmarks due to sync error:", apiError.message);
-            // Silently fail - we already have local bookmarks
           }
         }
       } catch (error) {
@@ -95,7 +93,6 @@ export const BookmarkProvider = ({ children }) => {
     initializeBookmarks();
   }, [status, session?.user?.id]);
 
-  // Save to localStorage on changes
   useEffect(() => {
     if (isReady) {
       localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
@@ -110,11 +107,7 @@ export const BookmarkProvider = ({ children }) => {
       if (existing) {
         newBookmarks = bookmarks.filter(item => item.id !== product.id);
         if (status === "authenticated") {
-          await removeFromFavourites(
-            product.id, 
-            session.user.id, 
-            session.accessToken
-          );
+          await removeFromFavourites(product.id, session.user.id, session.accessToken);
           toast.success("Removed from favorites");
         }
       } else {
@@ -122,7 +115,7 @@ export const BookmarkProvider = ({ children }) => {
         if (status === "authenticated") {
           await addToFavourites({
             productId: product.id,
-            userId: session.user.id
+            userId: session.user.id,
           }, session.accessToken);
           toast.success("Added to favorites");
         }
@@ -143,14 +136,16 @@ export const BookmarkProvider = ({ children }) => {
   };
 
   return (
-    <BookmarkContext.Provider value={{
-      bookmarks,
-      toggleBookmark,
-      isBookmarked: (id) => bookmarks.some(item => item.id === id),
-      isReady,
-      hasNewBookmark,
-      clearNewBookmarkNotification
-    }}>
+    <BookmarkContext.Provider
+      value={{
+        bookmarks,
+        toggleBookmark,
+        isBookmarked: (id) => bookmarks.some(item => item.id === id),
+        isReady,
+        hasNewBookmark,
+        clearNewBookmarkNotification,
+      }}
+    >
       {children}
     </BookmarkContext.Provider>
   );

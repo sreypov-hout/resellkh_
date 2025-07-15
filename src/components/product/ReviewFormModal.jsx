@@ -88,7 +88,7 @@ export const ReviewFormModal = ({ isOpen, onClose, onSubmit, userId, token }) =>
           </div>
           <div>
             <h4 className="font-semibold text-gray-900 text-lg">{userProfile.name}</h4>
-            <p className="text-gray-600 text-sm">Consumer</p>
+        
           </div>
         </div>
 

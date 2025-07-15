@@ -12,7 +12,7 @@ export default function FavoritePage() {
       console.error("Error in FavoritePage:", error);
       setError(error.message);
     };
-    
+
     window.addEventListener('error', handleError);
     return () => window.removeEventListener('error', handleError);
   }, []);
@@ -92,7 +92,7 @@ export default function FavoritePage() {
               <div className="grid grid-cols-2 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
                 {bookmarks.map((item) => (
                   <CartInBookmarkPage
-                    key={`${item.id}-${item.title}`} // Added unique key combining id and title
+                    key={`${item.id}-${item.title}`}
                     id={item.id}
                     imageUrl={item.imageUrl}
                     title={item.title}

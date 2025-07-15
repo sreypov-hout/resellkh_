@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import Cart from "@/components/profile/someComponent/Cart";
+import ProductCart from "@/components/domain/ProductCart";
 
 const API_URL = 'https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products';
 
@@ -110,7 +110,7 @@ export default function ResultSearchPage() {
                   }
 
                   return (
-                    <Cart
+                    <ProductCart
                       key={product.productId}
                       id={product.productId}
                       imageUrl={product.fileUrls?.[0] || '/images/placeholder.jpg'}

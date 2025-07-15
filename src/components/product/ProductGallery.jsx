@@ -18,18 +18,21 @@ const ProductGallery = ({ product }) => {
   }
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col sm:flex-row gap-4">
       {/* Thumbnails */}
-      <div className="flex flex-col gap-2">
+      <div className="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-x-visible no-scrollbar px-1 sm:px-0">
         {mediaItems.map((src, index) => (
           <button
             key={index}
             onClick={() => setSelectedImageIndex(index)}
-            className={`w-[94px] h-[94px] rounded-lg overflow-hidden border transition-all ${
-              selectedImageIndex === index
-                ? 'border-orange-500 ring-2 ring-orange-500'
-                : 'border-gray-200 hover:border-gray-300'
-            }`}
+            aria-current={selectedImageIndex === index ? 'true' : undefined}
+            className={`relative w-[94px] h-[94px] rounded-lg overflow-hidden border transition-all flex-shrink-0
+              ${
+                selectedImageIndex === index
+                  ? 'border-orange-500 ring-2 ring-orange-500'
+                  : 'border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500'
+              }
+            `}
           >
             <Image
               src={src}
@@ -37,10 +40,16 @@ const ProductGallery = ({ product }) => {
               width={94}
               height={94}
               className="object-cover"
+              priority={index === 0} // prioritize first image
             />
             {src.endsWith('.mp4') && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 pointer-events-none">
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </div>
@@ -50,7 +59,7 @@ const ProductGallery = ({ product }) => {
       </div>
 
       {/* Main Display */}
-      <div className="flex-grow w-full h-[400px] rounded-lg overflow-hidden border border-gray-200 relative">
+      <div className="flex-grow w-full max-h-[400px] rounded-lg overflow-hidden border border-gray-200 relative">
         {isVideo ? (
           <video
             src={mediaItems[selectedImageIndex]}
@@ -58,7 +67,7 @@ const ProductGallery = ({ product }) => {
             autoPlay
             loop
             muted
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         ) : (
           <Link
@@ -69,7 +78,7 @@ const ProductGallery = ({ product }) => {
               src={mediaItems[selectedImageIndex]}
               alt="Main product image"
               fill
-              sizes="100vw"
+              sizes="(max-width: 640px) 100vw, 50vw"
               className="object-cover"
               priority
             />

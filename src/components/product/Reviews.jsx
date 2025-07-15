@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import { ReviewFormModal } from "@/components/product/ReviewFormModal";
+import { useRouter } from "next/navigation"; // Add Next.js router
 
 // Skeleton component for loading state
 const SkeletonCard = () => (
@@ -18,6 +19,8 @@ const SkeletonCard = () => (
 );
 
 export default function Reviews({ sellerId }) {
+  const router = useRouter();
+
   const [reviews, setReviews] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -50,7 +53,6 @@ export default function Reviews({ sellerId }) {
           `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/ratings/${sellerId}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               Accept: "application/json",
             },
           }
@@ -86,10 +88,7 @@ export default function Reviews({ sellerId }) {
         setLoading(false);
       }
     };
-
-    if (token) {
-      fetchReviews();
-    }
+    fetchReviews();
   }, [sellerId, token]);
 
   const handleReviewSubmit = async ({ score, comment }) => {
@@ -138,6 +137,16 @@ export default function Reviews({ sellerId }) {
     }
   };
 
+  const onWriteReviewClick = () => {
+    if (token && userId) {
+      // Logged in → open modal
+      setIsModalOpen(true);
+    } else {
+      // Not logged in → redirect to login page
+      router.push("/login");
+    }
+  };
+
   const visibleReviews = showAll ? reviews : reviews.slice(0, 3);
 
   return (
@@ -145,7 +154,7 @@ export default function Reviews({ sellerId }) {
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-bold text-gray-900 text-lg">Reviews for Seller</h3>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={onWriteReviewClick}
           className="bg-orange-500 text-white px-5 py-2 rounded-[50px] text-sm font-medium hover:bg-orange-600 transition-colors flex items-center gap-2"
         >
           Write a review
@@ -192,7 +201,9 @@ export default function Reviews({ sellerId }) {
                           <FaStar
                             key={i}
                             className={
-                              i < Math.round(review.rating) ? "text-orange-500" : "text-gray-300"
+                              i < Math.round(review.rating)
+                                ? "text-orange-500"
+                                : "text-gray-300"
                             }
                           />
                         ))}
