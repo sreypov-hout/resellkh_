@@ -1,13 +1,15 @@
+// ProductCart.js
 "use client";
 
 import Image from "next/image";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa";
-import { useBookmark } from "@/context/BookmarkContext";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useBookmark } from "@/context/BookmarkContext";
 import { encryptId } from "@/utils/encryption";
+import { FaShoppingCart } from "react-icons/fa";
 
 export default function ProductCart({
   id,
@@ -23,6 +25,7 @@ export default function ProductCart({
   const bookmarked = isBookmarked(id);
   const router = useRouter();
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const getDiscountPercent = () => {
     if (discountText) {
@@ -39,7 +42,6 @@ export default function ProductCart({
       if (bookmarked) {
         removeBookmark(id);
       }
-
       router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
       toast("Please login to save favorites", {
         icon: "🔒",
@@ -67,7 +69,73 @@ export default function ProductCart({
     setTimeout(() => setIsAnimating(false), 300);
   };
 
-  // Fix here: use `id` prop, not undefined `product`
+  const handleAddToCart = async (e) => {
+    e.stopPropagation();
+
+    if (!session) {
+      toast("Please login to add items to cart", {
+        icon: "🔒",
+        style: {
+          borderRadius: "8px",
+          background: "#fff",
+          color: "#333",
+          padding: "8px 16px",
+        },
+      });
+      router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Authentication token not found. Please log in.");
+      return;
+    }
+    
+    // Quantity to add (default to 1)
+    const quantityToAdd = 1; 
+    const apiUrl = `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/cart/add?productId=${id}&quantity=${quantityToAdd}`;
+
+    // --- OPTIMISTIC UI UPDATE: Dispatch event BEFORE API call ---
+    // Create a CustomEvent to pass data
+    const cartUpdatedEvent = new CustomEvent('cart-updated', {
+      detail: { type: 'increment', quantity: quantityToAdd }
+    });
+    window.dispatchEvent(cartUpdatedEvent); // Dispatch the event immediately
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to add to cart due to server error.' }));
+        throw new Error(errorData.message || 'Failed to add to cart.');
+      }
+
+      const result = await response.json();
+      toast.success(result.message || "Product added to cart!");
+
+      // If API confirms, nothing more to do for count (it's already optimistically updated)
+      // If you need to re-sync with server's exact count, you could dispatch a 'refetch' event type here
+      // or check the response payload for a new total.
+
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error(error.message || "Failed to add product to cart.");
+      // --- REVERT OPTIMISTIC UPDATE ON FAILURE ---
+      const cartRevertEvent = new CustomEvent('cart-updated', {
+        detail: { type: 'decrement', quantity: quantityToAdd } // Or 'refetch'
+      });
+      window.dispatchEvent(cartRevertEvent);
+    }
+  };
+
+
   const encryptedProductId = encodeURIComponent(encryptId(id));
 
   const handleCardClick = () => {
@@ -80,8 +148,10 @@ export default function ProductCart({
 
   return (
     <div
-      className="flex flex-col cursor-pointer bg-white rounded-2xl border border-gray-200 overflow-hidden transition-transform w-full sm:w-[240px] max-w-sm"
+      className="flex flex-col cursor-pointer bg-white rounded-2xl border border-gray-200 overflow-hidden transition-transform w-full sm:w-[240px] max-w-sm group"
       onClick={handleCardClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative w-full aspect-[4/3] sm:h-[220px]">
         {discountText && (
@@ -97,6 +167,20 @@ export default function ProductCart({
           style={{ objectFit: "cover" }}
           className="object-center"
         />
+
+        {/* Add to Cart Icon - positioned at top-1 right-2, visible on hover */}
+        <div className="absolute top-1 right-2 z-20">
+          <button
+            onClick={handleAddToCart}
+            className={`transition-opacity duration-300 p-2 rounded-full bg-[#F97316] text-white shadow-lg ${
+              isHovered ? 'opacity-100' : 'opacity-0'
+            } focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:ring-opacity-75`}
+            aria-label="Add to cart"
+          >
+            <FaShoppingCart size={20} />
+          </button>
+        </div>
+
       </div>
 
       <div className="flex flex-col justify-between px-4 py-3 flex-grow">

@@ -1,3 +1,4 @@
+// AuthNavbar.js
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -9,7 +10,8 @@ import ImageScanModal from "./navbar/ImageScanModal";
 import ConfirmLogout from "./navbar/Confirmlogout";
 import { signOut } from "next-auth/react";
 import { encryptId } from "@/utils/encryption";
-import { Store, LayoutDashboard, ShoppingCart } from "lucide-react"; // Import necessary icons
+import { Store, LayoutDashboard, ShoppingCart } from "lucide-react";
+import Image from "next/image"; // Import Image for user avatar
 
 export default function AuthNavbar() {
   const [user, setUser] = useState(null);
@@ -22,20 +24,11 @@ export default function AuthNavbar() {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const desktopCategoryRef = useRef(null);
   const mobileCategoryRef = useRef(null);
-  const [cartItemCount, setCartItemCount] = useState(0); // Initialize cartItemCount state
+  const [cartItemCount, setCartItemCount] = useState(0);
 
-  // Category mapping
   const categoryMap = {
-    accessories: 1,
-    beauty: 2,
-    equipment_bag_shoes: 3,
-    book: 4,
-    fashion: 5,
-    home: 6,
-    sports_kids: 7,
-    electronic: 8,
-    vehicle: 9,
-    other: 10,
+    accessories: 1, beauty: 2, equipment_bag_shoes: 3, book: 4, fashion: 5,
+    home: 6, sports_kids: 7, electronic: 8, vehicle: 9, other: 10,
   };
 
   const topCategories = [
@@ -54,7 +47,6 @@ export default function AuthNavbar() {
     { name: "Other", key: "other" },
   ];
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -73,133 +65,135 @@ export default function AuthNavbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Load and manage user profile data and cart count
+  const fetchCartCount = async () => {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+
+    if (!token || !userId) {
+      setCartItemCount(0);
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/cart/count?userId=${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        setCartItemCount(data.payload?.count || 0);
+      } else {
+        console.error("Failed to fetch cart count:", res.statusText);
+        setCartItemCount(0);
+      }
+    } catch (err) {
+      console.error("Error fetching cart count:", err);
+      setCartItemCount(0);
+    }
+  };
+
   useEffect(() => {
-    const loadUserData = async () => {
-      // First try to get from localStorage cache
+    const loadInitialData = async () => {
       const cachedUser = localStorage.getItem("cachedUser");
       if (cachedUser) {
         try {
           const parsedUser = JSON.parse(cachedUser);
           setUser(parsedUser);
-          // Set cart item count from cached user data if available
           setCartItemCount(parsedUser.cartItemCount || 0);
         } catch (e) {
           console.error("Error parsing cached user data", e);
         }
       }
 
-      // Then fetch fresh data from API
-      const fetchUserProfile = async () => {
-        const token = localStorage.getItem("token");
-        const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
 
-        if (!token || !userId) {
-          setUser(null);
-          setCartItemCount(0); // Reset cart count if no user
-          return;
-        }
+      if (!token || !userId) {
+        setUser(null);
+        setCartItemCount(0);
+        return;
+      }
 
-        try {
-          const res = await fetch(
-            `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/${userId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          if (res.ok) {
-            const data = await res.json();
-            const userProfile = {
-              id: userId,
-              name:
-                `${data.payload?.firstName || ""} ${
-                  data.payload?.lastName || ""
-                }`.trim() || "User",
-              avatar:
-                data.payload?.profileImage ||
-                "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
-              isSellerFormCompleted: data.payload?.is_seller || false, // Ensure this property is set
-              // Assuming cart count comes from the profile API, replace `data.payload?.cartItemCount` with the actual field name
-              cartItemCount: data.payload?.cartItemCount || 0,
-            };
-
-            // Update cache and state
-            localStorage.setItem("cachedUser", JSON.stringify(userProfile));
-            setUser(userProfile);
-            setCartItemCount(userProfile.cartItemCount);
-          } else {
-            console.error("Failed to fetch user profile:", res.statusText);
-            setUser(null);
-            setCartItemCount(0);
+      try {
+        const res = await fetch(
+          `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           }
-        } catch (err) {
-          console.error("Error fetching user profile:", err);
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          const userProfile = {
+            id: userId,
+            name: `${data.payload?.firstName || ""} ${data.payload?.lastName || ""}`.trim() || "User",
+            avatar: data.payload?.profileImage || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAataA3AW1KSnjsdMt7-U_3EZElZ0=",
+            isSellerFormCompleted: data.payload?.seller || false,
+            cartItemCount: data.payload?.cartItemCount || 0,
+          };
+        
+          
+          localStorage.setItem("cachedUser", JSON.stringify(userProfile));
+          setUser(userProfile);
+          setCartItemCount(userProfile.cartItemCount);
+        } else {
+          console.error("Failed to fetch user profile:", res.statusText);
           setUser(null);
           setCartItemCount(0);
         }
-      };
-
-    // You might want to fetch cart count from a separate endpoint if it's not part of the profile API
-    const fetchCartCount = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        try {
-            const res = await fetch(
-                "https://phil-whom-hide-lynn.trycloudflare.com/api/v1/cart/count", // Replace with your actual cart count API endpoint
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            if (res.ok) {
-                const data = await res.json();
-                setCartItemCount(data.payload?.count || 0); // Adjust based on your API response
-            } else {
-                console.error("Failed to fetch cart count:", res.statusText);
-                setCartItemCount(0);
-            }
-        } catch (err) {
-            console.error("Error fetching cart count:", err);
-            setCartItemCount(0);
-        }
+      } catch (err) {
+        console.error("Error fetching user profile:", err);
+        setUser(null);
+        setCartItemCount(0);
+      } finally {
+        fetchCartCount(); // Ensures accuracy after initial load
+      }
     };
 
+    loadInitialData();
 
-      fetchUserProfile();
-      fetchCartCount(); // Fetch cart count when user data is loaded/updated
+    // --- MODIFIED: Event listener to handle cart updates directly ---
+    const handleCartUpdatedEvent = (event) => {
+      if (event.detail && event.detail.type === 'increment') {
+        setCartItemCount(prevCount => prevCount + event.detail.quantity);
+      } else if (event.detail && event.detail.type === 'decrement') {
+        setCartItemCount(prevCount => Math.max(0, prevCount - event.detail.quantity));
+      } else {
+        // Fallback: If event type is unknown or just a generic 'cart-updated', refetch
+        fetchCartCount(); 
+      }
     };
 
-    loadUserData();
+    const handleAuthChange = () => loadInitialData();
+    const handleProfileUpdate = () => loadInitialData();
 
-    // Set up event listeners
-    const handleProfileUpdate = () => loadUserData();
+
+    window.addEventListener("cart-updated", handleCartUpdatedEvent);
+    window.addEventListener("auth-change", handleAuthChange);
     window.addEventListener("profile-updated", handleProfileUpdate);
-    window.addEventListener("auth-change", loadUserData);
-    window.addEventListener("cart-updated", loadUserData); // Listen for custom event when cart changes
 
     return () => {
+      window.removeEventListener("cart-updated", handleCartUpdatedEvent);
+      window.removeEventListener("auth-change", handleAuthChange);
       window.removeEventListener("profile-updated", handleProfileUpdate);
-      window.removeEventListener("auth-change", loadUserData);
-      window.removeEventListener("cart-updated", loadUserData);
     };
   }, []);
 
-  // Close profile dropdown on route change
   useEffect(() => {
     setProfileOpen(false);
-    setCategoryOpen(false); // Also close category dropdown on route change
+    setCategoryOpen(false);
   }, [pathname]);
 
   const handleLogout = () => {
-    // Clear all user-related data
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("email");
@@ -211,7 +205,7 @@ export default function AuthNavbar() {
 
     setShowLogoutModal(false);
     setUser(null);
-    setCartItemCount(0); // Reset cart count on logout
+    setCartItemCount(0);
     signOut({ callbackUrl: "/" });
   };
 
@@ -225,19 +219,14 @@ export default function AuthNavbar() {
     router.push("/seller/dashboard");
   };
 
-  // UPDATED ENCRYPTION FUNCTION
   const getEncryptedProfileId = (id) => {
     try {
       if (!id) return "";
-
-      // Encrypt and make URL-safe
       const encrypted = encryptId(id.toString());
-
-      // Double encode to handle special characters in URL
       return encodeURIComponent(encrypted);
     } catch (error) {
       console.error("Profile ID encryption failed:", error);
-      return ""; // Return empty string to fail visibly
+      return "";
     }
   };
 
@@ -338,7 +327,7 @@ export default function AuthNavbar() {
               <>
                 {/* Shopping Cart Icon with Badge */}
                 <Link
-                  href="/buy/payment" // Link to your cart page
+                  href={user?.id ? `/buy/payment` : "/login"}
                   className="cursor-pointer hover:text-orange-500"
                 >
                   <div className="relative">
@@ -431,7 +420,7 @@ export default function AuthNavbar() {
                         </div>
                       </Link>
 
-                      {true ? (
+                      {user.isSellerFormCompleted ? (
                         <button
                           onClick={handleSellerDashboardClick}
                           className="w-full px-4 py-3 flex items-center gap-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-b transition-all duration-200"
