@@ -2,12 +2,11 @@
 
 import React from "react";
 
-// This component displays the total price breakdown and checkout button.
 const CheckoutSummary = ({
   subtotal,
   delivery,
   total,
-  onCheckout,
+  onCheckout, // This will now open the modal
   fullName,
   phone,
   address,
@@ -31,15 +30,11 @@ const CheckoutSummary = ({
       <div className="mt-4 border-t border-gray-200 pt-4 space-y-2 text-gray-700 text-sm">
         <div className="flex justify-between">
           <span>Subtotal:</span>
-          <span className="font-medium text-gray-800">
-            ${subtotal.toFixed(2)}
-          </span>
+          <span className="font-medium text-gray-800">${subtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
           <span>Delivery:</span>
-          <span className="font-medium text-gray-800">
-            ${delivery.toFixed(2)}
-          </span>
+          <span className="font-medium text-gray-800">${delivery.toFixed(2)}</span>
         </div>
       </div>
 
@@ -48,25 +43,15 @@ const CheckoutSummary = ({
         <span>${total.toFixed(2)}</span>
       </div>
 
-      {/* Checkout Button */}
+      {/* This button now opens the QR Code Modal */}
       <div className="flex justify-end mt-8">
         <button
           onClick={onCheckout}
-          className="bg-orange-500 text-white font-medium py-3 px-8 rounded-lg hover:bg-orange-600 transition transform hover:scale-105 flex items-center"
+          className="bg-blue-600 text-white font-medium py-3 px-8 rounded-lg hover:bg-blue-700 transition transform hover:scale-105 flex items-center"
         >
-          Checkout
-          <svg
-            className="w-5 h-5 ml-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 8l4 4m0 0l-4 4m4-4H3"
-            />
+          Proceed to Payment
+          <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/>
           </svg>
         </button>
       </div>
