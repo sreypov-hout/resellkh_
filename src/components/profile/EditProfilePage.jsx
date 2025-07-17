@@ -138,7 +138,12 @@ export default function EditProfilePage({ sellerId }) {
 
   // Merged handleChange function
   const handleChange = (field) => (e) => {
-    const value = e?.target?.value ?? e;
+    let value = e?.target?.value ?? e;
+
+     if (field === "mobile") {
+    value = value.replace(/\D/g, ''); // Remove any non-digit characters
+  }
+
     setFormData(prev => ({
       ...prev,
       [field]: value,
@@ -189,8 +194,25 @@ export default function EditProfilePage({ sellerId }) {
       return;
     }
 
+    // 1. Validate Mobile Number (format and presence if required)
+  if (!formData.mobile) { // Example: If mobile is required
+    toast.error("Mobile number is required.");
+    return;
+  }
+  // This regex allows 7 to 15 digits. Adjust as per your specific mobile number format requirements (e.g., country codes)
+  if (!/^\d{7,15}$/.test(formData.mobile)) {
+    toast.error("Please enter a valid mobile number (7-15 digits only).");
+    return;
+  }
+
     if (formData.telegram && !validateTelegramUsername(formData.telegram)) {
-      toast.error("Invalid Telegram username. Must be 5-32 characters and only contain letters, numbers, or underscores.");
+      toast.error("Invalid Telegram username. Must be 5-32 characters and only contain letters, numbers, or underscores.",
+        {
+      style: {   
+        maxWidth: '500px'
+      },
+    }
+      );
       return;
     }
 
@@ -264,6 +286,7 @@ export default function EditProfilePage({ sellerId }) {
       toast.dismiss(toastId);
       console.error("Error updating profile:", err);
       toast.error("Something went wrong.");
+      console.error("Error updating profile:", err);
     }
   };
 
@@ -319,7 +342,9 @@ export default function EditProfilePage({ sellerId }) {
               />
             </div>
             <div>
-              <p className="text-sm text-gray-700 mb-2">{formData.bio}</p>
+              <p className=" lg:max-w-[600px] md:max-w-[400px] max-w-[160px] text-sm text-gray-700 mb-2 break-words">
+                {formData.bio}
+              </p>
               <input
                 type="file"
                 ref={fileInputRef}
@@ -339,9 +364,9 @@ export default function EditProfilePage({ sellerId }) {
 
           <div className="max-w-4xl mx-auto">
             <Section title="Public profile">
-              <Input label="Username" value={formData.username} onChange={handleChange("username")} />
-              <Input label="First name" value={formData.firstName} onChange={handleChange("firstName")} />
-              <Input label="Last name" value={formData.lastName} onChange={handleChange("lastName")} />
+              <Input label="Username" value={formData.username} onChange={handleChange("username")} maxLength={50} />
+              <Input label="First name" value={formData.firstName} onChange={handleChange("firstName")} maxLength={50} />
+              <Input label="Last name" value={formData.lastName} onChange={handleChange("lastName")} maxLength={50} />
               <Textarea placeholder="Bio" value={formData.bio} onChange={handleChange("bio")} maxLength={255} />
             </Section>
 
@@ -377,7 +402,8 @@ export default function EditProfilePage({ sellerId }) {
                   const isValid = username.length <= 32 && /^[a-zA-Z0-9_]+$/.test(username);
                   if (!isValid) {
                     toast.dismiss();
-                    toast.error("Invalid Telegram username. Must be 5–32 characters and only contain letters, numbers, or underscores.");
+                    toast.error("Invalid Telegram username. Must be 5–32 characters and only contain letters, numbers, or underscores.",  
+                    );
                   }
                 }}
               />
@@ -425,8 +451,8 @@ export default function EditProfilePage({ sellerId }) {
                 onClick={handleSave}
                 disabled={ageError || !formData.birthday}
                 className={`px-6 py-2 rounded-full text-sm ${ageError || !formData.birthday
-                    ? 'bg-gray-400 cursor-not-allowed text-white'
-                    : 'bg-orange-500 hover:bg-orange-600 text-white'
+                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  : 'bg-orange-500 hover:bg-orange-600 text-white'
                   }`}
               >
                 Save Changes

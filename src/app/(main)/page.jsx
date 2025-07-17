@@ -16,5 +16,7 @@ export default function LandingPage() {
       <RecommendedList />
       <DailyBanner />
     </div>
+
+    
   );
 }

@@ -10,6 +10,15 @@ const ReviewsSection = ({ setActiveTab,sellerId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [visibleCount, setVisibleCount] = useState(3);
+  const [currentUsername, setCurrentUsername] = useState("User");
+
+  useEffect(() => {
+    // This effect runs once on mount to get the username
+    const storedUsername = localStorage.getItem("userName");
+    if (storedUsername) {
+      setCurrentUsername(storedUsername);
+    }
+  }, []); // Empty dependency array means this runs only once on mount
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -155,12 +164,8 @@ const ReviewsSection = ({ setActiveTab,sellerId }) => {
               alt="No reviews"
               className="w-[300px] h-auto mb-4"
             />
-            <p className="text-sm font-medium text-gray-800 mb-1">
-              <span className="font-semibold">@leackhena12_Q</span> has no reviews yet.
-            </p>
-            <p className="text-sm text-gray-500 max-w-xs">
-              Reviews are given when a buyer or seller completes a deal.
-              Contact <span className="font-medium text-gray-700">@leackhena12_Q</span> to find out more!
+            <p className="text-sm text-gray-600">
+              <span className="font-semibold">@{currentUsername}</span> doesn't have any reviews yet
             </p>
           </div>
         ) : (

@@ -23,6 +23,15 @@ export default function ListingsWithFilter({ userId }) {
   const [sortBy, setSortBy] = useState("");
   const [condition, setCondition] = useState("");
   const [status, setStatus] = useState("");
+  const [currentUsername, setCurrentUsername] = useState("User");
+
+  useEffect(() => {
+    // This effect runs once on mount to get the username
+    const storedUsername = localStorage.getItem("userName");
+    if (storedUsername) {
+      setCurrentUsername(storedUsername);
+    }
+  }, []); // Empty dependency array means this runs only once on mount
 
   useEffect(() => {
     async function fetchProducts() {
@@ -275,7 +284,7 @@ export default function ListingsWithFilter({ userId }) {
               className="w-[350px] h-auto mb-6"
             />
             <p className="text-sm text-gray-600">
-              <span className="font-semibold">@user</span> doesn't have any listings yet
+              <span className="font-semibold">@{currentUsername}</span> doesn't have any listings yet
             </p>
           </div>
         ) : (
