@@ -386,7 +386,7 @@ export default function AuthNavbar() {
                             className="rounded-full object-cover w-[50px] h-[50px]"
                           />
                           <div>
-                            <p className="text-sm font-medium text-gray-900 truncate w-[150px]">{user.name}</p>
+                            <p className="text-sm font-medium text-gray-900 truncate w-[130px]">{user.name}</p>
                             <p className="text-xs text-gray-500">View your profile</p>
                           </div>
                         </div>

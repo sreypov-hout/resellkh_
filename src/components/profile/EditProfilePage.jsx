@@ -200,8 +200,8 @@ export default function EditProfilePage({ sellerId }) {
     return;
   }
   // This regex allows 7 to 15 digits. Adjust as per your specific mobile number format requirements (e.g., country codes)
-  if (!/^\d{7,15}$/.test(formData.mobile)) {
-    toast.error("Please enter a valid mobile number (7-15 digits only).");
+  if (!/^\d{8,15}$/.test(formData.mobile)) {
+    toast.error("Please enter a valid mobile number (8-15 digits only).");
     return;
   }
 
@@ -342,7 +342,7 @@ export default function EditProfilePage({ sellerId }) {
               />
             </div>
             <div>
-              <p className=" lg:max-w-[600px] md:max-w-[400px] md:bg-green-500 sm:bg-red-500 max-w-[160px] text-sm text-gray-700 mb-2 break-words">
+              <p className=" lg:max-w-[600px] md:max-w-[400px] max-w-[160px] text-sm text-gray-700 mb-2 break-words">
                 {formData.bio}
               </p>
               <input
