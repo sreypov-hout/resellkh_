@@ -41,7 +41,7 @@ export default function ProfileBanner({ isOwner, user, rating = 0, reviewsCount 
       {/* Info Card - unchanged except for encrypted link */}
       <div className="absolute left-6 -bottom-5 right-6 h-[100px] bg-white rounded-xl shadow-md px-6 py-4 flex items-center justify-between z-10">
         {/* Avatar + Name */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white">
             {avatar ? (
               <Image 
@@ -60,12 +60,12 @@ export default function ProfileBanner({ isOwner, user, rating = 0, reviewsCount 
           </div>
 
           <div>
-            <h2 className="text-base font-semibold text-black line-clamp-1">
-              {name || "User"}
-            </h2>
+            <h2 className="text-base font-semibold text-black truncate max-w-[150px] lg:max-w-[550px] md:max-w-[300px]">
+  {name || "User"}
+</h2>
             <Link 
               href={getProfileUrl(id)} 
-              className="text-sm text-gray-500 hover:text-orange-500 transition-colors"
+              className="text-sm text-gray-500 lg:block md:block hidden hover:text-orange-500 transition-colors"
             >
               Profile Detail &gt;
             </Link>
@@ -74,7 +74,7 @@ export default function ProfileBanner({ isOwner, user, rating = 0, reviewsCount 
 
         {/* Rating + Edit Button - completely unchanged */}
         <div className="flex items-center gap-6">
-          <div className="text-right min-w-[80px]">
+          <div className="text-right min-w-[80px] hidden lg:block md:block">
             {reviewsCount > 0 ? (
               <>
                 <p className="text-sm font-medium text-gray-800 flex items-center justify-end gap-1">

@@ -34,7 +34,7 @@ export default function AuthNavbar() {
   const topCategories = [
     { name: "Fashion", key: "fashion" },
     { name: "Accessories", key: "accessories" },
-    { name: "Equipment & Shoes", key: "equipment_bag_shoes" },
+    { name: "Equipment", key: "equipment_bag_shoes" },
     { name: "Beauty", key: "beauty", showOn: "lg" },
     { name: "Book", key: "book", showOn: "lg" },
   ];
@@ -371,7 +371,7 @@ export default function AuthNavbar() {
                     alt="User Avatar"
                     width={32}
                     height={32}
-                    className="rounded-full object-cover cursor-pointer"
+                    className="rounded-full object-cover w-[35px] h-[35px] cursor-pointer"
                     onClick={() => setProfileOpen((prev) => !prev)}
                   />
                   {profileOpen && user && (
@@ -383,10 +383,10 @@ export default function AuthNavbar() {
                             alt="User Avatar"
                             width={50}
                             height={50}
-                            className="rounded-full object-cover"
+                            className="rounded-full object-cover w-[50px] h-[50px]"
                           />
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                            <p className="text-sm font-medium text-gray-900 truncate w-[150px]">{user.name}</p>
                             <p className="text-xs text-gray-500">View your profile</p>
                           </div>
                         </div>
