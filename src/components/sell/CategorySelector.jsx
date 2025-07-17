@@ -29,7 +29,7 @@ export default function CategorySelector({ selected, onSelect }) {
   }, []);
 
   return (
-    <div className="relative z-10 w-full max-w-md mx-auto" ref={dropdownRef}>
+    <div className="relative z-10 w-full max-w-2xl mx-auto" ref={dropdownRef}>
       <div
         onClick={() => setOpen(!open)}
         className="cursor-pointer flex justify-between items-center border px-4 py-3 rounded-xl bg-white shadow-sm w-full"

@@ -4,7 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 const backendURL =
   process.env.NEXT_PUBLIC_API_URL ||
-  "https://phil-whom-hide-lynn.trycloudflare.com/api/v1";
+  "https://comics-upset-dj-clause.trycloudflare.com/api/v1";
 
 export const authOptions = {
   providers: [

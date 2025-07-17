@@ -30,7 +30,7 @@ export default function TrendingNow() {
     async function fetchTrending() {
       try {
         const res = await fetch(
-          "https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products"
+          "https://comics-upset-dj-clause.trycloudflare.com/api/v1/products"
         );
         if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`);
 

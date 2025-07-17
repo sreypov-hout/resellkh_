@@ -67,7 +67,7 @@ export default function SellerEditForm() {
         return;
       }
       try {
-        const response = await fetch(`https://phil-whom-hide-lynn.trycloudflare.com/api/v1/sellers/user/${userId}`, {
+        const response = await fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/sellers/user/${userId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) { throw new Error("Could not find your seller information."); }
@@ -128,7 +128,7 @@ export default function SellerEditForm() {
     };
     
     try {
-      const response = await fetch(`https://phil-whom-hide-lynn.trycloudflare.com/api/v1/sellers/${sellerId}`, {
+      const response = await fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/sellers/${sellerId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
         body: JSON.stringify(payload),

@@ -69,7 +69,7 @@ export default function EditProductPage({ params }) {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products/getproductbyuserid/${session.user.id}`,
+        `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/getproductbyuserid/${session.user.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -48,11 +48,11 @@ export default function SellerInfo({ sellerId }) {
         };
 
         const [profileRes, ratingRes] = await Promise.all([
-          fetch(`https://phil-whom-hide-lynn.trycloudflare.com/api/v1/profile/${sellerId}`, { 
+          fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/profile/${sellerId}`, { 
             method: 'GET', 
             headers 
           }),
-          fetch(`https://phil-whom-hide-lynn.trycloudflare.com/api/v1/ratings/summary/${sellerId}`, { 
+          fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/ratings/summary/${sellerId}`, { 
             method: 'GET', 
             headers 
           })

@@ -1,20 +1,13 @@
 // src/components/services/ScanProduct.service.js
-const API_BASE_URL = 'https://phil-whom-hide-lynn.trycloudflare.com/api/v1';
+const API_BASE_URL = 'https://comics-upset-dj-clause.trycloudflare.com/api/v1'; // ✅ no space
 
-export const searchProductsByImage = async (imageFile, token) => {
+export const searchProductsByImage = async (imageFile) => {
   try {
-    if (!token) {
-      throw new Error('Authentication token is required');
-    }
-
     const formData = new FormData();
     formData.append('file', imageFile);
 
     const response = await fetch(`${API_BASE_URL}/products/search-by-image`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
       body: formData,
     });
 

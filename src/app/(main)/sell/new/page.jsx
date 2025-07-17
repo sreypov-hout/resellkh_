@@ -354,7 +354,6 @@ export const SellNewPage = () => {
   if (!condition) return toast.error('Please select product condition');
   if (!price || isNaN(parseFloat(price))) return toast.error('Please enter a valid price');
   if (!category) return toast.error('Please select a category');
-  if (!productStatus) return toast.error('Please select product status');
   if (!location.trim()) return toast.error('Location is required');
   const isTelegramValid = dealMethodRef.current?.validateTelegram?.();
   if (!isTelegramValid) return;
@@ -400,7 +399,7 @@ export const SellNewPage = () => {
 
       // Make the PUT request to update and publish the draft
       const response = await axios.put(
-        `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products/update-draft/${draftId}?${params.toString()}`,
+        `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/update-draft/${draftId}?${params.toString()}`,
         formData,
         {
           headers: {
@@ -427,7 +426,6 @@ export const SellNewPage = () => {
         mainCategoryId,
         productPrice: parseFloat(price),
         discountPercent: parseFloat(discount) || 0,
-        productStatus,
         description,
         location,
         latitude,
@@ -508,8 +506,6 @@ export const SellNewPage = () => {
                 <ItemDetailForm
                   title={title}
                   setTitle={setTitle}
-                  productStatus={productStatus}
-                  setProductStatus={setProductStatus}
                   description={description}
                   setDescription={setDescription}
                 />

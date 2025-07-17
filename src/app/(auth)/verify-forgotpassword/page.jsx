@@ -58,7 +58,7 @@ export default function OTPVerification() {
 
     try {
       setLoading(true);
-      const res = await fetch("https://phil-whom-hide-lynn.trycloudflare.com/api/v1/auths/verify-reset-otp", {
+      const res = await fetch("https://comics-upset-dj-clause.trycloudflare.com/api/v1/auths/verify-reset-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp: code }),
@@ -87,7 +87,7 @@ export default function OTPVerification() {
     try {
       setIsResending(true);
 
-      const res = await fetch("https://phil-whom-hide-lynn.trycloudflare.com/api/v1/auths/resend-otp", {
+      const res = await fetch("https://comics-upset-dj-clause.trycloudflare.com/api/v1/auths/resend-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

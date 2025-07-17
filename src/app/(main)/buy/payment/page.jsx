@@ -65,7 +65,7 @@ const useCart = () => {
     }
 
     try {
-      const response = await fetch(`https://phil-whom-hide-lynn.trycloudflare.com/api/v1/cart/user/${userId}`, {
+      const response = await fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/cart/user/${userId}`, {
         method: 'GET',
         headers: {
           'Accept': '*/*',

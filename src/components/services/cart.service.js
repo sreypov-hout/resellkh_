@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = 'https://phil-whom-hide-lynn.trycloudflare.com/api/v1';
+const API_BASE_URL = 'https://comics-upset-dj-clause.trycloudflare.com/api/v1';
 
 export const fetchCart = async (token) => {
   try {

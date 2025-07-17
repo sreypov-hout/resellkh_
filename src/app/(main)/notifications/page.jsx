@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { 
+import {
   fetchAllNotifications,
   markNotificationAsRead,
   parseJwt,
-  formatTimestamp
-} from "@/components/services/notification.service";
+  formatTimestamp,
+} from "@/components/services/notification.service"; // Adjust path if needed
 
+// Categorize notifications
 const categorizeByTime = (notifications) => {
   const now = new Date();
   const today = [];
   const lastWeek = [];
+  const older = [];
 
   notifications.forEach((notification) => {
     const notificationDate = new Date(notification.createdAt);
@@ -24,10 +26,12 @@ const categorizeByTime = (notifications) => {
       today.push(notification);
     } else if (diffInDays < 7) {
       lastWeek.push(notification);
+    } else {
+      older.push(notification);
     }
   });
 
-  return { today, lastWeek };
+  return { today, lastWeek, older };
 };
 
 export default function Notifications() {
@@ -42,18 +46,17 @@ export default function Notifications() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const token = localStorage.getItem("token");
+        if (!token) throw new Error("Authentication token not found.");
+        
         const userData = parseJwt(token);
         const userId = userData?.userId || userData?.id;
+        if (!userId) throw new Error("User ID not found in token.");
 
-        if (!token || !userId) {
-          throw new Error("Authentication required");
-        }
+        const fetchedNotifications = await fetchAllNotifications(token, userId);
 
-        const notifications = await fetchAllNotifications(token, userId);
-
-        const mappedNotifications = notifications.map((notification) => ({
+        const mappedNotifications = fetchedNotifications.map((notification) => ({
           id: notification.id,
           type: notification.title,
           content: notification.content,
@@ -74,33 +77,45 @@ export default function Notifications() {
     loadNotifications();
   }, []);
 
-  const handleNotificationClick = async (notificationId) => {
-    try {
-      const newExpanded = new Set(expandedNotifications);
-      if (newExpanded.has(notificationId)) {
-        newExpanded.delete(notificationId);
-      } else {
-        newExpanded.add(notificationId);
+  const handleNotificationClick = async (notificationId, newExpandedSet = null) => {
+    if (notificationId === "__toggleExpandOnly__" && newExpandedSet) {
+      setExpandedNotifications(newExpandedSet);
+      return;
+    }
 
-        const notification = notifications.find((n) => n.id === notificationId);
-        if (notification && notification.unread) {
-          const token = localStorage.getItem("token");
-          const userData = parseJwt(token);
-          const userId = userData?.userId || userData?.id;
+    const notification = notifications.find((n) => n.id === notificationId);
+    if (!notification) return;
 
-          if (token && userId) {
-            await markNotificationAsRead(token, userId, notificationId);
-            setNotifications((prev) =>
-              prev.map((n) =>
-                n.id === notificationId ? { ...n, unread: false } : n
-              )
-            );
-          }
+    const newExpanded = new Set(expandedNotifications);
+    if (newExpanded.has(notificationId)) {
+      newExpanded.delete(notificationId);
+    } else {
+      newExpanded.add(notificationId);
+    }
+    setExpandedNotifications(newExpanded);
+
+    if (notification.unread) {
+      const originalNotifications = notifications;
+
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === notificationId ? { ...n, unread: false } : n
+        )
+      );
+
+      try {
+        const token = localStorage.getItem("token");
+        const userData = parseJwt(token);
+        const userId = userData?.userId || userData?.id;
+        if (token && userId) {
+          await markNotificationAsRead(token, userId, notificationId);
+        } else {
+          throw new Error("Authentication details are missing.");
         }
+      } catch (error) {
+        console.error("Failed to mark notification as read on server:", error);
+        setNotifications(originalNotifications);
       }
-      setExpandedNotifications(newExpanded);
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
     }
   };
 
@@ -108,53 +123,63 @@ export default function Notifications() {
     activeTab === "all" ? true : n.unread
   );
 
-  const { today, lastWeek } = categorizeByTime(filteredNotifications);
+  const { today, lastWeek, older } = categorizeByTime(filteredNotifications);
   const allCount = notifications.length;
   const unreadCount = notifications.filter((n) => n.unread).length;
 
-  if (loading) {
-    return <NotificationLoadingState />;
-  }
-
-  if (error) {
-    return <NotificationErrorState error={error} />;
-  }
+  if (loading) return <NotificationLoadingState />;
+  if (error) return <NotificationErrorState error={error} />;
 
   return (
     <section className="w-full px-[7%] py-6">
       <div className="bg-white border border-gray-300 rounded-[24px] p-6 sm:p-10 shadow-sm">
-        <h1 className="text-xl sm:text-2xl font-semibold mb-6">Notifications</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold mb-6">
+          Notifications
+        </h1>
 
-        <NotificationTabs 
+        <NotificationTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           allCount={allCount}
           unreadCount={unreadCount}
         />
 
-        <NotificationSection
-          title="Today"
-          data={today}
-          expandedNotifications={expandedNotifications}
-          onNotificationClick={handleNotificationClick}
-        />
-        
-        <NotificationSection
-          title="Last week"
-          data={lastWeek}
-          expandedNotifications={expandedNotifications}
-          onNotificationClick={handleNotificationClick}
-        />
-
-        {filteredNotifications.length === 0 && (
+        {filteredNotifications.length === 0 ? (
           <NoNotificationsMessage activeTab={activeTab} />
+        ) : (
+          <>
+            {today.length > 0 && (
+              <NotificationSection
+                title="Today"
+                data={today}
+                expandedNotifications={expandedNotifications}
+                onNotificationClick={handleNotificationClick}
+              />
+            )}
+            {lastWeek.length > 0 && (
+              <NotificationSection
+                title="Last week"
+                data={lastWeek}
+                expandedNotifications={expandedNotifications}
+                onNotificationClick={handleNotificationClick}
+              />
+            )}
+            {older.length > 0 && (
+              <NotificationSection
+                title="Earlier"
+                data={older}
+                expandedNotifications={expandedNotifications}
+                onNotificationClick={handleNotificationClick}
+              />
+            )}
+          </>
         )}
       </div>
     </section>
   );
 }
 
-// Extracted components for better readability
+// Subcomponents
 
 function NotificationLoadingState() {
   return (
@@ -180,7 +205,12 @@ function NotificationErrorState({ error }) {
   );
 }
 
-function NotificationTabs({ activeTab, setActiveTab, allCount, unreadCount }) {
+function NotificationTabs({
+  activeTab,
+  setActiveTab,
+  allCount,
+  unreadCount,
+}) {
   return (
     <div className="flex justify-center items-center gap-10 border-b pb-4 mb-6 text-sm sm:text-base">
       {["all", "unread"].map((tab) => {
@@ -192,9 +222,7 @@ function NotificationTabs({ activeTab, setActiveTab, allCount, unreadCount }) {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`flex items-center gap-2 font-medium relative pb-1 transition ${
-              isActive
-                ? "text-black border-b-2 border-black"
-                : "text-gray-600"
+              isActive ? "text-black border-b-2 border-black" : "text-gray-600"
             }`}
           >
             <span className="bg-orange-500 text-black text-[10px] sm:text-xs px-2 py-0.5 rounded-full">
@@ -208,7 +236,12 @@ function NotificationTabs({ activeTab, setActiveTab, allCount, unreadCount }) {
   );
 }
 
-function NotificationSection({ title, data, expandedNotifications, onNotificationClick }) {
+function NotificationSection({
+  title,
+  data,
+  expandedNotifications,
+  onNotificationClick,
+}) {
   if (!data.length) return null;
 
   const truncateText = (text, maxLength = 100) => {
@@ -223,7 +256,10 @@ function NotificationSection({ title, data, expandedNotifications, onNotificatio
   return (
     <div className="mb-8">
       <h2 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-        <span role="img" aria-label="Time-based section">🕒</span> {title}
+        <span role="img" aria-label="Time-based section">
+          🕒
+        </span>{" "}
+        {title}
       </h2>
       <div className="space-y-4">
         {data.map((item) => {
@@ -257,7 +293,14 @@ function NotificationSection({ title, data, expandedNotifications, onNotificatio
                     <p className="text-sm text-gray-700 mt-1 leading-relaxed">
                       {displayContent}
                       {shouldTruncate && (
-                        <span className="text-blue-600 hover:text-blue-800 ml-1 font-medium cursor-pointer">
+                        <span
+                          className="text-blue-600 hover:text-blue-800 ml-1 font-medium cursor-pointer"
+                          // *** FINAL FIX IS HERE ***
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent the main onClick from firing twice
+                            onNotificationClick(item.id); // Call the main handler to mark as read AND expand
+                          }}
+                        >
                           {isExpanded ? " show less" : " read more"}
                         </span>
                       )}
@@ -283,8 +326,16 @@ function NotificationSection({ title, data, expandedNotifications, onNotificatio
 
 function NoNotificationsMessage({ activeTab }) {
   return (
-    <div className="text-center py-10 text-gray-500">
-      No {activeTab === "unread" ? "unread " : ""}notifications found.
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <img
+        src="/images/story set/no notification.jpg"
+        alt="No Notifications"
+        className="w-[320px] h-auto mb-6"
+      />
+      <p className="text-sm text-gray-600">
+        You don’t have any <span className="font-semibold">{activeTab}</span>{" "}
+        notifications yet.
+      </p>
     </div>
   );
 }
