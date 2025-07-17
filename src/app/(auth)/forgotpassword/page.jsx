@@ -23,7 +23,7 @@ export default function ForgotPassword() {
     setMessage("");
 
     try {
-      const url = `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/auths/forgot-password?email=${encodeURIComponent(email)}`;
+      const url = `https://comics-upset-dj-clause.trycloudflare.com/api/v1/auths/forgot-password?email=${encodeURIComponent(email)}`;
 
       const res = await fetch(url, {
         method: "POST",

@@ -25,7 +25,7 @@ export default function LoginForm() {
   try {
     // Step 1: Call your backend to validate credentials
     const response = await fetch(
-      "https://phil-whom-hide-lynn.trycloudflare.com/api/v1/auths/login",
+      "https://comics-upset-dj-clause.trycloudflare.com/api/v1/auths/login",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

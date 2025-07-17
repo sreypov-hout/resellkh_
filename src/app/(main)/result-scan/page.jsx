@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Cart from '@/components/profile/someComponent/Cart';
 import { searchProductsByImage } from '@/components/services/ScanProduct.service';
+import ProductCart from '@/components/domain/ProductCart';
 
 // SVG Icons
 const MagnifyingGlassIcon = () => (
@@ -26,126 +27,65 @@ export default function ResultScanPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const getAuthToken = () => {
-    try {
-      if (typeof window !== 'undefined') {
-        return localStorage.getItem('token');
-      }
-      return null;
-    } catch (error) {
-      console.error('Error accessing localStorage:', error);
-      return null;
+  const fetchSimilarProducts = useCallback(async () => {
+    if (!imgSrc) {
+      setIsLoading(false);
+      return;
     }
-  };
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch(imgSrc);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const file = new File([blob], 'search-image.jpg', { type: blob.type });
+
+      const result = await searchProductsByImage(file);
+
+      if (result.payload?.length > 0) {
+        const formattedResults = result.payload.map((product, index) => ({
+          id: product.productId || index,
+          title: product.productName,
+          description: product.description,
+          productPrice: product.productPrice,
+          discountPercent: product.discountPercent,
+          imageUrl: product.fileUrls?.[0] || '/images/placeholder-product.jpg',
+          condition: product.condition,
+          location: product.location,
+        }));
+        setScanResults(formattedResults);
+      } else {
+        setError({
+          title: "No matches found",
+          message: "We couldn't find similar products. Try with a different image or check back later.",
+          icon: <MagnifyingGlassIcon />
+        });
+        setScanResults([]);
+      }
+    } catch (err) {
+      setError({
+        title: "Search failed",
+        message: err.message || "Something went wrong. Please try again.",
+        icon: <ArrowPathIcon />
+      });
+      setScanResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [imgSrc]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
-    const fetchSimilarProducts = async () => {
-      if (!imgSrc) {
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const token = getAuthToken();
-        if (!token) {
-          throw new Error('Please login to use this feature');
-        }
-
-        const response = await fetch(imgSrc);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch image: ${response.status}`);
-        }
-        
-        const blob = await response.blob();
-        const file = new File([blob], 'search-image.jpg', { type: blob.type });
-        
-        const result = await searchProductsByImage(file, token);
-        
-        if (result.payload?.length > 0) {
-          const formattedResults = result.payload.map((product, index) => ({
-            id: product.productId || index,
-            title: product.productName,
-            description: product.description,
-            productPrice: product.productPrice,
-            discountPercent: product.discountPercent,
-            imageUrl: product.fileUrls?.[0] || '/images/placeholder-product.jpg',
-            condition: product.condition,
-            location: product.location,
-          }));
-          setScanResults(formattedResults);
-        } else {
-          setError({
-            title: "No matches found",
-            message: "We couldn't find similar products. Try with a different image or check back later.",
-            icon: <MagnifyingGlassIcon />
-          });
-          setScanResults([]);
-        }
-      } catch (err) {
-        setError({
-          title: "Search failed",
-          message: err.message || "Something went wrong. Please try again.",
-          icon: <ArrowPathIcon />
-        });
-        setScanResults([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchSimilarProducts();
-  }, [imgSrc]);
+  }, [fetchSimilarProducts]);
 
-  const handleTryAgain = async () => {
-    const token = getAuthToken();
-    if (!token) {
-      router.push('/login');
-    } else {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const response = await fetch(imgSrc);
-        const blob = await response.blob();
-        const file = new File([blob], 'search-image.jpg', { type: blob.type });
-        
-        const result = await searchProductsByImage(file, token);
-        
-        if (result.payload?.length > 0) {
-          const formattedResults = result.payload.map((product, index) => ({
-            id: product.productId || index,
-            title: product.productName,
-            description: product.description,
-            productPrice: product.productPrice,
-            discountPercent: product.discountPercent,
-            imageUrl: product.fileUrls?.[0] || '/images/placeholder-product.jpg',
-            condition: product.condition,
-            location: product.location,
-          }));
-          setScanResults(formattedResults);
-        } else {
-          setError({
-            title: "No matches found",
-            message: "We couldn't find similar products. Try with a different image or check back later.",
-            icon: <MagnifyingGlassIcon />
-          });
-          setScanResults([]);
-        }
-      } catch (err) {
-        setError({
-          title: "Search failed",
-          message: err.message || "Something went wrong. Please try again.",
-          icon: <ArrowPathIcon />
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  const handleTryAgain = () => {
+    fetchSimilarProducts();
   };
 
   const EmptyState = ({ error }) => (
@@ -194,7 +134,7 @@ export default function ResultScanPage() {
           <div className="flex justify-center">
             <img
               src={imgSrc}
-              alt="Scanned Image"
+              alt="Scanned"
               className="w-[300px] h-auto rounded-xl border object-contain"
             />
           </div>
@@ -210,7 +150,7 @@ export default function ResultScanPage() {
         <>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">Similar Products</h2>
-            <button 
+            <button
               onClick={handleTryAgain}
               className="text-[#ea580c] hover:text-[#d95f0e] flex items-center gap-1"
             >
@@ -220,7 +160,7 @@ export default function ResultScanPage() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
             {scanResults.map((item) => (
-              <Cart
+              <ProductCart
                 key={item.id}
                 id={item.id}
                 imageUrl={item.imageUrl}

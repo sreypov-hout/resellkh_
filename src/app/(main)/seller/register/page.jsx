@@ -109,7 +109,6 @@ export default function SellerRegistrationForm() {
     chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
     const payload = { contents: chatHistory };
-    // FIX: Retrieve API key from environment variable
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
     if (!apiKey) {
       toast.error("Gemini API key is missing. Please configure NEXT_PUBLIC_GEMINI_API_KEY.", { id: "desc-gen" });
@@ -149,34 +148,24 @@ export default function SellerRegistrationForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation for the final step before submission
     if (currentStep === 2) {
       if (!formData.bankName || !formData.accountHolderName || !formData.bankAccount) {
-        toast.error("Please fill in all required banking information.", {
-          duration: 3000,
-          position: 'bottom-right',
-        });
+        toast.error("Please fill in all required banking information.");
         return;
       }
       if (!formData.agreeToTerms) {
-        toast.error("You must agree to the Terms of Service and Privacy Policy.", {
-          duration: 3000,
-          position: 'bottom-right',
-        });
+        toast.error("You must agree to the Terms of Service and Privacy Policy.");
         return;
       }
     }
 
-    setIsSubmitting(true); // Start loading state
+    setIsSubmitting(true);
 
     const userId = localStorage.getItem('userId');
     const authToken = localStorage.getItem('token');
 
     if (!userId || !authToken) {
-      toast.error("Authentication data missing. Please log in again.", {
-        duration: 5000,
-        position: 'bottom-right',
-      });
+      toast.error("Authentication data missing. Please log in again.");
       setIsSubmitting(false);
       return;
     }
@@ -195,7 +184,8 @@ export default function SellerRegistrationForm() {
     };
 
     try {
-      const response = await fetch(`https://phil-whom-hide-lynn.trycloudflare.com/api/v1/sellers/user/${userId}`, {
+      // *** FINAL FIX: Corrected the API endpoint URL ***
+      const response = await fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/sellers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -206,54 +196,62 @@ export default function SellerRegistrationForm() {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        const text = await response.text();
+        const result = text ? JSON.parse(text) : {};
         console.log("API Response:", result);
-        toast.success("Seller application submitted successfully!", {
-          duration: 3000,
-          position: 'bottom-right',
-        });
+        toast.success("Seller application submitted successfully!");
 
-        // --- IMPORTANT: Dispatch custom event to notify AuthNavbar ---
-        // This is crucial for AuthNavbar to update its state immediately.
         window.dispatchEvent(new CustomEvent('profile-updated'));
-
-        // Redirect to seller dashboard after successful registration
         router.push("/seller/dashboard");
 
       } else {
-        const errorData = await response.json();
-        console.error("API Error:", errorData);
-        toast.error(`Submission failed: ${errorData.message || 'Unknown error'}`, {
-          duration: 5000,
-          position: 'bottom-right',
-        });
+        // Handle 401 Unauthorized specifically for session expiry.
+        if (response.status === 401) {
+          toast.error("Your session has expired. Please log in again.", {
+            duration: 4000,
+          });
+          // Clear invalid auth data from storage
+          localStorage.removeItem('token');
+          localStorage.removeItem('userId');
+          // Redirect to the login page (adjust this route if yours is different)
+          router.push('/login'); 
+          return; // Stop further execution
+        }
+
+        // Fallback for all other server errors
+        const errorText = await response.text();
+        let errorMessage = 'An unknown error occurred.';
+
+        if (errorText) {
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || (errorText !== '{}' ? errorText : 'The server returned an unspecified error.');
+          } catch (e) {
+            errorMessage = errorText;
+          }
+        } else {
+            errorMessage = `Request failed with status: ${response.status} ${response.statusText}`;
+        }
+  
+        console.error("API Error Response:", errorText);
+        toast.error(`Submission failed: ${errorMessage}`);
       }
     } catch (error) {
       console.error("Network or unexpected error:", error);
-      toast.error("An unexpected error occurred. Please try again.", {
-        duration: 5000,
-        position: 'bottom-right',
-      });
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
-      setIsSubmitting(false); // End loading state
+      setIsSubmitting(false);
     }
   };
 
   const nextStep = () => {
-    // Basic validation before moving to next step
     if (currentStep === 1) {
       if (formData.businessType !== "individual" && !formData.businessName) {
-        toast.error("Please enter your Business Name.", {
-          duration: 3000,
-          position: 'bottom-right',
-        });
+        toast.error("Please enter your Business Name.");
         return;
       }
       if (!formData.businessAddress || !formData.expectedMonthlyRevenue) {
-        toast.error("Please fill in all required business information.", {
-          duration: 3000,
-          position: 'bottom-right',
-        });
+        toast.error("Please fill in all required business information.");
         return;
       }
     }
@@ -267,7 +265,6 @@ export default function SellerRegistrationForm() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 py-12 px-4 font-sans">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 rounded-full mb-4 shadow-md">
             <Store className="w-8 h-8 text-white" />
@@ -280,7 +277,6 @@ export default function SellerRegistrationForm() {
           </p>
         </div>
 
-        {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             {[1, 2].map((step) => (
@@ -314,12 +310,10 @@ export default function SellerRegistrationForm() {
           </div>
         </div>
 
-        {/* Form */}
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl shadow-xl p-8"
         >
-          {/* Step 1: Business Information */}
           {currentStep === 1 && (
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
@@ -328,9 +322,7 @@ export default function SellerRegistrationForm() {
                   Business Information
                 </h2>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Business Type Selection (Modernized) */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Business Type *
@@ -342,7 +334,7 @@ export default function SellerRegistrationForm() {
                       return (
                         <button
                           key={option.value}
-                          type="button" // Important: type="button" to prevent form submission
+                          type="button"
                           onClick={() => handleBusinessTypeChange(option.value)}
                           className={`flex items-center px-4 py-2 rounded-lg border transition-all duration-200
                             ${isActive
@@ -357,8 +349,6 @@ export default function SellerRegistrationForm() {
                     })}
                   </div>
                 </div>
-
-                {/* Conditional Business Name Field */}
                 {formData.businessType !== "individual" && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -371,12 +361,10 @@ export default function SellerRegistrationForm() {
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 bg-gray-50 shadow-sm rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all duration-200"
                       placeholder="Your business name"
-                      required={formData.businessType !== "individual"} // Required only if visible
+                      required={formData.businessType !== "individual"}
                     />
                   </div>
                 )}
-
-                {/* Business Address */}
                 <div className={formData.businessType === "individual" ? "md:col-span-2" : ""}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Business Address *
@@ -391,8 +379,6 @@ export default function SellerRegistrationForm() {
                     required
                   />
                 </div>
-
-                {/* Business Description */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Business Description
@@ -422,8 +408,6 @@ export default function SellerRegistrationForm() {
                     </button>
                   </div>
                 </div>
-
-                {/* Expected Monthly Revenue */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Expected Monthly Revenue *
@@ -447,7 +431,6 @@ export default function SellerRegistrationForm() {
             </div>
           )}
 
-          {/* Step 2: Banking Information */}
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
@@ -456,7 +439,6 @@ export default function SellerRegistrationForm() {
                   Banking Information
                 </h2>
               </div>
-
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
                 <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-blue-800">
@@ -464,7 +446,6 @@ export default function SellerRegistrationForm() {
                   used for payment processing only.
                 </p>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -485,7 +466,6 @@ export default function SellerRegistrationForm() {
                     ))}
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Account Holder Name *
@@ -500,7 +480,6 @@ export default function SellerRegistrationForm() {
                     required
                   />
                 </div>
-
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Bank Account Number *
@@ -531,8 +510,6 @@ export default function SellerRegistrationForm() {
                     Enter your bank account number (e.g., 000-123456789)
                   </p>
                 </div>
-
-                {/* Agree to Terms checkbox - kept here as a final confirmation */}
                 <div className="md:col-span-2">
                   <label className="flex items-center text-sm text-gray-700">
                     <input
@@ -560,7 +537,6 @@ export default function SellerRegistrationForm() {
             </div>
           )}
 
-          {/* Navigation Buttons */}
           <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
             {currentStep > 1 && (
               <button
@@ -571,7 +547,6 @@ export default function SellerRegistrationForm() {
                 Previous
               </button>
             )}
-
             {currentStep < 2 ? (
               <button
                 type="button"

@@ -27,11 +27,11 @@ export const postProduct = async (productData) => {
     });
 
     // Debug output
-    console.log('Request URL:', `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products/upload?${queryParams.toString()}`);
+    console.log('Request URL:', `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/upload?${queryParams.toString()}`);
     console.log('Files being uploaded:', productData.files.map(f => f.name));
 
     const response = await fetch(
-      `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products/upload?${queryParams.toString()}`,
+      `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/upload?${queryParams.toString()}`,
       {
         method: 'POST',
         headers: {

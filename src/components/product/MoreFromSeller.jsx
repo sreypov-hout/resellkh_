@@ -14,7 +14,7 @@ const MoreFromSeller = ({ sellerId }) => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products/getproductbyuserid/${sellerId}`
+          `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/getproductbyuserid/${sellerId}`
         );
 
         if (!response.ok) {

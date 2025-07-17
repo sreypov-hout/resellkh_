@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import ProductCart from "../domain/ProductCart";
 import { productService } from "../services/allProduct.service";
 
-// Skeleton loader component
+// Skeleton loader for loading state
 const SkeletonCard = () => (
   <div className="w-full animate-pulse bg-gray-100 p-4 rounded-lg">
     <div className="h-40 bg-gray-300 rounded-md mb-4" />
@@ -20,17 +20,8 @@ export default function RecommendedList() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleViewMore = () => {
-    setLoadingMore(true);
-    // Simulate network delay for demo purposes
-    setTimeout(() => {
-      setVisibleCount((prev) => prev + 25);
-      setLoadingMore(false);
-    }, 800);
-  };
-
   useEffect(() => {
-    async function fetchRecommended() {
+    const fetchRecommended = async () => {
       setLoading(true);
       setError(null);
       try {
@@ -41,10 +32,18 @@ export default function RecommendedList() {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchRecommended();
   }, []);
+
+  const handleViewMore = () => {
+    setLoadingMore(true);
+    setTimeout(() => {
+      setVisibleCount((prev) => prev + 25);
+      setLoadingMore(false);
+    }, 600);
+  };
 
   const itemsToShow = items.slice(0, visibleCount);
 
@@ -63,33 +62,24 @@ export default function RecommendedList() {
 
         <div className="grid grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
           {loading
-            ? Array.from({ length: 10 }).map((_, index) => (
-                <SkeletonCard key={index} />
-              ))
+            ? Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)
             : itemsToShow.map((item) => {
-                const price =
-                  typeof item.productPrice === "number"
-                    ? item.discountPercent && item.discountPercent > 0
-                      ? (item.productPrice * (100 - item.discountPercent)) / 100
-                      : item.productPrice
-                    : 0;
+                const originalPrice = item.productPrice || 0;
+                const hasDiscount = item.discountPercent > 0;
+                const finalPrice = hasDiscount
+                  ? (originalPrice * (100 - item.discountPercent)) / 100
+                  : originalPrice;
 
                 return (
                   <ProductCart
                     key={item.productId}
                     id={item.productId}
-                    imageUrl={item.fileUrls?.[0] || "/default-image.jpg"}
+                    imageUrl={item.fileUrls?.[0] || "/images/placeholder.jpg"}
                     title={item.productName}
                     description={item.description}
-                    price={price.toFixed(2)}
-                    originalPrice={
-                      item.discountPercent > 0 ? item.productPrice : null
-                    }
-                    discountText={
-                      item.discountPercent > 0
-                        ? `${item.discountPercent}% OFF`
-                        : null
-                    }
+                    price={finalPrice.toFixed(2)}
+                    originalPrice={hasDiscount ? originalPrice : null}
+                    discountText={hasDiscount ? `${item.discountPercent}% OFF` : null}
                   />
                 );
               })}
