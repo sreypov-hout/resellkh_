@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = " https://comics-upset-dj-clause.trycloudflare.com/api/v1/products";
+const API_URL = "https://comics-upset-dj-clause.trycloudflare.com/api/v1/products";
 
 export const saveAsDraft = async (formData, accessToken) => {
   // --- FIX #1: Add a check for the access token ---

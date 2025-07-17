@@ -8,7 +8,7 @@ const ImageScanModal = dynamic(() => import('./ImageScanModal'), {
   ssr: false,
 });
 
-const API_URL = 'https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products';
+const API_URL = 'https://comics-upset-dj-clause.trycloudflare.com/api/v1/products';
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
@@ -38,17 +38,20 @@ export default function SearchBar() {
       setError(null);
       return;
     }
-    
+
     const controller = new AbortController();
     const signal = controller.signal;
-    
+
     const debounceTimer = setTimeout(() => {
       setLoading(true);
       setResults([]);
       setError(null);
-      
-      const searchUrl = `${API_URL}?search=${encodeURIComponent(query)}`;
-      fetch(searchUrl, { signal })
+
+      // --- FIX #1: THE FETCH ERROR ---
+      // We now call the base API_URL without adding "?search=".
+      // This matches the working code in your ResultSearchPage and should prevent the "Failed to fetch" error.
+      // All filtering will be done on the client-side below.
+      fetch(API_URL, { signal })
         .then((res) => {
           if (!res.ok) {
             throw new Error('Network response was not ok');
@@ -56,8 +59,14 @@ export default function SearchBar() {
           return res.json();
         })
         .then((data) => {
-          // Limit results to 10 items
-          const limitedResults = data.payload ? data.payload.slice(0, 10) : [];
+          // --- FIX #2: THE SEARCH LOGIC ---
+          // The filter now uses .startsWith() to find products that BEGIN WITH the query text.
+          const filteredData = data.payload ? data.payload.filter(product =>
+            product.productName.toLowerCase().startsWith(query.toLowerCase())
+          ) : [];
+
+          // Limit results to 10 items for the dropdown
+          const limitedResults = filteredData.slice(0, 10);
           setResults(limitedResults);
         })
         .catch((err) => {
@@ -72,7 +81,7 @@ export default function SearchBar() {
           setLoading(false);
         });
     }, 300);
-    
+
     return () => {
       clearTimeout(debounceTimer);
       controller.abort();
@@ -98,17 +107,18 @@ export default function SearchBar() {
   const handleSearchSubmit = (event) => {
     event.preventDefault();
     if (query.trim()) {
-      router.push(`result-search?query=${encodeURIComponent(query)}`);
+      router.push(`/result-search?query=${encodeURIComponent(query)}`);
       setQuery('');
       setResults([]);
     }
   };
 
+
   return (
     <div ref={wrapperRef} className="relative w-full">
       {!scanOpen && (
-        <form 
-          onSubmit={handleSearchSubmit} 
+        <form
+          onSubmit={handleSearchSubmit}
           className="absolute w-full rounded-2xl bg-[#f2edef] shadow-sm border border-gray-200"
         >
           <div className="flex items-center px-4 py-2">
@@ -131,8 +141,8 @@ export default function SearchBar() {
               <path d="M19 12H5" stroke="#171717" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          
-          {/* Suggestions Dropdown - Limited to 10 results */}
+
+          {/* Suggestions Dropdown */}
           {query.trim().length > 0 && (
             <div className="border-t border-gray-300 text-sm text-gray-800 max-h-60 overflow-y-auto">
               {loading && <div className="px-5 py-2 text-gray-500">Searching...</div>}
@@ -150,7 +160,7 @@ export default function SearchBar() {
                   ))}
                 </ul>
               )}
-              {!loading && results.length === 0 && query.trim().length > 0 && (
+              {!loading && !error && results.length === 0 && query.trim().length > 0 && (
                 <div className="px-5 py-2 text-gray-500">No results found</div>
               )}
             </div>

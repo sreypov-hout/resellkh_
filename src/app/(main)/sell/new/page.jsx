@@ -75,7 +75,7 @@ export const SellNewPage = () => {
     const fetchSpecificDraft = async () => {
       try {
         const response = await axios.get(
-          `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products/drafts/${draftId}`, // API endpoint for single draft
+          `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/drafts/${draftId}`, // API endpoint for single draft
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -134,7 +134,7 @@ export const SellNewPage = () => {
         const userId = session.user.id;
         try {
           const response = await axios.get(
-            `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
+            `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -278,7 +278,7 @@ export const SellNewPage = () => {
         });
 
         let response;
-        const baseUrl = "https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products/";
+        const baseUrl = "https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/";
 
         if (draftId) {
             response = await axios.put(
@@ -304,7 +304,7 @@ export const SellNewPage = () => {
             if (session?.user?.id) {
                 const userId = session.user.id;
                 const updatedDraftsResponse = await axios.get(
-                    `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
+                    `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (updatedDraftsResponse.status === 200 && updatedDraftsResponse.data?.payload) {

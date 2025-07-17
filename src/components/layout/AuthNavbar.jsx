@@ -218,15 +218,15 @@ export default function AuthNavbar() {
     signOut({ callbackUrl: "/" });
   };
 
-  const handleBecomeSellerClick = () => {
-    setProfileOpen(false);
-    router.push("/seller/register");
-  };
+  // const handleBecomeSellerClick = () => {
+  //   setProfileOpen(false);
+  //   router.push("/seller/register");
+  // };
 
-  const handleSellerDashboardClick = () => {
-    setProfileOpen(false);
-    router.push("/seller/dashboard");
-  };
+  // const handleSellerDashboardClick = () => {
+  //   setProfileOpen(false);
+  //   router.push("/seller/dashboard");
+  // };
 
   // *** FIXED: Added a new handler for the "Sell" button logic ***
   const handleSellClick = () => {
@@ -317,7 +317,7 @@ export default function AuthNavbar() {
               </>
             ) : (
               <>
-                <Link href={user?.id ? `/buy/payment` : "/login"} className="cursor-pointer hover:text-orange-500">
+                {/* <Link href={user?.id ? `/buy/payment` : "/login"} className="cursor-pointer hover:text-orange-500">
                   <div className="relative">
                     <ShoppingCart className="w-6 h-6 stroke-[1.5] stroke-gray-900" />
                     {cartItemCount > 0 && (
@@ -326,7 +326,7 @@ export default function AuthNavbar() {
                       </span>
                     )}
                   </div>
-                </Link>
+                </Link> */}
 
                 <Link href="/favourites" className="cursor-pointer hover:text-orange-500">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -392,7 +392,7 @@ export default function AuthNavbar() {
                         </div>
                       </Link>
 
-                      {user.isSellerFormCompleted ? (
+                      {/* {user.isSellerFormCompleted ? (
                         <button
                           onClick={handleSellerDashboardClick}
                           className="w-full px-4 py-3 flex items-center gap-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-b transition-all duration-200"
@@ -408,7 +408,7 @@ export default function AuthNavbar() {
                           <Store className="w-5 h-5 text-orange-500 group-hover:text-orange-600" />
                           <span className="ps-2">Become a Seller</span>
                         </button>
-                      )}
+                      )} */}
 
                       <button
                         onClick={() => setShowLogoutModal(true)}
