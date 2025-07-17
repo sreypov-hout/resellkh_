@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Cart from "@/components/profile/someComponent/Cart";
 import { fetchNearbyProducts } from "@/components/services/nearBy.service";
+import ProductCart from "@/components/domain/ProductCart";
 
 // --- Helper Components for different UI states ---
 
@@ -189,7 +190,7 @@ export default function ListingNearMePage() {
       <div className="grid grid-cols-2 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
         {products.map((product) => {
           const transformedProduct = transformProduct(product);
-          return <Cart key={transformedProduct.id} {...transformedProduct} />;
+          return <ProductCart key={transformedProduct.id} {...transformedProduct} />;
         })}
       </div>
     );
