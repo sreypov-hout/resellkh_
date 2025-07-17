@@ -15,7 +15,7 @@ const ReviewsSection = ({ setActiveTab,sellerId }) => {
     const token = localStorage.getItem('token');
     const fetchReviews = async () => {
       try {
-        const response = await fetch(`https://phil-whom-hide-lynn.trycloudflare.com/api/v1/ratings/${sellerId}`, {
+        const response = await fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/ratings/${sellerId}`, {
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`

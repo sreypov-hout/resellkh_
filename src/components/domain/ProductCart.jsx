@@ -169,7 +169,7 @@ export default function ProductCart({
         />
 
         {/* Add to Cart Icon - positioned at top-1 right-2, visible on hover */}
-        <div className="absolute top-1 right-2 z-20">
+        {/* <div className="absolute top-1 right-2 z-20">
           <button
             onClick={handleAddToCart}
             className={`transition-opacity duration-300 p-2 rounded-full bg-[#F97316] text-white shadow-lg ${
@@ -179,7 +179,7 @@ export default function ProductCart({
           >
             <FaShoppingCart size={20} />
           </button>
-        </div>
+        </div> */}
 
       </div>
 

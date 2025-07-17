@@ -13,16 +13,21 @@ export default function ManageDrafts() {
 
   useEffect(() => {
     const fetchDrafts = async () => {
-      if (status === 'authenticated' && session?.user?.id && session?.accessToken) {
-        try {
-          setLoading(true);
-          setError(null);
+      // Set initial loading state while session is being determined
+      setLoading(true);
+      setError(null);
 
+      if (status === 'authenticated') {
+        try {
           const token = session.accessToken;
           const userId = session.user.id;
 
+          if (!userId || !token) {
+            throw new Error("User ID or access token is missing.");
+          }
+
           const res = await axios.get(
-            `https://phil-whom-hide-lynn.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
+            `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -30,40 +35,36 @@ export default function ManageDrafts() {
               },
             }
           );
+          
+          // Handle successful response, even if payload is empty
+          const draftsData = res.data?.payload || [];
+          const activeDrafts = draftsData.filter(d => d?.productStatus === "DRAFT");
+          setDrafts(activeDrafts);
 
-          // Handle successful response
-          if (res.data) {
-            // If payload is null or undefined, treat as empty array
-            const draftsData = res.data.payload || [];
-            const activeDrafts = draftsData.filter(d => d && d.productStatus === "DRAFT");
-            setDrafts(activeDrafts);
-            
-            // Don't set error if payload is null/empty - this is a valid case
-          } else {
-            // Only set error if the response structure is completely invalid
-            setError('Invalid response structure from server');
-          }
         } catch (err) {
           console.error('Fetch drafts error:', err);
-          // Only show error for actual errors, not for empty responses
-          if (err.response?.status !== 404 && err.response?.status !== 200) {
+          
+          // Improved Error Handling:
+          // A 404 error means the user has no drafts, which is not an error condition.
+          // We will only set an error message for other, unexpected errors.
+          if (err.response?.status !== 404) {
             setError(
               err.response?.data?.message ||
               err.message ||
               'Failed to load drafts. Please try again.'
             );
           }
+           // If it is a 404, we do nothing, and the drafts will correctly remain an empty array.
+           setDrafts([]); 
         } finally {
           setLoading(false);
         }
-      } else if (status === 'loading') {
-        setLoading(true);
-        setError(null);
-      } else {
+      } else if (status === 'unauthenticated') {
         setLoading(false);
         setError('You must be logged in to manage drafts.');
         setDrafts([]);
       }
+      // If status is 'loading', we simply wait, the loading state is already true.
     };
 
     fetchDrafts();

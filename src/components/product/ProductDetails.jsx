@@ -163,7 +163,7 @@ const ProductDetails = ({ product }) => {
           )}
         </p>
 
-        <button
+        {/* <button
           onClick={handleAddToCart}
           className="mt-4 mr-2 bg-orange-500 text-white px-6 py-2 rounded-full text-[16px] hover:bg-orange-600 transition-colors"
         >
@@ -175,7 +175,7 @@ const ProductDetails = ({ product }) => {
           className="mt-4 bg-orange-500 text-white px-6 py-2 rounded-full text-[16px] hover:bg-orange-600 transition-colors"
         >
           Check out
-        </button>
+        </button> */}
       </div>
     </div>
   );
