@@ -102,7 +102,7 @@ export default function EditProfilePage({ sellerId }) {
             profileImage: null,
             coverImage: null,
           });
-          setSelectedImage(p.profileImage || "/default-avatar.png");
+          setSelectedImage(p.profileImage || "/images/profile/Engelina.jpg");
           setSelectedCoverImage(p.coverImage || "/cover.jpg");
         } else {
           setError("Profile not found or error in response.");

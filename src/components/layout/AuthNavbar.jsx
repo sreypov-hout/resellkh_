@@ -157,8 +157,7 @@ export default function AuthNavbar() {
           const userProfile = {
             id: userId,
             name: `${data.payload?.firstName || ""} ${data.payload?.lastName || ""}`.trim() || "User",
-            avatar: data.payload?.profileImage || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAataA3AW1KSnjsdMt7-U_3EZElZ0=",
-            isSellerFormCompleted: data.payload?.seller || false,
+            avatar: data.payload?.profileImage || "/images/profile/Engelina.jpg",
             cartItemCount: data.payload?.cartItemCount || 0,
           };
 
@@ -230,10 +229,10 @@ export default function AuthNavbar() {
 
   // *** FIXED: Added a new handler for the "Sell" button logic ***
   const handleSellClick = () => {
-    if (user?.isSellerFormCompleted) {
+    if (user) {
       router.push("/sell");
     } else {
-      router.push("/seller/register");
+      router.push("/login");
     }
   };
 

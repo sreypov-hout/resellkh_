@@ -88,7 +88,7 @@ export default function Register() {
           router.push(`/verifyOTP?email=${form.email}`);
 
         } else if (response.status === 401) {
-          setSubmitError("Unauthorized: Make sure the /register endpoint is public.");
+          setSubmitError("The email is already register");
         } else {
           setSubmitError(result?.message || "Registration failed. Please try again.");
         }

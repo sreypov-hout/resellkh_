@@ -2,7 +2,7 @@
 import { useBookmark } from "@/context/BookmarkContext";
 import CartInBookmarkPage from "@/components/profile/someComponent/CartInBookmarkPage";
 import { useEffect, useState } from "react";
-
+import { encryptId } from "@/utils/encryption";
 export default function FavoritePage() {
   const { bookmarks, isReady } = useBookmark();
   const [error, setError] = useState(null);
@@ -16,6 +16,17 @@ export default function FavoritePage() {
     window.addEventListener('error', handleError);
     return () => window.removeEventListener('error', handleError);
   }, []);
+const getEncrypted= (id) => {
+    try {
+      if (!id) return "";
+      const encrypted = encryptId(id.toString());
+      return encodeURIComponent(encrypted);
+    } catch (error) {
+      console.error("Profile ID encryption failed:", error);
+      return "";
+    }
+  };
+  
 
   if (error) {
     return (
@@ -93,7 +104,7 @@ export default function FavoritePage() {
                 {bookmarks.map((item) => (
                   <CartInBookmarkPage
                     key={`${item.id}-${item.title}`}
-                    id={item.id}
+                    id={getEncrypted(item.id)}
                     imageUrl={item.imageUrl}
                     title={item.title}
                     description={item.description}
