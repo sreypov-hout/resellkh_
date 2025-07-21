@@ -1,3 +1,5 @@
+// app/api/auth/[...nextauth]/route.js
+
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -19,52 +21,56 @@ export const authOptions = {
         },
       },
     }),
-
     CredentialsProvider({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-     async authorize(credentials) {
-  try {
-    const res = await fetch(`${backendURL}/auths/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: credentials?.email,
-        password: credentials?.password,
-      }),
-    });
+      async authorize(credentials) {
+        try {
+          const res = await fetch(`${backendURL}/auths/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: credentials?.email,
+              password: credentials?.password,
+            }),
+          });
 
-    if (!res.ok) return null;
+          if (!res.ok) {
+            console.error("Failed to login with credentials");
+            return null;
+          }
 
-    const data = await res.json(); // <-- no destructuring
-
-    if (!data.token) return null;
-
-    return {
-      id: data.userId,
-      email: data.email,
-      name: data.userName || `${data.firstName || ""} ${data.lastName || ""}`.trim(),
-      firstName: data.firstName,
-      lastName: data.lastName,
-      role: data.role || "USER",
-      token: data.token,
-      image: data.profileImage || null, // your response doesn't have profileImage, adjust if needed
-    };
-  } catch (error) {
-    console.error("Login error:", error);
-    return null;
-  }
-}
-
+          const data = await res.json();
+          
+          if (data && data.token) {
+            // The API response for credentials login won't have a profile image.
+            // So, `image` will be `null`. This is the desired behavior.
+            return {
+              id: data.userId,
+              email: data.email,
+              name: data.userName || `${data.firstName || ""} ${data.lastName || ""}`.trim(),
+              firstName: data.firstName,
+              lastName: data.lastName,
+              role: data.role || "USER",
+              token: data.token,
+              image: data.profileImage || null, 
+            };
+          }
+          return null;
+        } catch (error) {
+          console.error("Credentials authorize error:", error);
+          return null;
+        }
+      },
     }),
   ],
 
   callbacks: {
     async signIn({ account, profile, user }) {
-      if (account?.provider === "google" && profile?.email) {
+      if (account?.provider === "google") {
         try {
           const res = await fetch(`${backendURL}/auths/google`, {
             method: "POST",
@@ -80,55 +86,54 @@ export const authOptions = {
           if (!res.ok) return false;
 
           const { payload } = await res.json();
-
+          
+          // Populate user object with data from your backend
           user.id = payload.userId;
           user.token = payload.token;
-          user.firstName = payload.firstName;
-          user.lastName = payload.lastName;
           user.role = payload.role || "USER";
-          user.email = payload.email;
-          user.image = payload.profileImage || profile.picture;
-
+          // Use the Google picture as the image for the session.
+          user.image = profile.picture; 
+          
           return true;
         } catch (err) {
-          console.error("Google login error:", err);
+          console.error("Google sign-in callback error:", err);
           return false;
         }
       }
-
-      return true;
+      return true; // For credentials sign-in
     },
 
     async jwt({ token, user }) {
-      if (user?.token) {
+      // Persist data to the token
+      if (user) {
         token.accessToken = user.token;
         token.userId = user.id;
-        token.email = user.email;
         token.role = user.role;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
-        token.picture = user.image;
+        token.picture = user.image; // user.image is null for credentials, URL for Google
       }
       return token;
     },
 
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      session.user = {
-        id: token.userId,
-        email: token.email,
-        role: token.role,
-        firstName: token.firstName,
-        lastName: token.lastName,
-        image: token.picture,
-      };
+      // Persist data to the session
+      if (token) {
+        session.accessToken = token.accessToken;
+        session.user = {
+          id: token.userId,
+          email: token.email,
+          role: token.role,
+          name: session.user.name,
+          // The image will be the Google URL or null, which we handle in the navbar
+          image: token.picture, 
+        };
+      }
       return session;
     },
   },
 
   session: {
     strategy: "jwt",
-    maxAge: 5 * 60 * 60, 
+    maxAge: 5 * 60 * 60, // 5 hours
   },
 
   pages: {
@@ -137,7 +142,7 @@ export const authOptions = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-  debug: false,
+  debug: process.env.NODE_ENV === "development",
 };
 
 const handler = NextAuth(authOptions);

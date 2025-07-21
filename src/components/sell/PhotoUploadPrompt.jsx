@@ -1,38 +1,28 @@
+// src/components/sell/PhotoUploadPrompt.jsx
 'use client';
 import { useRouter } from 'next/navigation';
-import { ImagePlus } from 'lucide-react';
 import { useRef } from 'react';
+import { useFiles } from '@/context/FileContext'; // Import the custom hook
 
 export default function PhotoUploadPrompt() {
   const fileInputRef = useRef(null);
   const router = useRouter();
+  const { setUploadedFiles } = useFiles(); // Get the setter function from context
 
-  const handleFiles = async (files) => {
+  const handleFiles = (files) => {
+    // We get the raw File objects, not Data URLs
     const selectedFiles = Array.from(files).slice(0, 5);
 
-    const fileData = await Promise.all(
-      selectedFiles.map(file => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            resolve({
-              name: file.name,
-              type: file.type,
-              dataUrl: reader.result,
-            });
-          };
-          reader.readAsDataURL(file);
-        });
-      })
-    );
+    // Set the files in the global context state
+    setUploadedFiles(selectedFiles);
 
-    localStorage.setItem('uploadedPreviews', JSON.stringify(fileData));
+    // Navigate to the next page
     router.push('/sell/new');
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    if (e.dataTransfer.files) {
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFiles(e.dataTransfer.files);
     }
   };
@@ -57,8 +47,7 @@ export default function PhotoUploadPrompt() {
         onChange={(e) => handleFiles(e.target.files)}
       />
       <div className="mb-4">
-        {/* <ImagePlus className="w-12 h-12 text-gray-400 group-hover:text-orange-500" /> */}
-        <img src="/images/story set/image.jpg" alt="" className='w-[40px]' />
+        <img src="/images/story set/image.jpg" alt="Upload Icon" className='w-[40px]' />
       </div>
       <div className="mb-4">
         <span className="px-6 py-2 mt-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition">

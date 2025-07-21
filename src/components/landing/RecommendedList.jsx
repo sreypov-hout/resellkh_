@@ -64,11 +64,16 @@ export default function RecommendedList() {
           {loading
             ? Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)
             : itemsToShow.map((item) => {
-                const originalPrice = item.productPrice || 0;
-                const hasDiscount = item.discountPercent > 0;
-                const finalPrice = hasDiscount
-                  ? (originalPrice * (100 - item.discountPercent)) / 100
-                  : originalPrice;
+                const originalPrice = Number(item.productPrice) || 0;
+                const discountPercent = Number(item.discountPercent) || 0;
+                const hasDiscount = discountPercent > 0;
+                let finalPrice = originalPrice;
+
+                if (hasDiscount) {
+                  finalPrice = (originalPrice * (100 - discountPercent)) / 100;
+                }
+
+                if (isNaN(finalPrice)) finalPrice = 0;
 
                 return (
                   <ProductCart
@@ -79,7 +84,7 @@ export default function RecommendedList() {
                     description={item.description}
                     price={finalPrice.toFixed(2)}
                     originalPrice={hasDiscount ? originalPrice : null}
-                    discountText={hasDiscount ? `${item.discountPercent}% OFF` : null}
+                    discountText={hasDiscount ? `${discountPercent}% OFF` : null}
                   />
                 );
               })}

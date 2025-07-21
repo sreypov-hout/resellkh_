@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import ProductCart from "../domain/ProductCart";
+import Cart from "./someComponent/Cart";
 
 // Skeleton Card Component
 const SkeletonCard = () => (
@@ -291,7 +291,7 @@ export default function ListingsWithFilter({ userId }) {
               const firstImageUrl = item.fileUrls?.[0] || "/images/default-product.png";
 
               return (
-                <ProductCart
+                <Cart
                   key={item.productId}
                   id={item.productId}
                   imageUrl={firstImageUrl}
@@ -300,6 +300,7 @@ export default function ListingsWithFilter({ userId }) {
                   price={price.toFixed(2)}
                   originalPrice={item.discountPercent ? item.productPrice : null}
                   discountText={item.discountPercent ? `${item.discountPercent}% OFF` : null}
+                  showEditButton = {true}
                 />
               );
             })}

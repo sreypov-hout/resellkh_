@@ -9,10 +9,10 @@ import ConditionSelector from "@/components/sell/ConditionSelector";
 import ItemDetailForm from "@/components/sell/ItemDetailForm";
 import DealMethod from "@/components/sell/DealMethod";
 import PricingInput from "@/components/sell/PricingInput";
-
+import { encryptId } from "@/utils/encryption";
 import { deleteProduct } from "@/components/services/deleteProduct.service";
 import { updateProduct } from "@/components/services/updateProduct.service";
-
+import toast from "react-hot-toast";
 const staticCategories = [
   { id: 1, name: "Accessories" },
   { id: 2, name: "Beauty" },
@@ -55,7 +55,16 @@ export default function EditProductPage({ params }) {
       router.push("/login?redirect=/edit-product/" + productId);
     }
   }, [status, router, productId]);
-
+const getEncrypted= (id) => {
+    try {
+      if (!id) return "";
+      const encrypted = encryptId(id.toString());
+      return encodeURIComponent(encrypted);
+    } catch (error) {
+      console.error("Profile ID encryption failed:", error);
+      return "";
+    }
+  };
   // Fetch product data
   useEffect(() => {
     if (productId && status === "authenticated") {
@@ -156,116 +165,109 @@ export default function EditProductPage({ params }) {
   };
 
   const handleSaveEdit = async () => {
-    // Validate required fields
-    if (!files || files.length === 0) {
-      alert("Please upload at least one image");
-      return;
-    }
+  if (!files || files.length === 0) {
+    toast.error("Please upload at least one image");
+    return;
+  }
 
-    if (!title.trim()) {
-      alert("Product name is required");
-      return;
-    }
+  if (!title.trim()) {
+    toast.error("Product name is required");
+    return;
+  }
 
-    if (!condition) {
-      alert("Please select product condition");
-      return;
-    }
+  if (!condition) {
+    toast.error("Please select product condition");
+    return;
+  }
 
-    if (!price || isNaN(parseFloat(price))) {
-      alert("Please enter a valid price");
-      return;
-    }
+  if (!price || isNaN(parseFloat(price))) {
+    toast.error("Please enter a valid price");
+    return;
+  }
 
-    if (status !== "authenticated") {
-      alert("Please login to continue");
+  if (status !== "authenticated") {
+    toast.error("Please login to continue");
+    router.push("/login?redirect=/edit-product/" + productId);
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const selectedCategory = staticCategories.find(
+      (cat) => cat.name === category
+    );
+    const mainCategoryId = selectedCategory ? selectedCategory.id : 0;
+
+    const productData = {
+      productId: parseInt(productId),
+      productName: title,
+      userId: session.user.id,
+      mainCategoryId,
+      productPrice: parseFloat(price),
+      discountPercent: parseFloat(discount) || 0,
+      productStatus: originalProduct?.productStatus || "Public",
+      description: description || "",
+      location: location || "",
+      latitude: latitude || 0,
+      longitude: longitude || 0,
+      condition,
+      telegramUrl: telegram || "",
+      files,
+    };
+
+    const result = await updateProduct(
+      productId,
+      productData,
+      files,
+      session.accessToken
+    );
+
+    toast.success("Product updated successfully!");
+    router.push(`/profile/${getEncrypted(session.user.id)}`);
+  } catch (error) {
+    console.error("Update Error:", error);
+    toast.error(`Update failed: ${error.message}`);
+    if (error.message.includes("Unauthorized")) {
       router.push("/login?redirect=/edit-product/" + productId);
-      return;
     }
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-    setIsLoading(true);
-
-    try {
-      const selectedCategory = staticCategories.find(
-        (cat) => cat.name === category
-      );
-      const mainCategoryId = selectedCategory ? selectedCategory.id : 0;
-
-      const productData = {
-        productId: parseInt(productId),
-        productName: title,
-        userId: session.user.id,
-        mainCategoryId,
-        productPrice: parseFloat(price),
-        discountPercent: parseFloat(discount) || 0,
-        productStatus: originalProduct?.productStatus || "Public",
-        description: description || "",
-        location: location || "",
-        latitude: latitude || 0,
-        longitude: longitude || 0,
-        condition,
-        telegramUrl: telegram || "",
-        // Ensure files are passed correctly
-        files,
-      };
-
-      // Call your update product API
-      const result = await updateProduct(
-        productId,
-        productData,
-        files,
-        session.accessToken
-      );
-
-      alert("Product updated successfully!");
-      router.push(`/profile/${session.user.id}`);
-    } catch (error) {
-      console.error("Update Error:", error);
-      alert(`Update failed: ${error.message}`);
-      // Optionally redirect if the error is related to authentication
-      if (error.message.includes("Unauthorized")) {
-        router.push("/login?redirect=/edit-product/" + productId);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
   // Your existing handleDelete function in EditProductPage.js
 
   const handleDelete = async () => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this product? This action cannot be undone."
-      )
-    ) {
-      return;
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this product? This action cannot be undone."
+  );
+
+  if (!confirmDelete) {
+    toast("Delete cancelled");
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const token = session.accessToken;
+    const result = await deleteProduct(productId, token);
+
+    if (result && result.status === 200) {
+      toast.success("Product deleted successfully!");
+      router.push(`/profile/${getEncrypted(session.user.id)}`);
+    } else {
+      throw new Error(result.message || "Failed to delete product.");
     }
+  } catch (error) {
+    console.error("Delete Error:", error);
+    toast.error(`Delete failed: ${error.message}`);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-    setIsLoading(true);
-
-    try {
-      const token = session.accessToken; // Get token for delete call
-      // Call your deleteProduct service with productId and token
-      const result = await deleteProduct(productId, token);
-
-      console.log("Delete API response:", result); // Log the response for debugging
-
-      // Check the response from your deleteProduct service
-      // Based on your API response structure: { message: "Product deleted successfully", payload: {...}, status: 200, ...}
-      if (result && result.status === 200) {
-        alert("Product deleted successfully!");
-        router.push(`/profile/${session.user.id}`); // Redirect on success
-      } else {
-        // If the API indicates an error but response.ok was true (unlikely with a good API)
-        throw new Error(result.message || "Failed to delete product.");
-      }
-    } catch (error) {
-      console.error("Delete Error:", error);
-      alert(`Delete failed: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (status !== "authenticated") {
     return (

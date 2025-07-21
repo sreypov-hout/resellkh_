@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -7,7 +6,7 @@ import { FaRegBookmark, FaBookmark } from "react-icons/fa";
 import { useBookmark } from "@/context/BookmarkContext";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-
+import { encryptId } from "@/utils/encryption";
 export default function Cart({
   id,
   imageUrl,
@@ -31,7 +30,16 @@ export default function Cart({
     }
     return null;
   };
-
+const getEncrypted= (id) => {
+    try {
+      if (!id) return "";
+      const encrypted = encryptId(id.toString());
+      return encodeURIComponent(encrypted);
+    } catch (error) {
+      console.error("Profile ID encryption failed:", error);
+      return "";
+    }
+  };
   const handleToggle = (e) => {
     e.stopPropagation();
 
@@ -76,13 +84,15 @@ export default function Cart({
   };
 
   const handleCardClick = () => {
-    router.push(`/product/${id}`);
+    router.push(`/product/${getEncrypted(id)}`);
   };
 
   const handleEditClick = (e) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Prevent card navigation
     if (onEdit) {
       onEdit(id);
+    } else {
+      router.push(`/edit-product/${id}`);
     }
   };
 
@@ -99,10 +109,7 @@ export default function Cart({
           </div>
         )}
 
-Loun Siven, [7/16/2025 9:09 AM]
-
-
-        {/* Edit Button */}
+        {/* ✏️ Edit Icon */}
         {showEditButton && (
           <button
             onClick={handleEditClick}
