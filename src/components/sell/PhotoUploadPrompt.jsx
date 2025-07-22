@@ -1,20 +1,18 @@
-// src/components/sell/PhotoUploadPrompt.jsx
 'use client';
+
 import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
-import { useFiles } from '@/context/FileContext'; // Import the custom hook
+import { fileStore } from '@/lib/fileStore'; // CORRECTED: lowercase 's'
 
 export default function PhotoUploadPrompt() {
   const fileInputRef = useRef(null);
   const router = useRouter();
-  const { setUploadedFiles } = useFiles(); // Get the setter function from context
 
   const handleFiles = (files) => {
-    // We get the raw File objects, not Data URLs
-    const selectedFiles = Array.from(files).slice(0, 5);
-
-    // Set the files in the global context state
-    setUploadedFiles(selectedFiles);
+    if (!files || files.length === 0) return;
+    
+    // Store the actual File objects in our simple store
+    fileStore.files = Array.from(files).slice(0, 5);
 
     // Navigate to the next page
     router.push('/sell/new');
@@ -22,19 +20,15 @@ export default function PhotoUploadPrompt() {
 
   const handleDrop = (e) => {
     e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    if (e.dataTransfer.files) {
       handleFiles(e.dataTransfer.files);
     }
-  };
-
-  const handleClick = () => {
-    fileInputRef.current.click();
   };
 
   return (
     <div
       className="bg-orange-50 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center h-80 p-6 text-center group hover:border-orange-400 hover:bg-orange-100 transition-colors duration-300 cursor-pointer"
-      onClick={handleClick}
+      onClick={() => fileInputRef.current?.click()}
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
     >

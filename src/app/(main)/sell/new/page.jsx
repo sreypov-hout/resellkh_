@@ -496,7 +496,11 @@ export const SellNewPage = () => {
 
         <div className="flex flex-col md:flex-row gap-8">
           <div className="flex-1 space-y-4">
-            <PhotoUploader files={files} setFiles={setFiles} />
+           <PhotoUploader 
+  key={draftId || 'new-listing'} 
+  initialFiles={files} 
+  onFilesChange={setFiles} 
+/>
           </div>
           <div className="w-full md:w-1/2 space-y-6">
             <CategorySelector selected={category} onSelect={setCategory} categories={staticCategories} />

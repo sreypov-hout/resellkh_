@@ -1,7 +1,5 @@
-// src/context/FileContext.js
 'use client';
-
-import { createContext, useState, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 const FileContext = createContext();
 
