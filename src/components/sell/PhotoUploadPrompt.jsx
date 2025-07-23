@@ -1,20 +1,38 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
-import { fileStore } from '@/lib/fileStore'; // CORRECTED: lowercase 's'
+import { useRouter } from 'next/navigation';
+import { setUploadedFiles } from '@/utils/fileStore'; // FIX: Import the file store
+import { toast } from 'react-hot-toast';
 
 export default function PhotoUploadPrompt() {
   const fileInputRef = useRef(null);
   const router = useRouter();
 
+  // FIX: This function now processes the files and uses the store
   const handleFiles = (files) => {
-    if (!files || files.length === 0) return;
-    
-    // Store the actual File objects in our simple store
-    fileStore.files = Array.from(files).slice(0, 5);
+    // Convert FileList to an array and validate
+    const selectedFiles = Array.from(files).filter(file =>
+      (file.type.startsWith('image/') || file.type.startsWith('video/')) &&
+      file.size <= 20 * 1024 * 1024 // 20MB limit
+    );
 
-    // Navigate to the next page
+    if (selectedFiles.length === 0 && files.length > 0) {
+        toast.error("No valid files selected. Please choose images or videos under 20MB.");
+        return;
+    }
+
+    if (selectedFiles.length < files.length) {
+        toast.error("Some files were too large (max 20MB) and were ignored.");
+    }
+    
+    // Limit to 5 files
+    const finalFiles = selectedFiles.slice(0, 5);
+
+    // Store the files in our temporary in-memory store
+    setUploadedFiles(finalFiles);
+    
+    // Redirect to the new sell page
     router.push('/sell/new');
   };
 
@@ -25,10 +43,14 @@ export default function PhotoUploadPrompt() {
     }
   };
 
+  const handleClick = () => {
+    fileInputRef.current.click();
+  };
+
   return (
     <div
       className="bg-orange-50 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center h-80 p-6 text-center group hover:border-orange-400 hover:bg-orange-100 transition-colors duration-300 cursor-pointer"
-      onClick={() => fileInputRef.current?.click()}
+      onClick={handleClick}
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
     >

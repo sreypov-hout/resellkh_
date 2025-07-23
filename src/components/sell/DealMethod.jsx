@@ -91,8 +91,7 @@ const DealMethod = forwardRef(
         const isValid = /^[a-zA-Z0-9_]{5,32}$/.test(username);
 
         if (username && !isValid) {
-          setTelegramError('Invalid Telegram username. Must be 5–32 characters and contain only letters, numbers, or underscores.');
-          toast.error('Invalid Telegram username. Please check format.');
+          toast.error('Invalid Telegram username.Must be 5–32 characters and contain only letters, numbers, or underscores.');
           return false;
         }
         

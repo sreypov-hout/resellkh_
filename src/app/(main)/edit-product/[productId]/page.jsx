@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, use, useMemo, useCallback } from "react"; // Import useMemo and useCallback
+// FIX 1: Import the 'use' hook from React.
+import { useState, useEffect, useMemo, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import PhotoUploader from "@/components/sell/PhotoUploader";
+import EditPhotoUploader from "@/components/sell/editPhotoUpload";
 import CategorySelector from "@/components/sell/CategorySelector";
 import ConditionSelector from "@/components/sell/ConditionSelector";
 import ItemDetailForm from "@/components/sell/ItemDetailForm";
@@ -28,13 +29,12 @@ const staticCategories = [
 ];
 
 export default function EditProductPage({ params }) {
+    // FIX 2: Unwrap the 'params' object with use() before destructuring.
     const { productId } = use(params);
     const router = useRouter();
     const { data: session, status } = useSession();
 
-    // This state now holds the final list of files for saving
-    const [filesToSave, setFilesToSave] = useState([]);
-
+    const [filesToSave, setFilesToSave] = useState(null);
     const [category, setCategory] = useState("");
     const [condition, setCondition] = useState("");
     const [title, setTitle] = useState("");
@@ -109,26 +109,29 @@ export default function EditProductPage({ params }) {
         }
     }, [productId, status, session]);
 
-    // **FIX 1: Stabilize the 'initialFiles' array with useMemo.**
-    // This stops it from being recreated on every render.
     const initialFiles = useMemo(() => {
         if (originalProduct?.fileUrls?.length > 0) {
             return originalProduct.fileUrls.map((url, index) => ({
                 id: `existing-${originalProduct.productId}-${index}`,
                 url: url,
+                fileObject: { 
+                    url,
+                    id: `existing-${originalProduct.productId}-${index}`,
+                    name: `Image ${index + 1}`
+                }
             }));
         }
         return [];
     }, [originalProduct]);
 
-    // **FIX 2: Stabilize the 'onFilesChange' function with useCallback.**
-    // This ensures the function reference doesn't change on every render.
     const handleFilesChange = useCallback((newFiles) => {
         setFilesToSave(newFiles);
     }, []);
 
     const handleSaveEdit = async () => {
-        if (!filesToSave.length) return toast.error("Please upload at least one image");
+        if (filesToSave !== null && filesToSave.length === 0) {
+            return toast.error("Please upload at least one image");
+        }
         if (!title.trim()) return toast.error("Product name is required");
         if (!condition) return toast.error("Please select product condition");
         if (!price || isNaN(parseFloat(price))) return toast.error("Please enter a valid price");
@@ -141,12 +144,18 @@ export default function EditProductPage({ params }) {
                 mainCategoryId: cat ? cat.id : 0,
                 productPrice: parseFloat(price),
                 discountPercent: parseFloat(discount) || 0,
-                description, location, condition,
+                description,
+                location,
+                condition,
                 telegramUrl: telegram,
-                latitude, longitude,
+                latitude,
+                longitude,
                 productStatus: originalProduct?.productStatus || "ON SALE",
             };
-            await updateProduct(productId, productData, filesToSave, session.accessToken);
+
+            const files = filesToSave !== null ? filesToSave : initialFiles.map(f => f.fileObject);
+            
+            await updateProduct(productId, productData, files, session.accessToken);
             toast.success("Product updated successfully!");
             router.push(`/profile/${getEncrypted(session.user.id)}`);
         } catch (error) {
@@ -192,8 +201,7 @@ export default function EditProductPage({ params }) {
             <h1 className="text-xl font-semibold text-gray-800 mb-4">Edit Product</h1>
             <div className="flex flex-col md:flex-row gap-8">
                 <div className="flex-1 space-y-4">
-                    {/* **FIX 3: Pass the stabilized props to the uploader.** */}
-                    <PhotoUploader
+                    <EditPhotoUploader
                         key={productId}
                         initialFiles={initialFiles}
                         onFilesChange={handleFilesChange}
@@ -204,18 +212,44 @@ export default function EditProductPage({ params }) {
                     {category && (
                         <>
                             <ConditionSelector selected={condition} onSelect={setCondition} />
-                            <ItemDetailForm title={title} setTitle={setTitle} description={description} setDescription={setDescription} />
-                            <DealMethod location={location} setLocation={setLocation} telegram={telegram} setTelegram={setTelegram} setLatLng={setLatLng} setLatitude={setLatitude} setLongitude={setLongitude} />
-                            <PricingInput price={price} setPrice={setPrice} discount={discount} setDiscount={setDiscount} />
+                            <ItemDetailForm 
+                                title={title} 
+                                setTitle={setTitle} 
+                                description={description} 
+                                setDescription={setDescription} 
+                            />
+                            <DealMethod 
+                                location={location} 
+                                setLocation={setLocation} 
+                                telegram={telegram} 
+                                setTelegram={setTelegram} 
+                                setLatLng={setLatLng} 
+                                setLatitude={setLatitude} 
+                                setLongitude={setLongitude} 
+                            />
+                            <PricingInput 
+                                price={price} 
+                                setPrice={setPrice} 
+                                discount={discount} 
+                                setDiscount={setDiscount} 
+                            />
                         </>
                     )}
                 </div>
             </div>
             <div className="flex justify-between mt-8">
-                <button disabled={isLoading} onClick={handleDelete} className="px-6 py-2 rounded-full text-white bg-red-500 hover:bg-red-600 disabled:bg-gray-400">
+                <button 
+                    disabled={isLoading} 
+                    onClick={handleDelete} 
+                    className="px-6 py-2 rounded-full text-white bg-red-500 hover:bg-red-600 disabled:bg-gray-400"
+                >
                     {isLoading ? "Deleting..." : "Delete"}
                 </button>
-                <button disabled={isLoading} onClick={handleSaveEdit} className="px-6 py-2 rounded-full text-white bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400">
+                <button 
+                    disabled={isLoading} 
+                    onClick={handleSaveEdit} 
+                    className="px-6 py-2 rounded-full text-white bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400"
+                >
                     {isLoading ? "Saving..." : "Save Changes"}
                 </button>
             </div>
