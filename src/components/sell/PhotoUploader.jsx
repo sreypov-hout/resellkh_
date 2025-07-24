@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 
 export default function PhotoUploader({ files, setFiles }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -28,24 +29,98 @@ export default function PhotoUploader({ files, setFiles }) {
     setIsDragging(false);
   };
 
-  const processFiles = (newFiles) => {
-    const validFiles = newFiles.filter(file =>
-      (file.type.startsWith('image/') || file.type.startsWith('video/')) &&
-      file.size <= 20 * 1024 * 1024 // 20MB limit
-    );
+  const getVideoDuration = (file) => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        resolve(video.duration);
+      };
+      
+      video.src = URL.createObjectURL(file);
+    });
+  };
 
-    if (validFiles.length !== newFiles.length) {
-      console.warn('Some files were invalid or too large (max 20MB)');
+  const hasExistingImage = () => {
+    return files.some(file => {
+      if (file.url) return !/\.(mp4|mov|avi|webm)$/i.test(file.url);
+      if (file instanceof File) return file.type.startsWith('image/');
+      return false;
+    });
+  };
+
+  const processFiles = async (newFiles) => {
+    // First validate all files before processing
+    const validatedFiles = [];
+    let hasInvalidVideoFirst = false;
+    
+    // Check if any videos are being uploaded without existing image
+    if (!hasExistingImage()) {
+      const hasVideo = newFiles.some(file => {
+        if (file instanceof File) return file.type.startsWith('video/');
+        if (file.url) return /\.(mp4|mov|avi|webm)$/i.test(file.url);
+        return false;
+      });
+
+      if (hasVideo) {
+        toast.error('Please upload at least one image first before adding videos');
+        hasInvalidVideoFirst = true;
+      }
+    }
+
+    // If invalid video upload attempt, stop processing
+    if (hasInvalidVideoFirst) return;
+
+    for (const file of newFiles) {
+      // Check file type
+      const isImage = file.type?.startsWith('image/') || 
+                     (file.url && !/\.(mp4|mov|avi|webm)$/i.test(file.url));
+      const isVideo = file.type?.startsWith('video/') || 
+                      (file.url && /\.(mp4|mov|avi|webm)$/i.test(file.url));
+      
+      if (!isImage && !isVideo) {
+        toast.error(`File ${file.name} is not an image or video`);
+        continue;
+      }
+      
+      // Check file size
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error(`File ${file.name} is too large (max 20MB)`);
+        continue;
+      }
+      
+      // Additional validation for videos
+      if (isVideo && !isImage) {
+        try {
+          const duration = await getVideoDuration(file);
+          if (duration > 10) {
+            toast.error(`Video ${file.name} is too long (max 10 seconds)`);
+            continue;
+          }
+        } catch (error) {
+          toast.error(`Could not validate video ${file.name}`);
+          continue;
+        }
+      }
+      
+      validatedFiles.push(file);
     }
     
+    if (validatedFiles.length === 0) return;
+
     setFiles(prevFiles => {
-      const combined = [...prevFiles, ...validFiles];
+      const combined = [...prevFiles, ...validatedFiles];
       const uniqueFiles = combined.reduce((acc, current) => {
-          const identifier = current instanceof File ? current.name : current.url;
-          if (!acc.find(item => (item instanceof File ? item.name : item.url) === identifier)) {
-              acc.push(current);
-          }
-          return acc;
+        const identifier = current instanceof File ? current.name : current.url;
+        if (!acc.some(item => {
+          const itemIdentifier = item instanceof File ? item.name : item.url;
+          return itemIdentifier === identifier;
+        })) {
+          acc.push(current);
+        }
+        return acc;
       }, []);
       return uniqueFiles.slice(0, 5);
     });
@@ -56,7 +131,7 @@ export default function PhotoUploader({ files, setFiles }) {
   };
   
   const renderMediaPreview = (file) => {
-    if (file.url) { // For existing draft files with a URL
+    if (file.url) {
       const isVideo = /\.(mp4|mov|avi|webm)$/i.test(file.url);
       return isVideo ? (
         <video controls className="w-full h-48 object-cover rounded-lg" src={file.url} />
@@ -65,7 +140,7 @@ export default function PhotoUploader({ files, setFiles }) {
       );
     }
 
-    if (file instanceof File) { // For new File objects
+    if (file instanceof File) {
       const src = URL.createObjectURL(file);
       const isVideo = file.type.startsWith('video/');
       return isVideo ? (
@@ -120,6 +195,12 @@ export default function PhotoUploader({ files, setFiles }) {
             Drag & drop photos/videos here<br />
             (Max {5 - files.length} remaining, 20MB each)
           </p>
+          {files.length === 0 && (
+            <p className="text-xs text-gray-500 mt-2">
+              Note: First upload must be an image<br />
+              Videos must be under 10 seconds
+            </p>
+          )}
         </label>
       </div>
 

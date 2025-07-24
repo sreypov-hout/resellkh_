@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
 
 async function getMediaTypeFromUrl(url) {
     try {
@@ -9,21 +10,69 @@ async function getMediaTypeFromUrl(url) {
         return contentType?.startsWith('video') ? 'video' : 'image';
     } catch (err) {
         console.error('Error fetching content type:', err);
-        if (/\.(mp4|mov|webm)$/i.test(url)) return 'video';
+        if (/\.(mp4|mov|webm|avi|mkv)$/i.test(url)) return 'video';
         return 'image';
     }
 }
 
-const processFile = async (file, index) => {
+const getVideoDuration = (file) => {
+    return new Promise((resolve) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        
+        video.onloadedmetadata = () => {
+            window.URL.revokeObjectURL(video.src);
+            resolve(video.duration);
+        };
+        
+        video.onerror = () => {
+            window.URL.revokeObjectURL(video.src);
+            resolve(0); // Return 0 if duration can't be determined
+        };
+        
+        video.src = URL.createObjectURL(file);
+    });
+};
+
+const processFile = async (file, index, existingItems = []) => {
+    // First item must be an image if there are no existing items
+    if (existingItems.length === 0) {
+        const isVideo = file instanceof File 
+            ? file.type.startsWith('video/') || file.name?.match(/\.(mp4|mov|webm|avi|mkv)$/i)
+            : /\.(mp4|mov|webm|avi|mkv)$/i.test(file.url);
+        
+        if (isVideo) {
+            throw new Error('FIRST_IMAGE_REQUIRED');
+        }
+    }
+
+    // For video files, validate duration
+    if ((file instanceof File && (file.type.startsWith('video/') || file.name?.match(/\.(mp4|mov|webm|avi|mkv)$/i)))) {
+        try {
+            const duration = await getVideoDuration(file);
+            if (duration > 10) { 
+                throw new Error('VIDEO_TOO_LONG');
+            }
+        } catch (error) {
+            console.error('Video validation error:', error);
+            throw new Error('VIDEO_VALIDATION_FAILED');
+        }
+    
+    }
+
+    // Handle File objects (new uploads)
     if (file instanceof File) {
+        const isVideo = file.type.startsWith('video/') || file.name?.match(/\.(mp4|mov|webm|avi|mkv)$/i);
         return {
             id: `${file.name}-${file.lastModified}-${Date.now()}`,
             name: file.name,
-            type: file.type.startsWith('video') ? 'video' : 'image',
+            type: isVideo ? 'video' : 'image',
             previewUrl: URL.createObjectURL(file),
             fileObject: file,
         };
     }
+    
+    // Handle existing URLs
     if (file?.url) {
         const mediaType = await getMediaTypeFromUrl(file.url);
         return {
@@ -31,32 +80,52 @@ const processFile = async (file, index) => {
             name: file.name || `Media ${index + 1}`,
             type: mediaType,
             previewUrl: file.url,
-            fileObject: file, // Keep the original file object with URL
+            fileObject: file,
         };
     }
+    
     return null;
 };
-
 export default function EditPhotoUploader({ initialFiles = [], onFilesChange }) {
     const [mediaItems, setMediaItems] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
     const isInitialized = useRef(false);
+    const initialFilesProcessed = useRef(false);
 
-    // Load initial files and notify parent
+    // Load initial files
     useEffect(() => {
-        if (isInitialized.current || !Array.isArray(initialFiles) || initialFiles.length === 0) return;
+        if (initialFilesProcessed.current || !Array.isArray(initialFiles) || initialFiles.length === 0) return;
 
         const loadInitialFiles = async () => {
-            const processed = await Promise.all(initialFiles.map((f, i) => processFile(f, i)));
-            const validFiles = processed.filter(Boolean);
-            setMediaItems(validFiles);
-            onFilesChange(validFiles.map(item => item.fileObject));
-            isInitialized.current = true;
+            try {
+                const processed = await Promise.all(
+                    initialFiles.map((f, i) => processFile(f, i))
+                );
+                const validFiles = processed.filter(Boolean);
+                setMediaItems(validFiles);
+                initialFilesProcessed.current = true;
+            } catch (error) {
+                console.error('Error loading initial files:', error);
+            }
         };
         
         loadInitialFiles();
-    }, [initialFiles, onFilesChange]);
+    }, [initialFiles]);
+
+    // Notify parent when new files are added
+    useEffect(() => {
+        if (isInitialized.current) {
+            // Only send new files (File objects) to parent
+            const newFiles = mediaItems
+                .filter(item => item.fileObject instanceof File)
+                .map(item => item.fileObject);
+            
+            onFilesChange(newFiles);
+        } else {
+            isInitialized.current = true;
+        }
+    }, [mediaItems, onFilesChange]);
 
     // Clean up blob URLs
     useEffect(() => {
@@ -80,42 +149,63 @@ export default function EditPhotoUploader({ initialFiles = [], onFilesChange }) 
 
     const addFiles = useCallback(async (newFiles) => {
         const filesArray = Array.from(newFiles);
-        const processedNew = await Promise.all(
-            filesArray.map((f, i) => processFile(f, mediaItems.length + i))
-        );
-        const validNewFiles = processedNew.filter(Boolean);
+        
+        try {
+            const processedNew = await Promise.all(
+                filesArray.map((f, i) => 
+                    processFile(f, mediaItems.length + i, mediaItems)
+                        .catch(error => {
+                            switch (error.message) {
+                                case 'FIRST_IMAGE_REQUIRED':
+                                    toast.error('Please upload at least one image first before adding videos');
+                                    break;
+                                case 'VIDEO_TOO_LONG':
+                                    toast.error('Videos must be under 10 seconds');
+                                    break;
+                                case 'VIDEO_VALIDATION_FAILED':
+                                    toast.error('Could not validate video duration');
+                                    break;
+                                default:
+                                    toast.error('Invalid file type or format');
+                            }
+                            return null;
+                        })
+                )
+            );
+            
+            const validNewFiles = processedNew.filter(Boolean);
+            if (validNewFiles.length === 0) return;
 
-        setMediaItems(prevItems => {
-            const combined = [...prevItems, ...validNewFiles];
-            const unique = deduplicateById(combined);
-            const final = unique.slice(0, 5);
-            onFilesChange(final.map(item => item.fileObject));
-            return final;
-        });
-    }, [mediaItems, onFilesChange]);
+            setMediaItems(prevItems => {
+                const combined = [...prevItems, ...validNewFiles];
+                const unique = deduplicateById(combined);
+                const final = unique.slice(0, 5);
+                return final;
+            });
+        } catch (error) {
+            console.error('Error processing files:', error);
+        }
+    }, [mediaItems]);
 
     const handleRemove = useCallback((idToRemove) => {
         setMediaItems(prevItems => {
             const updated = prevItems.filter(item => item.id !== idToRemove);
-            onFilesChange(updated.map(item => item.fileObject));
             const removedItem = prevItems.find(item => item.id === idToRemove);
             if (removedItem?.previewUrl?.startsWith('blob:')) {
                 URL.revokeObjectURL(removedItem.previewUrl);
             }
             return updated;
         });
-    }, [onFilesChange]);
+    }, []);
 
     const moveToFirst = useCallback((idToMove) => {
         setMediaItems(prevItems => {
             const item = prevItems.find(f => f.id === idToMove);
             if (!item) return prevItems;
             const rest = prevItems.filter(f => f.id !== idToMove);
-            const updated = [item, ...rest];
-            onFilesChange(updated.map(item => item.fileObject));
-            return updated;
+            return [item, ...rest];
         });
-    }, [onFilesChange]);
+    }, []);
     
     const handleFileInputChange = useCallback((e) => {
         if (e.target.files?.length) {
@@ -159,6 +249,12 @@ export default function EditPhotoUploader({ initialFiles = [], onFilesChange }) 
                     <p className="text-gray-700 text-[15px]">
                         or drag media here<br />(up to 5 photos/videos)
                     </p>
+                    {mediaItems.length === 0 && (
+                        <p className="text-xs text-gray-500 mt-2">
+                            Note: First upload must be an image<br />
+                            Videos must be under 10 seconds
+                        </p>
+                    )}
                 </div>
             )}
 
@@ -181,16 +277,32 @@ export default function EditPhotoUploader({ initialFiles = [], onFilesChange }) 
                                 </div>
                                 <div className="w-full h-48 flex items-center justify-center bg-gray-100 relative">
                                     {item.type === 'video' ? (
-                                        <video src={item.previewUrl} className="w-full h-full object-cover" controls playsInline />
+                                        <video 
+                                            src={item.previewUrl} 
+                                            className="w-full h-full object-cover" 
+                                            controls 
+                                            playsInline
+                                            muted
+                                            preload="metadata"
+                                        />
                                     ) : (
-                                        <img src={item.previewUrl} alt={item.name} className="w-full h-full object-cover" />
+                                        <img 
+                                            src={item.previewUrl} 
+                                            alt={item.name} 
+                                            className="w-full h-full object-cover" 
+                                            loading="lazy"
+                                        />
                                     )}
                                 </div>
-                                <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">{item.type?.toUpperCase()}</div>
+                                <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                                    {item.type?.toUpperCase()}
+                                </div>
                             </div>
                         ))}
                     </div>
-                    <p className="text-sm text-gray-500 text-right mt-1">{mediaItems.length}/5 {mediaItems.length === 5 && '(Maximum reached)'}</p>
+                    <p className="text-sm text-gray-500 text-right mt-1">
+                        {mediaItems.length}/5 {mediaItems.length === 5 && '(Maximum reached)'}
+                    </p>
                 </>
             )}
         </>

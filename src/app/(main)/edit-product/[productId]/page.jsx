@@ -1,6 +1,5 @@
 'use client';
 
-// FIX 1: Import the 'use' hook from React.
 import { useState, useEffect, useMemo, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -29,12 +28,13 @@ const staticCategories = [
 ];
 
 export default function EditProductPage({ params }) {
-    // FIX 2: Unwrap the 'params' object with use() before destructuring.
-    const { productId } = use(params);
+    const unwrappedParams = use(params);
+    const { productId } = unwrappedParams;
+    
     const router = useRouter();
     const { data: session, status } = useSession();
 
-    const [filesToSave, setFilesToSave] = useState(null);
+    const [filesToSave, setFilesToSave] = useState([]);
     const [category, setCategory] = useState("");
     const [condition, setCondition] = useState("");
     const [title, setTitle] = useState("");
@@ -77,10 +77,19 @@ export default function EditProductPage({ params }) {
                         `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/getproductbyuserid/${session.user.id}`,
                         { headers: { Authorization: `Bearer ${token}` } }
                     );
-                    if (!response.ok) throw new Error("Failed to fetch product data");
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
 
-                    const data = await response.json();
-                    const product = data.payload.find((p) => p.productId === parseInt(productId));
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch (jsonError) {
+                        throw new Error("Invalid JSON response from server");
+                    }
+
+                    const product = data.payload?.find((p) => p.productId === parseInt(productId));
                     if (!product) throw new Error("Product not found");
                     if (product.userId !== session.user.id) throw new Error("Unauthorized");
 
@@ -100,6 +109,7 @@ export default function EditProductPage({ params }) {
                     if (cat) setCategory(cat.name);
 
                 } catch (err) {
+                    console.error("Fetch error:", err);
                     setError(err.message);
                 } finally {
                     setIsLoadingProduct(false);
@@ -125,45 +135,9 @@ export default function EditProductPage({ params }) {
     }, [originalProduct]);
 
     const handleFilesChange = useCallback((newFiles) => {
-        setFilesToSave(newFiles);
+        const onlyNewFiles = newFiles.filter(file => file instanceof File);
+        setFilesToSave(onlyNewFiles);
     }, []);
-
-    const handleSaveEdit = async () => {
-        if (filesToSave !== null && filesToSave.length === 0) {
-            return toast.error("Please upload at least one image");
-        }
-        if (!title.trim()) return toast.error("Product name is required");
-        if (!condition) return toast.error("Please select product condition");
-        if (!price || isNaN(parseFloat(price))) return toast.error("Please enter a valid price");
-
-        setIsLoading(true);
-        try {
-            const cat = staticCategories.find((c) => c.name === category);
-            const productData = {
-                productName: title,
-                mainCategoryId: cat ? cat.id : 0,
-                productPrice: parseFloat(price),
-                discountPercent: parseFloat(discount) || 0,
-                description,
-                location,
-                condition,
-                telegramUrl: telegram,
-                latitude,
-                longitude,
-                productStatus: originalProduct?.productStatus || "ON SALE",
-            };
-
-            const files = filesToSave !== null ? filesToSave : initialFiles.map(f => f.fileObject);
-            
-            await updateProduct(productId, productData, files, session.accessToken);
-            toast.success("Product updated successfully!");
-            router.push(`/profile/${getEncrypted(session.user.id)}`);
-        } catch (error) {
-            toast.error(`Update failed: ${error.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const handleDelete = async () => {
         if (!window.confirm("Are you sure you want to delete this product?")) return;
@@ -178,6 +152,61 @@ export default function EditProductPage({ params }) {
             setIsLoading(false);
         }
     };
+
+   const handleSaveEdit = async (e) => {
+  e.preventDefault();
+  
+  if (!title.trim()) return toast.error("Product name is required");
+  if (!condition) return toast.error("Please select product condition");
+  if (!price || isNaN(parseFloat(price))) return toast.error("Please enter a valid price");
+
+  setIsLoading(true);
+  try {
+    const cat = staticCategories.find((c) => c.name === category);
+    const productData = {
+      productName: title,
+      mainCategoryId: cat ? cat.id : 0,
+      productPrice: parseFloat(price),
+      discountPercent: parseFloat(discount) || 0,
+      description,
+      location,
+      condition,
+      telegramUrl: telegram,
+      latitude,
+      longitude,
+      productStatus: originalProduct?.productStatus || "ON SALE",
+    };
+
+    const result = await updateProduct(
+      productId, 
+      productData, 
+      filesToSave, 
+      session.accessToken
+    );
+    
+    if (result.success || result) {
+      toast.success("Product updated successfully!");
+      router.push(`/profile/${getEncrypted(session.user.id)}`);
+    } else {
+      throw new Error('Update completed but no confirmation received');
+    }
+  } catch (error) {
+    console.error("Update error:", error);
+    
+    // More specific error messages
+    if (error.message.includes('Network error')) {
+      toast.error("Network error - please check your connection");
+    } else if (error.message.includes('non-JSON')) {
+      toast.error("Server error - please try again later");
+    } else {
+      toast.error(error.message || "Failed to update product");
+    }
+    
+    // Optional: Log to error tracking service
+  } finally {
+    setIsLoading(false);
+  }
+};
 
     if (isLoadingProduct) {
         return (
