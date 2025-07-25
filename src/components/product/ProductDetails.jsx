@@ -112,7 +112,7 @@ const ProductDetails = ({ product }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[32px] font-bold text-gray-900 mb-2">{productName}</h1>
+        <h1 className="text-[32px] font-bold text-gray-900 mb-2 line-clamp-1">{productName}</h1>
         <div className="flex items-center space-x-4">
           <span className="text-3xl font-bold text-orange-500">
             ${discountedPrice.toFixed(2)}
@@ -151,7 +151,7 @@ const ProductDetails = ({ product }) => {
 
       <div>
         <h3 className="font-medium text-gray-900 mb-3">Description</h3>
-        <p className="text-gray-600 leading-relaxed">
+        <p className="text-gray-600 leading-relaxed line-clamp-1">
           {displayedDescription}
           {isTruncated && (
             <span

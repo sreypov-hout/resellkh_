@@ -1,34 +1,41 @@
 export const postProduct = async (productData) => {
   try {
-    // Get token from localStorage
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No authentication token found');
 
-    // Create URL with query parameters
+    // Create URL with all necessary query parameters
     const queryParams = new URLSearchParams({
       productName: productData.productName,
       userId: productData.userId,
       mainCategoryId: productData.mainCategoryId,
       productPrice: productData.productPrice,
       discountPercent: productData.discountPercent || 0,
-      productStatus: productData.productStatus || 'available',
+      productStatus: productData.productStatus || 'ON SALE',
       description: productData.description || '',
       location: productData.location || '',
       latitude: productData.latitude || 0,
       longitude: productData.longitude || 0,
-      condition: productData.condition,
-      telegramUrl: productData.telegramUrl || ''
+      condition: productData.condition || '',
+      telegramUrl: productData.telegramUrl || '' // Ensure this is included
     });
 
     // Create FormData for files
     const formData = new FormData();
-    productData.files.forEach(file => {
-      formData.append('files', file);
-    });
-
-    // Debug output
-    console.log('Request URL:', `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/upload?${queryParams.toString()}`);
-    console.log('Files being uploaded:', productData.files.map(f => f.name));
+    if (productData.files && productData.files.length > 0) {
+      productData.files.forEach(file => {
+        if (file instanceof File) {
+          formData.append('files', file);
+        } else if (file.url) {
+          // Handle case where file is an object with URL (for drafts)
+          fetch(file.url)
+            .then(res => res.blob())
+            .then(blob => {
+              const file = new File([blob], `image_${Date.now()}.jpg`, { type: 'image/jpeg' });
+              formData.append('files', file);
+            });
+        }
+      });
+    }
 
     const response = await fetch(
       `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/upload?${queryParams.toString()}`,
@@ -49,13 +56,7 @@ export const postProduct = async (productData) => {
 
     return await response.json();
   } catch (error) {
-    console.error('Upload Error:', {
-      message: error.message,
-      productData: {
-        ...productData,
-        files: productData.files.map(f => f.name)
-      }
-    });
+    console.error('Upload Error:', error.message);
     throw error;
   }
 };

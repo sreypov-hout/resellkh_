@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, use } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react"; // Added useRef
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import EditPhotoUploader from "@/components/sell/editPhotoUpload";
@@ -28,11 +28,10 @@ const staticCategories = [
 ];
 
 export default function EditProductPage({ params }) {
-    const unwrappedParams = use(params);
-    const { productId } = unwrappedParams;
-
+    const { productId } = params;
     const router = useRouter();
     const { data: session, status } = useSession();
+    const dealMethodRef = useRef(null); // Added this line
 
     const [filesToSave, setFilesToSave] = useState([]);
     const [category, setCategory] = useState("");
@@ -141,51 +140,55 @@ export default function EditProductPage({ params }) {
         }
     };
 
-   const handleSaveEdit = async (e) => {
-      e.preventDefault();
-      
-      if (!title.trim()) return toast.error("Product name is required");
-      if (!condition) return toast.error("Please select product condition");
-      if (!price || isNaN(parseFloat(price))) return toast.error("Please enter a valid price");
-
-      setIsLoading(true);
-      const cat = staticCategories.find((c) => c.name === category);
-      
-      const productData = {
-          productName: title,
-          userId: session.user.id,
-          mainCategoryId: cat ? cat.id : null,
-          productPrice: parseFloat(price),
-          discountPercent: parseFloat(discount) || 0,
-          description: description,
-          location: location,
-          condition: condition,
-          telegramUrl: telegram,
-          latitude: latitude,
-          longitude: longitude,
-          productStatus: originalProduct?.productStatus || "ON SALE",
-      };
-
-      try {
-        const result = await updateProduct(
-          productId, 
-          productData, 
-          filesToSave, 
-          session.accessToken
-        );
+    const handleSaveEdit = async (e) => {
+        e.preventDefault();
         
-        if (result) {
-          toast.success("Product updated successfully!");
-          router.push(`/profile/${getEncrypted(session.user.id)}`);
-        } else {
-          throw new Error('Update may have failed; no confirmation received.');
+        if (!title.trim()) return toast.error("Product name is required");
+        if (!condition) return toast.error("Please select product condition");
+        if (!price || isNaN(parseFloat(price))) return toast.error("Please enter a valid price");
+
+        // Validate Telegram URL
+        const telegramUrl = dealMethodRef.current?.validateTelegram?.();
+        if (telegramUrl === null) return; // Validation failed
+
+        setIsLoading(true);
+        const cat = staticCategories.find((c) => c.name === category);
+        
+        const productData = {
+            productName: title,
+            userId: session.user.id,
+            mainCategoryId: cat ? cat.id : null,
+            productPrice: parseFloat(price),
+            discountPercent: parseFloat(discount) || 0,
+            description: description,
+            location: location,
+            condition: condition,
+            telegramUrl: telegramUrl || '', // Use the validated URL
+            latitude: latitude,
+            longitude: longitude,
+            productStatus: originalProduct?.productStatus || "ON SALE",
+        };
+
+        try {
+            const result = await updateProduct(
+                productId, 
+                productData, 
+                filesToSave, 
+                session.accessToken
+            );
+            
+            if (result) {
+                toast.success("Product updated successfully!");
+                router.push(`/profile/${getEncrypted(session.user.id)}`);
+            } else {
+                throw new Error('Update may have failed; no confirmation received.');
+            }
+        } catch (error) {
+            console.error("Update error:", error);
+            toast.error(error.message || "Failed to update product");
+        } finally {
+            setIsLoading(false);
         }
-      } catch (error) {
-        console.error("Update error:", error);
-        toast.error(error.message || "Failed to update product");
-      } finally {
-        setIsLoading(false);
-      }
     };
 
     if (isLoadingProduct) {
@@ -201,7 +204,6 @@ export default function EditProductPage({ params }) {
             <h1 className="text-xl font-semibold text-gray-800 mb-4">Edit Product</h1>
             <div className="flex flex-col md:flex-row gap-8">
                 <div className="flex-1 space-y-4">
-                    {/* ✨ FIX: Pass the productId as a prop here */}
                     <EditPhotoUploader
                         key={productId}
                         initialFiles={initialFiles}
@@ -221,11 +223,11 @@ export default function EditProductPage({ params }) {
                                 setDescription={setDescription} 
                             />
                             <DealMethod 
+                                ref={dealMethodRef} // Added ref here
                                 location={location} 
                                 setLocation={setLocation} 
                                 telegram={telegram} 
                                 setTelegram={setTelegram}
-                                setLatLng={setLatLng} 
                                 setLatitude={setLatitude} 
                                 setLongitude={setLongitude} 
                             />

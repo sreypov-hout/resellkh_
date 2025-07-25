@@ -302,100 +302,88 @@ export const SellNewPage = () => {
   };
   
   const handleListNow = async () => {
-    if (!files.length) return toast.error('Please upload at least one image');
-    if (!title.trim()) return toast.error('Product name is required');
-    if (!condition) return toast.error('Please select product condition');
-    if (!price || isNaN(parseFloat(price))) return toast.error('Please enter a valid price');
-    if (!category) return toast.error('Please select a category');
-    if (!location.trim()) return toast.error('Location is required');
-    const isTelegramValid = dealMethodRef.current?.validateTelegram?.();
-    if (!isTelegramValid) return;
-    setIsLoading(true);
-    try {
-      const token = session?.accessToken || localStorage.getItem('token');
-      if (!token) {
-        toast.error("You must be logged in to list an item.");
-        setIsLoading(false);
-        router.push('/login');
-        return;
-      }
-      if (draftId) {
-        const selectedCategory = staticCategories.find((cat) => cat.name === category);
-        const mainCategoryId = selectedCategory ? selectedCategory.id : 0;
-        const params = new URLSearchParams();
-        params.append('productName', title);
-        params.append('mainCategoryId', mainCategoryId);
-        params.append('productPrice', price);
-        params.append('discountPercent', discount || '0');
-        params.append('description', description);
-        params.append('location', location);
-        params.append('latitude', latitude || '0');
-        params.append('longitude', longitude || '0');
-        params.append('condition', condition);
-        params.append('telegramUrl', telegram);
-        params.append('productStatus', 'ON SALE');
-        const formData = new FormData();
-        files.forEach(file => {
-          if (file instanceof File) {
-            formData.append('files', file);
-          }
-        });
-        const response = await axios.put(
-          `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/update-draft/${draftId}?${params.toString()}`,
-          formData, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data'
-            }
-          }
-        );
-        if (response.status === 200) {
-          toast.success("Item published successfully!");
-          router.replace(`/profile/${encodeURIComponent(encryptId(session.user.id))}`);
-        } else {
-          throw new Error(response.data?.message || "Failed to publish draft");
-        }
-      } else {
-        const selectedCategory = staticCategories.find((cat) => cat.name === category);
-        const mainCategoryId = selectedCategory ? selectedCategory.id : 0;
-        const productData = {
-          productName: title,
-          userId: session.user.id,
-          mainCategoryId,
-          productPrice: parseFloat(price),
-          discountPercent: parseFloat(discount) || 0,
-          description,
-          location,
-          latitude,
-          longitude,
-          condition,
-          telegramUrl: telegram,
-          files,
-        };
-        const result = await postProduct(productData, token);
-        if (result) {
-          toast.success("Item listed successfully!");
-          const encryptedId = encodeURIComponent(encryptId(session.user.id));
-          router.push(`/profile/${encryptedId}`);
-        } else {
-          throw new Error('Failed to upload product');
-        }
-      }
-    } catch (error) {
-      console.error('Submit error:', error);
-      if (error.response?.status === 401) {
-        toast.error("Session expired. Please login again.");
-        router.push('/login');
-      } else {
-        const errorMessage = error.response?.data?.message ||
-          error.message ||
-          "Failed to list item. Please try again.";
-        toast.error(errorMessage);
-      }
-    } finally {
+  if (!files.length) return toast.error('Please upload at least one image');
+  if (!title.trim()) return toast.error('Product name is required');
+  if (!condition) return toast.error('Please select product condition');
+  if (!price || isNaN(parseFloat(price))) return toast.error('Please enter a valid price');
+  if (!category) return toast.error('Please select a category');
+  if (!location.trim()) return toast.error('Location is required');
+  
+  // Validate Telegram and get the URL
+  const telegramUrl = dealMethodRef.current?.validateTelegram?.();
+  if (telegramUrl === null) return; // Validation failed
+
+  setIsLoading(true);
+  
+  try {
+    const token = session?.accessToken || localStorage.getItem('token');
+    if (!token) {
+      toast.error("You must be logged in to list an item.");
       setIsLoading(false);
+      router.push('/login');
+      return;
     }
-  };
+    
+    const selectedCategory = staticCategories.find((cat) => cat.name === category);
+    const mainCategoryId = selectedCategory ? selectedCategory.id : 0;
+    
+    const productData = {
+      productName: title,
+      userId: session.user.id,
+      mainCategoryId,
+      productPrice: parseFloat(price),
+      discountPercent: parseFloat(discount) || 0,
+      productStatus: 'ON SALE',
+      description,
+      location,
+      latitude,
+      longitude,
+      condition,
+      telegramUrl: telegramUrl || '', // Use the validated URL
+      files,
+    };
+    
+    let result;
+    if (draftId) {
+      const formData = new FormData();
+      Object.keys(productData).forEach(key => {
+        if (key !== 'files') {
+          formData.append(key, productData[key]);
+        }
+      });
+      productData.files.forEach(file => {
+        if (file instanceof File) {
+          formData.append('files', file);
+        }
+      });
+
+      const response = await axios.put(
+        `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/update-draft/${draftId}`,
+        formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      result = response.data;
+      toast.success("Item published successfully!");
+    } else {
+      result = await postProduct(productData);
+      toast.success("Item listed successfully!");
+    }
+
+    const encryptedId = encodeURIComponent(encryptId(session.user.id));
+    router.push(`/profile/${encryptedId}`);
+
+  } catch (error) {
+    console.error('Submit error:', error);
+    const errorMessage = error.response?.data?.message || error.message || "Failed to list item. Please try again.";
+    toast.error(errorMessage);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
       <div className="relative">

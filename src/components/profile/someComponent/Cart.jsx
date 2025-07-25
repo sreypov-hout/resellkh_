@@ -118,7 +118,7 @@ const getEncrypted= (id) => {
           <h3 className="text-sm font-semibold text-gray-800 line-clamp-1">
             {title}
           </h3>
-          <p className="mt-1 text-[13px] text-gray-600 leading-snug line-clamp-2">
+          <p className="mt-1 text-[13px] text-gray-600 leading-snug line-clamp-1">
             {description}
           </p>
         </div>

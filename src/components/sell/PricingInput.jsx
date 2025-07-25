@@ -4,9 +4,11 @@ const EXCHANGE_RATE = 4000;
 
 export default function PricingInput({ price, setPrice, discount, setDiscount }) {
   const [currency, setCurrency] = useState("USD");
-  const [inputValue, setInputValue] = useState(""); // To control input display
+  const [inputValue, setInputValue] = useState("");
+  const MAX_USD = 2000000;
+  const MAX_KHR = 801778400;
 
-  // When price or currency changes from outside, update displayed inputValue accordingly
+  // Update displayed value when price or currency changes
   useEffect(() => {
     if (price === "" || price === null || isNaN(price)) {
       setInputValue("");
@@ -17,19 +19,23 @@ export default function PricingInput({ price, setPrice, discount, setDiscount })
       setInputValue(price.toString());
     } else {
       // Convert USD price to KHR for display
-      setInputValue((price * EXCHANGE_RATE).toFixed(0));
+      const khrValue = (price * EXCHANGE_RATE).toFixed(2);
+      setInputValue(khrValue);
     }
   }, [price, currency]);
 
-  
   const handleInputChange = (e) => {
     let val = e.target.value;
 
-    // Allow only digits and optional decimal for USD; for KHR only digits (no decimals)
+    // Validation based on currency
     if (currency === "USD") {
-      if (!/^\d*\.?\d*$/.test(val)) return;
+      // Allow up to 2,000,000 USD with 2 decimal places
+      if (!/^\d{0,7}(\.\d{0,2})?$/.test(val)) return;
+      if (parseFloat(val) > MAX_USD) return;
     } else {
-      if (!/^\d*$/.test(val)) return;
+      // Allow up to 801,778,400 KHR (no decimals)
+      if (!/^\d{0,9}$/.test(val)) return;
+      if (parseInt(val) > MAX_KHR) return;
     }
 
     setInputValue(val);
@@ -40,23 +46,21 @@ export default function PricingInput({ price, setPrice, discount, setDiscount })
     }
 
     // Convert input to USD internally and store
+    const numericValue = parseFloat(val);
     if (currency === "USD") {
-      setPrice(parseFloat(val));
+      setPrice(numericValue);
     } else {
       // Convert KHR input back to USD
-      setPrice(parseFloat(val) / EXCHANGE_RATE);
+      setPrice(numericValue / EXCHANGE_RATE);
     }
   };
-  const discountInUSD =
-  price && discount
-    ? (price * discount) / 100
-    : 0;
 
-// Convert discount to selected currency for display
-const discountDisplay =
-  currency === "USD"
-    ? discountInUSD.toFixed(2)
-    : (discountInUSD * EXCHANGE_RATE).toFixed(0);
+  const discountInUSD = price && discount ? (price * discount) / 100 : 0;
+
+  // Convert discount to selected currency for display
+  const discountDisplay = currency === "USD" 
+    ? discountInUSD.toLocaleString('en-US', { maximumFractionDigits: 2 })
+    : (discountInUSD * EXCHANGE_RATE).toLocaleString('en-US', { maximumFractionDigits: 0 });
 
   return (
     <div className="space-y-6">
@@ -72,10 +76,9 @@ const discountDisplay =
             <input
               type="text"
               inputMode={currency === "USD" ? "decimal" : "numeric"}
-              min="0"
               value={inputValue}
               onChange={handleInputChange}
-              placeholder="0.00"
+              placeholder={currency === "USD" ? "0.00" : "0"}
               className="w-full h-[48px] pt-4 pl-10 pr-4 py-3 rounded-2xl bg-[#f1edef] text-black placeholder:text-gray-800 focus:outline-none"
             />
           </div>
@@ -100,6 +103,11 @@ const discountDisplay =
             </button>
           </div>
         </div>
+        <p className="text-xs text-gray-500">
+          Max: {currency === "USD" 
+            ? `$${MAX_USD.toLocaleString()}` 
+            : `R${MAX_KHR.toLocaleString()}`}
+        </p>
       </div>
 
       {/* Discount Section */}
@@ -117,10 +125,7 @@ const discountDisplay =
               value={discount}
               onChange={(e) => {
                 const value = e.target.value;
-                if (
-                  /^\d{0,3}(\.\d{0,2})?$/.test(value) &&
-                  parseFloat(value) <= 100
-                ) {
+                if (/^\d{0,3}(\.\d{0,2})?$/.test(value) && parseFloat(value) <= 100) {
                   setDiscount(value);
                 }
               }}
