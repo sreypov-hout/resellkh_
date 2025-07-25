@@ -30,7 +30,7 @@ const staticCategories = [
 export default function EditProductPage({ params }) {
     const unwrappedParams = use(params);
     const { productId } = unwrappedParams;
-    
+
     const router = useRouter();
     const { data: session, status } = useSession();
 
@@ -77,18 +77,12 @@ export default function EditProductPage({ params }) {
                         `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/getproductbyuserid/${session.user.id}`,
                         { headers: { Authorization: `Bearer ${token}` } }
                     );
-                    
+
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
 
-                    let data;
-                    try {
-                        data = await response.json();
-                    } catch (jsonError) {
-                        throw new Error("Invalid JSON response from server");
-                    }
-
+                    const data = await response.json();
                     const product = data.payload?.find((p) => p.productId === parseInt(productId));
                     if (!product) throw new Error("Product not found");
                     if (product.userId !== session.user.id) throw new Error("Unauthorized");
@@ -124,19 +118,13 @@ export default function EditProductPage({ params }) {
             return originalProduct.fileUrls.map((url, index) => ({
                 id: `existing-${originalProduct.productId}-${index}`,
                 url: url,
-                fileObject: { 
-                    url,
-                    id: `existing-${originalProduct.productId}-${index}`,
-                    name: `Image ${index + 1}`
-                }
             }));
         }
         return [];
     }, [originalProduct]);
 
     const handleFilesChange = useCallback((newFiles) => {
-        const onlyNewFiles = newFiles.filter(file => file instanceof File);
-        setFilesToSave(onlyNewFiles);
+        setFilesToSave(newFiles.filter(file => file instanceof File));
     }, []);
 
     const handleDelete = async () => {
@@ -154,75 +142,58 @@ export default function EditProductPage({ params }) {
     };
 
    const handleSaveEdit = async (e) => {
-  e.preventDefault();
-  
-  if (!title.trim()) return toast.error("Product name is required");
-  if (!condition) return toast.error("Please select product condition");
-  if (!price || isNaN(parseFloat(price))) return toast.error("Please enter a valid price");
+      e.preventDefault();
+      
+      if (!title.trim()) return toast.error("Product name is required");
+      if (!condition) return toast.error("Please select product condition");
+      if (!price || isNaN(parseFloat(price))) return toast.error("Please enter a valid price");
 
-  setIsLoading(true);
-  try {
-    const cat = staticCategories.find((c) => c.name === category);
-    const productData = {
-      productName: title,
-      mainCategoryId: cat ? cat.id : 0,
-      productPrice: parseFloat(price),
-      discountPercent: parseFloat(discount) || 0,
-      description,
-      location,
-      condition,
-      telegramUrl: telegram,
-      latitude,
-      longitude,
-      productStatus: originalProduct?.productStatus || "ON SALE",
+      setIsLoading(true);
+      const cat = staticCategories.find((c) => c.name === category);
+      
+      const productData = {
+          productName: title,
+          userId: session.user.id,
+          mainCategoryId: cat ? cat.id : null,
+          productPrice: parseFloat(price),
+          discountPercent: parseFloat(discount) || 0,
+          description: description,
+          location: location,
+          condition: condition,
+          telegramUrl: telegram,
+          latitude: latitude,
+          longitude: longitude,
+          productStatus: originalProduct?.productStatus || "ON SALE",
+      };
+
+      try {
+        const result = await updateProduct(
+          productId, 
+          productData, 
+          filesToSave, 
+          session.accessToken
+        );
+        
+        if (result) {
+          toast.success("Product updated successfully!");
+          router.push(`/profile/${getEncrypted(session.user.id)}`);
+        } else {
+          throw new Error('Update may have failed; no confirmation received.');
+        }
+      } catch (error) {
+        console.error("Update error:", error);
+        toast.error(error.message || "Failed to update product");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    const result = await updateProduct(
-      productId, 
-      productData, 
-      filesToSave, 
-      session.accessToken
-    );
-    
-    if (result.success || result) {
-      toast.success("Product updated successfully!");
-      router.push(`/profile/${getEncrypted(session.user.id)}`);
-    } else {
-      throw new Error('Update completed but no confirmation received');
-    }
-  } catch (error) {
-    console.error("Update error:", error);
-    
-    // More specific error messages
-    if (error.message.includes('Network error')) {
-      toast.error("Network error - please check your connection");
-    } else if (error.message.includes('non-JSON')) {
-      toast.error("Server error - please try again later");
-    } else {
-      toast.error(error.message || "Failed to update product");
-    }
-    
-    // Optional: Log to error tracking service
-  } finally {
-    setIsLoading(false);
-  }
-};
-
     if (isLoadingProduct) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-            </div>
-        );
+        return <div className="text-center p-8">Loading...</div>;
     }
 
     if (error) {
-        return (
-            <div className="text-center py-10">
-                <p className="text-red-500 mb-4">Error: {error}</p>
-                <button onClick={() => router.back()} className="px-4 py-2 bg-gray-500 text-white rounded">Go Back</button>
-            </div>
-        );
+        return <div className="text-center p-8 text-red-500">Error: {error}</div>;
     }
 
     return (
@@ -230,10 +201,12 @@ export default function EditProductPage({ params }) {
             <h1 className="text-xl font-semibold text-gray-800 mb-4">Edit Product</h1>
             <div className="flex flex-col md:flex-row gap-8">
                 <div className="flex-1 space-y-4">
+                    {/* ✨ FIX: Pass the productId as a prop here */}
                     <EditPhotoUploader
                         key={productId}
                         initialFiles={initialFiles}
                         onFilesChange={handleFilesChange}
+                        productId={productId}
                     />
                 </div>
                 <div className="w-full md:w-1/2 space-y-6">
@@ -251,7 +224,7 @@ export default function EditProductPage({ params }) {
                                 location={location} 
                                 setLocation={setLocation} 
                                 telegram={telegram} 
-                                setTelegram={setTelegram} 
+                                setTelegram={setTelegram}
                                 setLatLng={setLatLng} 
                                 setLatitude={setLatitude} 
                                 setLongitude={setLongitude} 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
 
 async function getMediaTypeFromUrl(url) {
     try {
@@ -27,7 +28,7 @@ const getVideoDuration = (file) => {
         
         video.onerror = () => {
             window.URL.revokeObjectURL(video.src);
-            resolve(0); // Return 0 if duration can't be determined
+            resolve(0);
         };
         
         video.src = URL.createObjectURL(file);
@@ -35,7 +36,6 @@ const getVideoDuration = (file) => {
 };
 
 const processFile = async (file, index, existingItems = []) => {
-    // First item must be an image if there are no existing items
     if (existingItems.length === 0) {
         const isVideo = file instanceof File 
             ? file.type.startsWith('video/') || file.name?.match(/\.(mp4|mov|webm|avi|mkv)$/i)
@@ -46,7 +46,6 @@ const processFile = async (file, index, existingItems = []) => {
         }
     }
 
-    // For video files, validate duration
     if ((file instanceof File && (file.type.startsWith('video/') || file.name?.match(/\.(mp4|mov|webm|avi|mkv)$/i)))) {
         try {
             const duration = await getVideoDuration(file);
@@ -60,7 +59,6 @@ const processFile = async (file, index, existingItems = []) => {
     
     }
 
-    // Handle File objects (new uploads)
     if (file instanceof File) {
         const isVideo = file.type.startsWith('video/') || file.name?.match(/\.(mp4|mov|webm|avi|mkv)$/i);
         return {
@@ -72,7 +70,6 @@ const processFile = async (file, index, existingItems = []) => {
         };
     }
     
-    // Handle existing URLs
     if (file?.url) {
         const mediaType = await getMediaTypeFromUrl(file.url);
         return {
@@ -86,14 +83,16 @@ const processFile = async (file, index, existingItems = []) => {
     
     return null;
 };
-export default function EditPhotoUploader({ initialFiles = [], onFilesChange }) {
+
+// This signature correctly accepts the 'productId' prop
+export default function EditPhotoUploader({ initialFiles = [], onFilesChange, productId }) {
+    const { data: session } = useSession();
     const [mediaItems, setMediaItems] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
     const isInitialized = useRef(false);
     const initialFilesProcessed = useRef(false);
 
-    // Load initial files
     useEffect(() => {
         if (initialFilesProcessed.current || !Array.isArray(initialFiles) || initialFiles.length === 0) return;
 
@@ -113,10 +112,8 @@ export default function EditPhotoUploader({ initialFiles = [], onFilesChange }) 
         loadInitialFiles();
     }, [initialFiles]);
 
-    // Notify parent when new files are added
     useEffect(() => {
         if (isInitialized.current) {
-            // Only send new files (File objects) to parent
             const newFiles = mediaItems
                 .filter(item => item.fileObject instanceof File)
                 .map(item => item.fileObject);
@@ -127,7 +124,6 @@ export default function EditPhotoUploader({ initialFiles = [], onFilesChange }) 
         }
     }, [mediaItems, onFilesChange]);
 
-    // Clean up blob URLs
     useEffect(() => {
         return () => {
             mediaItems.forEach(item => {
@@ -187,16 +183,57 @@ export default function EditPhotoUploader({ initialFiles = [], onFilesChange }) 
         }
     }, [mediaItems]);
 
-    const handleRemove = useCallback((idToRemove) => {
+    const handleRemove = useCallback(async (idToRemove) => {
+        const itemToRemove = mediaItems.find(item => item.id === idToRemove);
+        if (!itemToRemove) return;
+
+        const isExistingFile = !itemToRemove.previewUrl.startsWith('blob:') && !(itemToRemove.fileObject instanceof File);
+
+        if (isExistingFile) {
+            if (!productId) {
+                toast.error("Product ID is missing. Cannot delete file.");
+                return;
+            }
+            try {
+                const token = session?.accessToken || localStorage.getItem('token');
+                if (!token) {
+                    toast.error("You are not authenticated.");
+                    return;
+                }
+
+                const response = await fetch(
+                    `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/${productId}/files?fileUrl=${encodeURIComponent(itemToRemove.previewUrl)}`,
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Failed to delete file.");
+                }
+
+                toast.success("Media deleted successfully!");
+
+            } catch (error) {
+                toast.error(`Deletion failed: ${error.message}`);
+                console.error("Error deleting file:", error);
+                return;
+            }
+        }
+        
         setMediaItems(prevItems => {
             const updated = prevItems.filter(item => item.id !== idToRemove);
-            const removedItem = prevItems.find(item => item.id === idToRemove);
-            if (removedItem?.previewUrl?.startsWith('blob:')) {
-                URL.revokeObjectURL(removedItem.previewUrl);
+            if (itemToRemove.previewUrl?.startsWith('blob:')) {
+                URL.revokeObjectURL(itemToRemove.previewUrl);
             }
             return updated;
         });
-    }, []);
+
+    }, [mediaItems, session, productId]);
 
     const moveToFirst = useCallback((idToMove) => {
         setMediaItems(prevItems => {
