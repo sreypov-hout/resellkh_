@@ -1,7 +1,7 @@
 export const deleteProduct = async (productId, token) => {
   try {
     const response = await fetch(
-      `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/${productId}`,
+      `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/${productId}`,
       {
         method: "DELETE",
         headers: {

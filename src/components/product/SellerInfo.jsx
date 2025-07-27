@@ -48,11 +48,11 @@ export default function SellerInfo({ sellerId }) {
         };
 
         const [profileRes, ratingRes] = await Promise.all([
-          fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/profile/${sellerId}`, { 
+          fetch(`https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/profile/${sellerId}`, { 
             method: 'GET', 
             headers 
           }),
-          fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/ratings/summary/${sellerId}`, { 
+          fetch(`https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/ratings/summary/${sellerId}`, { 
             method: 'GET', 
             headers 
           })

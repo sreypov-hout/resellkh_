@@ -20,7 +20,7 @@ export const updateProduct = async (
       });
     }
 
-    const url = `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/updateproduct/${productId}?${queryParams.toString()}`;
+    const url = `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/updateproduct/${productId}?${queryParams.toString()}`;
 
     const response = await fetch(url, {
       method: "PUT",

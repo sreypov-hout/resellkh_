@@ -185,7 +185,7 @@ export default function SellerRegistrationForm() {
 
     try {
       // *** FINAL FIX: Corrected the API endpoint URL ***
-      const response = await fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/sellers`, {
+      const response = await fetch(`https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/sellers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

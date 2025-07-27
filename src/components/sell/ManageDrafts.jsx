@@ -27,7 +27,7 @@ export default function ManageDrafts() {
           }
 
           const res = await axios.get(
-            `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
+            `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,

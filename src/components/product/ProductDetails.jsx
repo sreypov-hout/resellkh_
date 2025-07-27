@@ -64,7 +64,7 @@ const ProductDetails = ({ product }) => {
     }
 
     const quantityToAdd = 1;
-    const apiUrl = `https://comics-upset-dj-clause.trycloudflare.com/api/v1/cart/add?productId=${id}&quantity=${quantityToAdd}`;
+    const apiUrl = `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/cart/add?productId=${id}&quantity=${quantityToAdd}`;
 
     // Optimistic UI update
     window.dispatchEvent(new CustomEvent('cart-updated', {

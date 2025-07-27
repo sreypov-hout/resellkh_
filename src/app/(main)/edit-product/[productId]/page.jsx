@@ -73,7 +73,7 @@ export default function EditProductPage({ params }) {
                     setIsLoadingProduct(true);
                     const token = localStorage.getItem("token");
                     const response = await fetch(
-                        `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/getproductbyuserid/${session.user.id}`,
+                        `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/getproductbyuserid/${session.user.id}`,
                         { headers: { Authorization: `Bearer ${token}` } }
                     );
 

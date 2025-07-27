@@ -85,7 +85,7 @@ export const SellNewPage = () => {
     const fetchSpecificDraft = async () => {
       try {
         const response = await axios.get(
-          `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/drafts/${draftId}`,
+          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/drafts/${draftId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -138,7 +138,7 @@ export const SellNewPage = () => {
         const userId = session.user.id;
         try {
           const response = await axios.get(
-            `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/drafts/user/${userId}`, {
+            `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/drafts/user/${userId}`, {
               headers: {
                 Authorization: `Bearer ${token}`
               },
@@ -238,7 +238,7 @@ export const SellNewPage = () => {
             }
         });
         let response;
-        const baseUrl = "https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/";
+        const baseUrl = "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/";
         if (draftId) {
             response = await axios.put(
                 `${baseUrl}drafts/${draftId}?${params.toString()}`,
@@ -261,7 +261,7 @@ export const SellNewPage = () => {
             if (session?.user?.id) {
                 const userId = session.user.id;
                 const updatedDraftsResponse = await axios.get(
-                    `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
+                    `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (updatedDraftsResponse.status === 200 && updatedDraftsResponse.data?.payload) {
@@ -358,7 +358,7 @@ export const SellNewPage = () => {
       });
 
       const response = await axios.put(
-        `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/update-draft/${draftId}`,
+        `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/update-draft/${draftId}`,
         formData, {
           headers: {
             'Authorization': `Bearer ${token}`,

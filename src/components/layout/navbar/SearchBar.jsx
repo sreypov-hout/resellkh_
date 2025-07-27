@@ -8,7 +8,7 @@ const ImageScanModal = dynamic(() => import('./ImageScanModal'), {
   ssr: false,
 });
 
-const API_URL = 'https://comics-upset-dj-clause.trycloudflare.com/api/v1/products';
+const API_URL = 'https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products';
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');

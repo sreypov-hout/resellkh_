@@ -94,7 +94,7 @@ export default function ProductCart({
     
     // Quantity to add (default to 1)
     const quantityToAdd = 1; 
-    const apiUrl = `https://comics-upset-dj-clause.trycloudflare.com/api/v1/cart/add?productId=${id}&quantity=${quantityToAdd}`;
+    const apiUrl = `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/cart/add?productId=${id}&quantity=${quantityToAdd}`;
 
     // --- OPTIMISTIC UI UPDATE: Dispatch event BEFORE API call ---
     // Create a CustomEvent to pass data

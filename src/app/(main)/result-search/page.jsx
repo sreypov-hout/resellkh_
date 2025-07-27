@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import ProductCart from "@/components/domain/ProductCart";
 
-const API_URL = 'https://comics-upset-dj-clause.trycloudflare.com/api/v1/products';
+const API_URL = 'https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products';
 
 const SkeletonCard = () => (
   <div className="animate-pulse">

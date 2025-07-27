@@ -48,7 +48,7 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      const response = await fetch("https://comics-upset-dj-clause.trycloudflare.com/api/v1/auths/reset-new-password", {
+      const response = await fetch("https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/auths/reset-new-password", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"

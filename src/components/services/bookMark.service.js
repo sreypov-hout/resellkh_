@@ -1,4 +1,4 @@
-const API_BASE = "https://comics-upset-dj-clause.trycloudflare.com/api/v1/favourites";
+const API_BASE = "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/favourites";
 
 export async function fetchFavouritesByUserId(userId, token) {
   if (!userId || !token) {

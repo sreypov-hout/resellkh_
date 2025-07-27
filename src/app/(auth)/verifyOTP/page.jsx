@@ -24,7 +24,7 @@ export default function OTPVerification() {
     if (timer <= 0) {
       setTimer(60);
       toast.success("OTP resent.");
-      fetch("https://comics-upset-dj-clause.trycloudflare.com/api/v1/auths/resend-otp", {
+      fetch("https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/auths/resend-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -91,7 +91,7 @@ export default function OTPVerification() {
   try {
     setLoading(true);
 
-    const res = await fetch("https://comics-upset-dj-clause.trycloudflare.com/api/v1/auths/verify-otp", {
+    const res = await fetch("https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/auths/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, otp: code }),

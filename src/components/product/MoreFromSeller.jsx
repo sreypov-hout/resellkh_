@@ -14,7 +14,7 @@ const MoreFromSeller = ({ sellerId }) => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/getproductbyuserid/${sellerId}`
+          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/getproductbyuserid/${sellerId}`
         );
 
         if (!response.ok) {

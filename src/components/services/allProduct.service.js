@@ -2,7 +2,7 @@ export const productService = {
   fetchRecommendedProducts: async () => {
     try {
       const response = await fetch(
-        "https://comics-upset-dj-clause.trycloudflare.com/api/v1/products"
+        "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products"
       );
 
       if (!response.ok) {

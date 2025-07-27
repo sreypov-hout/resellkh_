@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://comics-upset-dj-clause.trycloudflare.com/api/v1";
+const API_BASE_URL = "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1";
 
 export const getProductIdByNotificationId = async (notificationId, token) => {
   // Renamed parameters and function for clarity

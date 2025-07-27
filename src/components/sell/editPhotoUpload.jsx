@@ -202,7 +202,7 @@ export default function EditPhotoUploader({ initialFiles = [], onFilesChange, pr
                 }
 
                 const response = await fetch(
-                    `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/${productId}/files?fileUrl=${encodeURIComponent(itemToRemove.previewUrl)}`,
+                    `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/${productId}/files?fileUrl=${encodeURIComponent(itemToRemove.previewUrl)}`,
                     {
                         method: 'DELETE',
                         headers: {

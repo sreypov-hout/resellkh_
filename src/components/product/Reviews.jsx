@@ -50,7 +50,7 @@ export default function Reviews({ sellerId }) {
 
       try {
         const res = await fetch(
-          `https://comics-upset-dj-clause.trycloudflare.com/api/v1/ratings/${sellerId}`,
+          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/ratings/${sellerId}`,
           {
             headers: {
               Accept: "application/json",
@@ -98,7 +98,7 @@ export default function Reviews({ sellerId }) {
         return;
       }
 
-      const res = await fetch("https://comics-upset-dj-clause.trycloudflare.com/api/v1/ratings", {
+      const res = await fetch("https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/ratings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

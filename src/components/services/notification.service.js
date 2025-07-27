@@ -1,5 +1,5 @@
 // services/notificationService.js
-const API_BASE_URL = "https://comics-upset-dj-clause.trycloudflare.com/api/v1";
+const API_BASE_URL = "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1";
 
 export const fetchAllNotifications = async (token, userId) => {
   try {

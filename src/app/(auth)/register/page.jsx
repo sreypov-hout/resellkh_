@@ -67,7 +67,7 @@ export default function Register() {
       setLoading(true);
       setSubmitError("");
       try {
-        const response = await fetch('https://comics-upset-dj-clause.trycloudflare.com/api/v1/auths/register', {
+        const response = await fetch('https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/auths/register', {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

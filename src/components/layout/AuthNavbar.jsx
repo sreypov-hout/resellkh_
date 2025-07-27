@@ -83,7 +83,7 @@ export default function AuthNavbar() {
       const fetchCartCount = async () => {
         try {
           const res = await fetch(
-            `https://comics-upset-dj-clause.trycloudflare.com/api/v1/cart/count?userId=${user.id}`,
+            `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/cart/count?userId=${user.id}`,
             { headers: { Authorization: `Bearer ${session.accessToken}` } }
           );
 
