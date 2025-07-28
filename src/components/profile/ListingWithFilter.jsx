@@ -34,7 +34,7 @@ export default function ListingsWithFilter({ userId }) {
         if (!userId) throw new Error("User ID not provided");
 
         const response = await fetch(
-          `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/getproductbyuserid/${userId}`,
+          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/getproductbyuserid/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -44,7 +44,7 @@ export default function SellerProfileClient({ sellerId }) {
       try {
         // ✅ Use decrypted sellerId in both API calls
         const profileRes = await fetch(
-          `https://comics-upset-dj-clause.trycloudflare.com/api/v1/profile/${numericSellerId}`,
+          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/profile/${numericSellerId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -55,7 +55,7 @@ export default function SellerProfileClient({ sellerId }) {
         const profileData = await profileRes.json();
 
         const ratingRes = await fetch(
-          `https://comics-upset-dj-clause.trycloudflare.com/api/v1/ratings/summary/${numericSellerId}`,
+          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/ratings/summary/${numericSellerId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
