@@ -289,7 +289,6 @@ export default function ListingsWithFilter({ userId }) {
                   : 0;
 
               const firstImageUrl = item.fileUrls?.[0] || "/images/default-product.png";
-
               return (
                 <Cart
                   key={item.productId}
