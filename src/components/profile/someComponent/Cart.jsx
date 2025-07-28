@@ -1,0 +1,151 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { useBookmark } from "@/context/BookmarkContext";
+import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { encryptId } from "@/utils/encryption";
+export default function Cart({
+  id,
+  imageUrl,
+  title,
+  description,
+  price,
+  originalPrice = null,
+  discountText = null,
+  showEditButton = false,
+  onEdit = null,
+}) {
+  const { toggleBookmark, isBookmarked } = useBookmark();
+  const bookmarked = isBookmarked(id);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const router = useRouter();
+
+  const getDiscountPercent = () => {
+    if (discountText) {
+      const match = discountText.match(/\d+/);
+      return match ? parseInt(match[0]) : null;
+    }
+    return null;
+  };
+const getEncrypted= (id) => {
+    try {
+      if (!id) return "";
+      const encrypted = encryptId(id.toString());
+      return encodeURIComponent(encrypted);
+    } catch (error) {
+      console.error("Profile ID encryption failed:", error);
+      return "";
+    }
+  };
+  const handleToggle = (e) => {
+    e.stopPropagation();
+
+    toggleBookmark({
+      id,
+      imageUrl,
+      title,
+      description,
+      price,
+      originalPrice,
+      discountPercent: getDiscountPercent(),
+    });
+
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 300);
+
+  };
+
+  const handleCardClick = () => {
+    router.push(`/product/${getEncrypted(id)}`);
+  };
+
+  const handleEditClick = (e) => {
+    e.stopPropagation(); // Prevent card navigation
+    if (onEdit) {
+      onEdit(id);
+    } else {
+      router.push(`/edit-product/${id}`);
+    }
+  };
+
+  return (
+    <div
+      className="flex flex-col bg-white rounded-2xl shadow-md overflow-hidden transition-transform w-full sm:w-[220px] max-w-sm relative"
+      onClick={handleCardClick}
+    >
+      {/* Image Section */}
+      <div className="relative w-full aspect-[4/3] sm:h-[220px]">
+        {discountText && (
+          <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-semibold px-2 py-[2px] rounded-full z-10 shadow">
+            {discountText}
+          </div>
+        )}
+
+        {/* ✏️ Edit Icon */}
+        {showEditButton && (
+          <button
+            onClick={handleEditClick}
+            className="absolute top-2 right-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-md transition-all duration-200 hover:scale-105 z-10"
+            title="Edit Product"
+          >
+            <svg
+              className="w-4 h-4 text-gray-600 hover:text-orange-500 transition-colors"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+            </svg>
+          </button>
+        )}
+
+        <Image
+          src={imageUrl}
+          alt={title}
+          fill
+          sizes="(max-width: 640px) 100vw, 240px"
+          style={{ objectFit: "cover" }}
+          className="rounded-t-2xl"
+        />
+      </div>
+
+      {/* Content Section */}
+      <div className="flex flex-col justify-between px-4 py-3 flex-grow">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-800 line-clamp-1">
+            {title}
+          </h3>
+          <p className="mt-1 text-[13px] text-gray-600 leading-snug line-clamp-1">
+            {description}
+          </p>
+        </div>
+
+        <div className="mt-2 flex items-center justify-between">
+          <div className="flex items-baseline space-x-1">
+            <span className="text-[#F97316] font-bold text-sm">${price}</span>
+            {originalPrice && (
+              <span className="text-gray-400 line-through text-[13px]">
+                ${originalPrice}
+              </span>
+            )}
+          </div>
+          <div
+            className={`cursor-pointer transition-transform duration-300 ${
+              isAnimating ? "scale-125" : "scale-100"
+            } ${bookmarked ? "text-orange-500" : "text-gray-400"}`}
+            onClick={(e) => handleToggle(e)}
+          >
+            {bookmarked ? (
+              <FaBookmark size={18} />
+            ) : (
+              <FaRegBookmark size={18} />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
