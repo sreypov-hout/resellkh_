@@ -5,13 +5,22 @@ import Link from "next/link";
 import Image from "next/image";
 import { encryptId } from "@/utils/encryption";
 
-export default function ProfileBanner({ isOwner, user, rating = 0, reviewsCount = 0 }) {
+const DEFAULT_AVATAR_URL =
+  "https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm";
+const DEFAULT_COVER_URL = "/cover.jpg";
+
+export default function ProfileBanner({
+  isOwner,
+  user,
+  rating = 0,
+  reviewsCount = 0,
+}) {
   const { name, avatar, cover, id } = user || {};
 
   // Get encrypted profile URL with fallback
   const getProfileUrl = (userId) => {
     try {
-      if (!userId) return '/profile';
+      if (!userId) return "/profile";
       const encryptedId = encryptId(userId.toString());
       // Make URL-safe by replacing problematic characters
       return `/profile/${encodeURIComponent(encryptedId)}`;
@@ -21,17 +30,20 @@ export default function ProfileBanner({ isOwner, user, rating = 0, reviewsCount 
     }
   };
 
+  const actualAvatarSrc = avatar || DEFAULT_AVATAR_URL;
+  const actualCoverSrc = cover || DEFAULT_COVER_URL;
+
   return (
     <div className="relative w-full mb-12">
       {/* Cover Image - unchanged */}
       <div className="relative w-full h-[180px] rounded-2xl overflow-hidden bg-gray-100">
-        {cover ? (
-          <Image 
-            src={cover} 
-            alt="Cover" 
-            fill 
-            className="object-cover w-full h-full" 
-            priority 
+        {actualCoverSrc ? (
+          <Image
+            src={actualCoverSrc}
+            alt="Cover"
+            fill
+            className="object-cover w-full h-full"
+            priority
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-blue-100 to-purple-100" />
@@ -43,12 +55,12 @@ export default function ProfileBanner({ isOwner, user, rating = 0, reviewsCount 
         {/* Avatar + Name */}
         <div className="flex items-center gap-4">
           <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white">
-            {avatar ? (
-              <Image 
-                src={avatar} 
-                alt="User Avatar" 
-                fill 
-                className="object-cover" 
+            {actualAvatarSrc ? (
+              <Image
+                src={actualAvatarSrc}
+                alt="User Avatar"
+                fill
+                className="object-cover"
               />
             ) : (
               <div className="w-full h-full bg-gray-300 flex items-center justify-center">
@@ -63,8 +75,8 @@ export default function ProfileBanner({ isOwner, user, rating = 0, reviewsCount 
             <h2 className="text-base font-semibold text-black line-clamp-1">
               {name || "User"}
             </h2>
-            <Link 
-              href={getProfileUrl(id)} 
+            <Link
+              href={getProfileUrl(id)}
               className="text-sm text-gray-500 hover:text-orange-500 transition-colors"
             >
               Profile Detail &gt;

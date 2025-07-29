@@ -113,7 +113,10 @@ export default function EditProfilePage({ sellerId }) {
             profileImage: null,
             coverImage: null,
           });
-          setSelectedImage(p.profileImage || "/default-avatar.png");
+          setSelectedImage(
+            p.profileImage ||
+              "https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm"
+          );
           setSelectedCoverImage(p.coverImage || "/cover.jpg");
         } else {
           setError("Profile not found or error in response.");
@@ -155,7 +158,7 @@ export default function EditProfilePage({ sellerId }) {
         isValid: false,
         message: "Username must be at least 3 characters",
       };
-    if (username.length > 30)
+    if (username.length > 15)
       return {
         isValid: false,
         message: "Username must be less than 30 characters",
@@ -170,17 +173,31 @@ export default function EditProfilePage({ sellerId }) {
   };
 
   const validateName = (name, fieldName) => {
-    if (!name) return { isValid: true, message: "" }; // Optional field
-    if (name.length > 50)
-      return {
-        isValid: false,
-        message: `${fieldName} must be less than 50 characters`,
-      };
-    if (!/^[a-zA-Z\s]+$/.test(name))
-      return {
-        isValid: false,
-        message: `${fieldName} can only contain letters and spaces`,
-      };
+    if (fieldName === "First name" || fieldName === "Last name") {
+      if (!name || name.trim() === "") {
+        return { isValid: false, message: `${fieldName} is required.` };
+      }
+    } else {
+      if (!name) return { isValid: true, message: "" }; // Optional field for other names
+    }
+
+    if (name && name.trim() !== "") {
+      if (name.length > 25)
+        return {
+          isValid: false,
+          message: `${fieldName} must be less than 50 characters`,
+        };
+      if (name.length < 2)
+        return {
+          isValid: false,
+          message: `${fieldName} must be at least 2 characters.`,
+        };
+      if (!/^[a-zA-Z]+(\s[a-zA-Z]+)*$/.test(name))
+        return {
+          isValid: false,
+          message: `${fieldName} can only contain letters and spaces`,
+        };
+    }
     return { isValid: true, message: "" };
   };
 
@@ -210,7 +227,7 @@ export default function EditProfilePage({ sellerId }) {
 
   const validateMobile = (mobile) => {
     if (!mobile) return { isValid: true, message: "" }; // Optional field
-    if (mobile.length > 20)
+    if (mobile.length > 10)
       return { isValid: false, message: "Mobile number is too long" };
     if (!/^[\d\s\-\+\(\)]+$/.test(mobile))
       return { isValid: false, message: "Please enter a valid mobile number" };
@@ -225,14 +242,14 @@ export default function EditProfilePage({ sellerId }) {
 
     switch (field) {
       case "username":
-        processedValue = value.slice(0, 30);
+        processedValue = value.slice(0, 15);
         break;
       case "firstName":
       case "lastName":
-        processedValue = value.slice(0, 50);
+        processedValue = value.slice(0, 25);
         break;
       case "bio":
-        processedValue = value.slice(0, 255);
+        processedValue = value.slice(0, 50);
         break;
       case "mobile":
         processedValue = value.slice(0, 20);
@@ -323,6 +340,7 @@ export default function EditProfilePage({ sellerId }) {
       return;
     }
 
+    // First name is now required - check if it's empty or null
     const firstNameValidation = validateName(formData.firstName, "First name");
     if (!firstNameValidation.isValid) {
       toast.error(firstNameValidation.message);
@@ -526,6 +544,7 @@ export default function EditProfilePage({ sellerId }) {
                 onChange={handleChange("firstName")}
                 maxLength={25}
                 error={fieldErrors.firstName}
+                required
               />
               <Input
                 label="Last name"
@@ -533,12 +552,13 @@ export default function EditProfilePage({ sellerId }) {
                 onChange={handleChange("lastName")}
                 maxLength={25}
                 error={fieldErrors.lastName}
+                required // Add this line
               />
               <Textarea
                 placeholder="Bio"
                 value={formData.bio}
                 onChange={handleChange("bio")}
-                maxLength={255}
+                maxLength={50}
               />
             </Section>
 
@@ -554,7 +574,7 @@ export default function EditProfilePage({ sellerId }) {
               <Input
                 placeholder="@yourusername"
                 value={formData.telegram}
-                maxLength={33}
+                maxLength={20}
                 error={fieldErrors.telegram}
                 onChange={(e) => {
                   let raw = e.target.value.trim();
@@ -658,11 +678,15 @@ function Input({
   error,
   min,
   max,
+  required = false,
 }) {
   return (
     <div className="mb-4">
       {label && (
-        <label className="block text-sm font-semibold mb-1">{label}</label>
+        <label className="block text-sm font-semibold mb-1">
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </label>
       )}
       <input
         type={type}
