@@ -1,4 +1,5 @@
-const API_BASE_URL = "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1"; // Your API base URL
+const API_BASE_URL =
+  "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1"; // Your API base URL
 
 export const fetchUserProfile = async (userId, token) => {
   if (!userId || !token) {
