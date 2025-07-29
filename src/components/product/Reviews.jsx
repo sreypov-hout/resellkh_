@@ -4,9 +4,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import { ReviewFormModal } from "@/components/product/ReviewFormModal";
-import { useRouter } from "next/navigation"; // Add Next.js router
+import { useRouter } from "next/navigation";
 
-// Skeleton component for loading state
 const SkeletonCard = () => (
   <div className="flex space-x-4 pb-6 animate-pulse">
     <div className="w-12 h-12 bg-gray-300 rounded-full" />
@@ -47,7 +46,6 @@ export default function Reviews({ sellerId }) {
     const fetchReviews = async () => {
       setLoading(true);
       setError(null);
-
       try {
         const res = await fetch(
           `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/ratings/${sellerId}`,
@@ -74,7 +72,7 @@ export default function Reviews({ sellerId }) {
             }),
             rating: r.score || 0,
             comment: r.comment || "",
-            userAvatar: r.reviewerAvatar || "/default-avatar.png",
+            userAvatar: r.reviewerAvatar,
           }));
 
           setReviews(mappedReviews);
@@ -139,10 +137,8 @@ export default function Reviews({ sellerId }) {
 
   const onWriteReviewClick = () => {
     if (token && userId) {
-      // Logged in → open modal
       setIsModalOpen(true);
     } else {
-      // Not logged in → redirect to login page
       router.push("/login");
     }
   };
@@ -150,14 +146,15 @@ export default function Reviews({ sellerId }) {
   const visibleReviews = showAll ? reviews : reviews.slice(0, 3);
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="font-bold text-gray-900 text-lg">Reviews for Seller</h3>
+    <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm w-full">
+      {/* Header */}
+      <div className="flex flex-row sm:flex-row sm:items-center sm:justify-between gap-12 mb-6">
+        <h3 className="font-bold text-gray-900 text-base sm:text-lg mt-2">Reviews for Seller</h3>
         <button
           onClick={onWriteReviewClick}
-          className="bg-orange-500 text-white px-5 py-2 rounded-[50px] text-sm font-medium hover:bg-orange-600 transition-colors flex items-center gap-2"
+          className="bg-orange-500 text-white px-4 py-2 sm:px-5 rounded-full text-sm font-medium hover:bg-orange-600 transition flex items-center gap-2"
         >
-          Write a review
+          comment
           <svg width="18" height="20" viewBox="0 0 18 20" fill="none">
             <path
               d="M3.94 12.036C3.707 12.66 3.51 13.236 3.334 13.819C4.294 13.122 5.435 12.68 6.752 12.515C9.265 12.201 11.498 10.542 12.628 8.457L11.172 7.002L12.585 5.587L13.585 4.586C14.015 4.156 14.5 3.362 15.013 2.218C9.42 3.085 5.996 6.51 3.94 12.036ZM14 7.001L15 8C14 11 11 14 7 14.5C4.331 14.834 2.664 16.667 1.998 20H0C1 14 3 0 18 0C17 2.997 16.002 4.996 15.003 5.997L14 7.001Z"
@@ -167,11 +164,10 @@ export default function Reviews({ sellerId }) {
         </button>
       </div>
 
+      {/* Content */}
       {loading ? (
         <div className="space-y-6">
-          {[...Array(3)].map((_, idx) => (
-            <SkeletonCard key={idx} />
-          ))}
+          {[...Array(3)].map((_, idx) => <SkeletonCard key={idx} />)}
         </div>
       ) : error ? (
         <div className="p-4 text-center text-red-500">{error}</div>
@@ -184,7 +180,7 @@ export default function Reviews({ sellerId }) {
               <div key={index} className="flex space-x-4 pb-6">
                 <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
                   <Image
-                    src={review.userAvatar}
+                    src={review.userAvatar || "https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm"}
                     alt={review.name}
                     width={48}
                     height={48}
@@ -194,8 +190,8 @@ export default function Reviews({ sellerId }) {
                 </div>
                 <div className="flex-1">
                   <div className="mb-1">
-                    <h4 className="font-semibold text-gray-900">{review.name}</h4>
-                    <div className="flex items-center space-x-5 mt-1">
+                    <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{review.name}</h4>
+                    <div className="flex flex-wrap items-center gap-3 mt-1">
                       <div className="flex text-sm">
                         {[...Array(5)].map((_, i) => (
                           <FaStar
@@ -217,11 +213,12 @@ export default function Reviews({ sellerId }) {
             ))}
           </div>
 
+          {/* Toggle button */}
           {reviews.length > 3 && (
             <div className="text-center mt-4">
               <button
                 onClick={() => setShowAll(!showAll)}
-                className="text-gray-900 hover:text-orange-500 transition-colors text-sm font-medium"
+                className="text-gray-900 hover:text-orange-500 transition text-sm font-medium"
               >
                 {showAll ? "Show less reviews" : "Read all reviews >"}
               </button>

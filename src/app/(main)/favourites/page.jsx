@@ -77,10 +77,10 @@ const getEncrypted= (id) => {
   try {
     return (
       <div className="px-[7%]">
-        <div className="p-4 md:p-6">
-          <div className="p-4 rounded-[24px] border border-gray-200">
+        <div className="p-1 md:p-6">
+          <div className="p-1 rounded-[24px] border border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">Favorites</h2>
+              <h2 className="text-lg font-semibold text-gray-800 ps-2 mt-1">Favorites</h2>
             </div>
 
             {bookmarks.length === 0 ? (

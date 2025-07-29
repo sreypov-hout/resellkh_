@@ -49,8 +49,8 @@ export default function RecommendedList() {
 
   return (
     <section className="w-full pt-5 md:pt-10 mb-10">
-      <div className="w-full">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+      <div className="w-full max-w-screen-2xl mx-auto">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 md:mb-6">
           Recommended For You
         </h2>
 
@@ -60,9 +60,12 @@ export default function RecommendedList() {
           </p>
         )}
 
-        <div className="grid grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
+        {/* Grid: fully responsive */}
+        <div className="grid grid-cols-2 md:grid-cols-3 md:gap-5 lg:grid-cols-4 xl:grid-cols-5 xl:px-1 gap-3 justify-items-center">
           {loading
-            ? Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)
+            ? Array.from({ length: 10 }).map((_, i) => (
+                <SkeletonCard key={`skeleton-${i}`} />
+              ))
             : itemsToShow.map((item) => {
                 const originalPrice = Number(item.productPrice) || 0;
                 const discountPercent = Number(item.discountPercent) || 0;
@@ -91,11 +94,11 @@ export default function RecommendedList() {
         </div>
 
         {!loading && visibleCount < items.length && (
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 md:mt-10">
             <button
               onClick={handleViewMore}
               disabled={loadingMore}
-              className={`px-6 py-2 mt-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition flex items-center justify-center mx-auto ${
+              className={`px-6 py-2 md:px-8 md:py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition flex items-center justify-center mx-auto ${
                 loadingMore ? "opacity-75 cursor-not-allowed" : ""
               }`}
             >

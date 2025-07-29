@@ -43,15 +43,6 @@ export default function ProductCart({
         removeBookmark(id);
       }
       router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
-      toast("Please login to save favorites", {
-        icon: "🔒",
-        style: {
-          borderRadius: "8px",
-          background: "#fff",
-          color: "#333",
-          padding: "8px 16px",
-        },
-      });
       return;
     }
 
@@ -74,13 +65,7 @@ export default function ProductCart({
 
     if (!session) {
       toast("Please login to add items to cart", {
-        icon: "🔒",
-        style: {
-          borderRadius: "8px",
-          background: "#fff",
-          color: "#333",
-          padding: "8px 16px",
-        },
+        
       });
       router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
       return;
@@ -205,11 +190,7 @@ export default function ProductCart({
             onClick={(e) => handleToggle(e)}
           >
             {bookmarked ? <FaBookmark size={18} /> : <FaRegBookmark size={18} />}
-            {!session && (
-              <span className="absolute hidden group-hover:block -top-8 -left-4 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                Login to save
-              </span>
-            )}
+        
           </div>
         </div>
       </div>

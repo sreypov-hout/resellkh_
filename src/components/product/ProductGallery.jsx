@@ -15,6 +15,11 @@ const isVideoMime = async (url) => {
   }
 };
 
+// Simple skeleton box component
+const SkeletonBox = ({ className }) => (
+  <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
+);
+
 const ProductGallery = ({ product }) => {
   const mediaItems = product?.fileUrls ?? [];
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -31,18 +36,36 @@ const ProductGallery = ({ product }) => {
     if (mediaItems.length > 0) detectMediaTypes();
   }, [mediaItems]);
 
+  // Show skeleton UI while loading media types
   if (mediaTypes.length !== mediaItems.length) {
     return (
-      <div className="text-center text-gray-500 p-8 border rounded-lg">
-        Loading product media...
+      <div className="flex flex-row gap-3 w-full max-w-full overflow-hidden">
+        {/* Thumbnails skeleton (vertical column) */}
+        <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto scrollbar-thin pr-1">
+          {[...Array(Math.min(mediaItems.length, 5))].map((_, i) => (
+            <SkeletonBox
+              key={i}
+              className="w-[64px] h-[64px] sm:w-[94px] sm:h-[94px] rounded-lg"
+            />
+          ))}
+          {/* If no media, show some placeholder */}
+          {mediaItems.length === 0 && (
+            <SkeletonBox className="w-[64px] h-[64px] sm:w-[94px] sm:h-[94px] rounded-lg" />
+          )}
+        </div>
+
+        {/* Main media skeleton */}
+        <div className="flex-grow w-full max-h-[400px] rounded-lg overflow-hidden border border-gray-200 relative">
+          <SkeletonBox className="w-full h-full rounded-lg" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4">
-      {/* Thumbnails */}
-      <div className="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-x-visible no-scrollbar px-1 sm:px-0">
+    <div className="flex flex-row gap-3 w-full max-w-full overflow-hidden">
+      {/* Thumbnails - always vertical */}
+      <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto scrollbar-thin pr-1">
         {mediaItems.map((src, index) => {
           const isVideo = mediaTypes[index] === 'video';
 
@@ -51,7 +74,7 @@ const ProductGallery = ({ product }) => {
               key={index}
               onClick={() => setSelectedIndex(index)}
               aria-current={selectedIndex === index ? 'true' : undefined}
-              className={`relative w-[94px] h-[94px] rounded-lg overflow-hidden border transition-all flex-shrink-0 ${
+              className={`relative w-[84px] h-[64px] sm:w-[94px] sm:h-[94px] rounded-lg overflow-hidden border transition-all ${
                 selectedIndex === index
                   ? 'border-orange-500 ring-2 ring-orange-500'
                   : 'border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500'
@@ -90,8 +113,8 @@ const ProductGallery = ({ product }) => {
         })}
       </div>
 
-      {/* Main Display */}
-      <div className="flex-grow w-full max-h-[400px] rounded-lg overflow-hidden border border-gray-200 relative">
+      {/* Main Media Display */}
+      <div className="flex-grow w-full h-[300px] rounded-lg overflow-hidden border border-gray-200 relative">
         {mediaTypes[selectedIndex] === 'video' ? (
           <video
             src={mediaItems[selectedIndex]}
@@ -110,7 +133,7 @@ const ProductGallery = ({ product }) => {
               src={mediaItems[selectedIndex]}
               alt="Main product image"
               fill
-              sizes="(max-width: 640px) 100vw, 50vw"
+              sizes="(max-width: 640px) 100vw, 75vw"
               className="object-cover"
               priority
             />

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import ProfileBanner from "@/components/profile/ProfileBanner";
 import ProfileTabs from "@/components/profile/ProfileTabs";
-import { decryptId } from "@/utils/encryption"; // ✅ Import decryption util
+import { decryptId } from "@/utils/encryption";
 
 export default function SellerProfileClient({ sellerId }) {
   const searchParams = useSearchParams();
@@ -16,10 +16,9 @@ export default function SellerProfileClient({ sellerId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ Decrypt once, memoized
   const numericSellerId = useMemo(() => {
     try {
-      const decoded = decodeURIComponent(sellerId); // Decode URL-safe string
+      const decoded = decodeURIComponent(sellerId);
       const decrypted = decryptId(decoded);
       console.log("Encrypted sellerId from URL:", sellerId);
       console.log("Decrypted numeric sellerId:", decrypted);
@@ -42,7 +41,6 @@ export default function SellerProfileClient({ sellerId }) {
     async function fetchData() {
       setLoading(true);
       try {
-        // ✅ Use decrypted sellerId in both API calls
         const profileRes = await fetch(
           `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/profile/${numericSellerId}`,
           {
@@ -91,9 +89,9 @@ export default function SellerProfileClient({ sellerId }) {
     fetchData();
   }, [numericSellerId]);
 
-  if (loading) return <div className="p-8 text-center">Loading profile...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
-  if (!userData) return <div className="p-8 text-center">Profile not found</div>;
+  if (loading) return <div className="p-6 text-center sm:p-8">Loading profile...</div>;
+  if (error) return <div className="p-6 text-center text-red-500 sm:p-8">{error}</div>;
+  if (!userData) return <div className="p-6 text-center sm:p-8">Profile not found</div>;
 
   return (
     <div className="max-w-full px-[7%] py-4 mx-auto">

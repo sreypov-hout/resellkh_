@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import DraftCard from './DraftCard';
-import { useSession } from 'next-auth/react';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import DraftCard from "./DraftCard";
+import { useSession } from "next-auth/react";
 
 export default function ManageDrafts() {
   const [drafts, setDrafts] = useState([]);
@@ -13,11 +13,10 @@ export default function ManageDrafts() {
 
   useEffect(() => {
     const fetchDrafts = async () => {
-      // Set initial loading state while session is being determined
       setLoading(true);
       setError(null);
 
-      if (status === 'authenticated') {
+      if (status === "authenticated") {
         try {
           const token = session.accessToken;
           const userId = session.user.id;
@@ -31,49 +30,54 @@ export default function ManageDrafts() {
             {
               headers: {
                 Authorization: `Bearer ${token}`,
-                Accept: 'application/json',
+                Accept: "application/json",
               },
             }
           );
-          
-          // Handle successful response, even if payload is empty
-          const draftsData = res.data?.payload || [];
-          const activeDrafts = draftsData.filter(d => d?.productStatus === "DRAFT");
-          setDrafts(activeDrafts);
 
+          const draftsData = res.data?.payload || [];
+          const activeDrafts = draftsData.filter(
+            (d) => d?.productStatus === "DRAFT"
+          );
+          setDrafts(activeDrafts);
         } catch (err) {
-          console.error('Fetch drafts error:', err);
-          
-          // Improved Error Handling:
-          // A 404 error means the user has no drafts, which is not an error condition.
-          // We will only set an error message for other, unexpected errors.
+          console.error("Fetch drafts error:", err);
           if (err.response?.status !== 404) {
             setError(
               err.response?.data?.message ||
-              err.message ||
-              'Failed to load drafts. Please try again.'
+                err.message ||
+                "Failed to load drafts. Please try again."
             );
           }
-           // If it is a 404, we do nothing, and the drafts will correctly remain an empty array.
-           setDrafts([]); 
+          setDrafts([]);
         } finally {
           setLoading(false);
         }
-      } else if (status === 'unauthenticated') {
+      } else if (status === "unauthenticated") {
         setLoading(false);
-        setError('You must be logged in to manage drafts.');
+        setError("You must be logged in to manage drafts.");
         setDrafts([]);
       }
-      // If status is 'loading', we simply wait, the loading state is already true.
     };
 
     fetchDrafts();
   }, [session, status]);
 
   if (loading) {
+    // Skeleton loader grid matching draft cards
     return (
       <section className="p-4">
-        <p className="text-gray-600">Loading drafts...</p>
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-[17px] font-semibold animate-pulse bg-gray-300 rounded w-40 h-6"></p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="h-48 bg-gray-300 rounded-lg animate-pulse"
+            ></div>
+          ))}
+        </div>
       </section>
     );
   }
@@ -91,7 +95,7 @@ export default function ManageDrafts() {
       <div className="flex items-center justify-between mb-4">
         <p className="text-[17px] font-semibold">Manage Drafts</p>
       </div>
-      
+
       {drafts.length === 0 ? (
         <p className="text-gray-600">You don't have any drafts saved yet.</p>
       ) : (

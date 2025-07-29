@@ -50,7 +50,6 @@ export default function EditProfilePage({ sellerId }) {
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
 
-    // Adjust age if birthday hasn't occurred this year
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
@@ -64,7 +63,7 @@ export default function EditProfilePage({ sellerId }) {
       return `/profile/${encodeURIComponent(encrypted)}`;
     } catch (error) {
       console.error("Encryption failed:", error);
-      return `/profile/${sellerId}`; // Fallback to unencrypted
+      return `/profile/${sellerId}`;
     }
   };
 
@@ -79,7 +78,7 @@ export default function EditProfilePage({ sellerId }) {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/profile/${sellerId}`, {
+        const res = await fetch(`https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/profile/${sellerId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -136,7 +135,6 @@ export default function EditProfilePage({ sellerId }) {
     return regex.test(cleanUsername);
   };
 
-  // Merged handleChange function
   const handleChange = (field) => (e) => {
     const value = e?.target?.value ?? e;
     setFormData(prev => ({
@@ -145,7 +143,6 @@ export default function EditProfilePage({ sellerId }) {
       ...(field === "location" ? { address: value } : {})
     }));
 
-    // Validate age for birthday field
     if (field === 'birthday' && value) {
       const age = calculateAge(value);
       if (age < 12) {
@@ -226,7 +223,7 @@ export default function EditProfilePage({ sellerId }) {
     const toastId = toast.loading("Saving profile...");
 
     try {
-      const res = await fetch("https://comics-upset-dj-clause.trycloudflare.com/api/v1/profile/edit", {
+      const res = await fetch("https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/profile/edit", {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
         body: formDataToSend,
@@ -271,13 +268,14 @@ export default function EditProfilePage({ sellerId }) {
   if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
 
   return (
-    <div className="mx-auto px-[7%] mb-20">
-      <div className="relative w-full h-[180px] rounded-2xl overflow-hidden group">
+    <div className="mx-auto px-4 sm:px-[7%] mb-20">
+      {/* Cover Image Section */}
+      <div className="relative w-full h-[150px] sm:h-[180px] rounded-2xl overflow-hidden group">
         <Image
           src={selectedCoverImage}
           alt="Cover"
           fill
-          className="object-cover w-[100%] h-[100%] rounded-2xl"
+          className="object-cover w-full h-full rounded-2xl"
           priority
         />
         <input
@@ -291,35 +289,37 @@ export default function EditProfilePage({ sellerId }) {
         <div className="absolute top-3 right-3 flex gap-2">
           <button
             onClick={() => coverInputRef.current?.click()}
-            className="bg-white/80 hover:bg-white text-sm px-3 py-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+            className="bg-white/80 hover:bg-white text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
           >
             Edit Cover
           </button>
         </div>
       </div>
 
-      <div className="w-full px-6 -mt-20 relative z-10">
-        <div className="bg-white rounded-xl shadow px-6 pt-6">
+      {/* Main Content */}
+      <div className="w-full px-2 sm:px-6 -mt-16 sm:-mt-20 relative z-10">
+        <div className="bg-white rounded-xl shadow px-4 sm:px-6 pt-4 sm:pt-6">
           <h1 className="text-lg font-bold mb-1">Edit Profile</h1>
 
-          <div className="flex items-center text-gray-500 mb-5">
+          <div className="flex items-center text-gray-500 text-sm mb-4 sm:mb-5">
             <Link href={getEncryptedProfileUrl()} className="hover:text-black">Profile</Link>
             <span className="mx-2">&gt;</span>
             <span className="text-orange-500">Edit profile</span>
           </div>
 
-          <div className="flex items-center gap-6 mb-10 mx-auto max-w-4xl">
-            <div className="relative ">
+          {/* Profile Image and Bio */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-6 sm:mb-10 mx-auto max-w-4xl">
+            <div className="relative">
               <Image
                 src={selectedImage}
                 alt="avatar"
-                width={120}
-                height={120}
-                className="rounded-full object-cover w-[120px] h-[120px]"
+                width={96}
+                height={96}
+                className="rounded-full object-cover w-24 h-24 sm:w-[120px] sm:h-[120px]"
               />
             </div>
-            <div>
-              <p className="text-sm text-gray-700 mb-2">{formData.bio}</p>
+            <div className="w-full sm:w-auto text-center sm:text-left">
+              <p className="text-sm text-gray-700 mb-2 line-clamp-2">{formData.bio}</p>
               <input
                 type="file"
                 ref={fileInputRef}
@@ -337,6 +337,7 @@ export default function EditProfilePage({ sellerId }) {
             </div>
           </div>
 
+          {/* Form Sections */}
           <div className="max-w-4xl mx-auto">
             <Section title="Public profile">
               <Input label="Username" value={formData.username} onChange={handleChange("username")} />
@@ -352,15 +353,6 @@ export default function EditProfilePage({ sellerId }) {
                 onChange={handleChange("location")}
               />
             </Section>
-
-            {/* <Section title="Business address">
-              <Link href="/location" className="flex items-center text-orange-500 font-medium">
-                <div className="w-6 h-6 bg-orange-500 rounded-full text-white flex items-center justify-center mr-2">
-                  <Move className="w-4 h-4" />
-                </div>
-                Add Location
-              </Link>
-            </Section> */}
 
             <Section title="Telegram Username">
               <Input
@@ -386,7 +378,7 @@ export default function EditProfilePage({ sellerId }) {
             <Section title="Private Information">
               <p className="text-xs text-gray-500 mb-4 flex items-center gap-1">
                 <svg
-                  className="inline-block w-8 md:w-5 lg:w-5"
+                  className="inline-block w-5"
                   viewBox="0 0 27 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -417,10 +409,9 @@ export default function EditProfilePage({ sellerId }) {
                 max={new Date().toISOString().split('T')[0]}
               />
               {ageError && <p className="text-red-500 text-sm">{ageError}</p>}
-
             </Section>
 
-            <div className="flex justify-end -mt-7 py-10">
+            <div className="flex justify-end py-6 sm:py-10">
               <button
                 onClick={handleSave}
                 disabled={ageError || !formData.birthday}
@@ -458,12 +449,11 @@ function Input({ label, value, onChange, placeholder = "", type = "text", ...res
         onChange={onChange}
         placeholder={placeholder}
         className="w-full border h-[45px] rounded-[24px] border-gray-900 px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
-        {...rest} // <-- support additional props like max
+        {...rest}
       />
     </div>
   );
 }
-
 
 function Textarea({ value, onChange, maxLength, placeholder = "" }) {
   return (

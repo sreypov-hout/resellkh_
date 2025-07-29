@@ -21,7 +21,7 @@ export default function DraftCard({ draft }) {
     <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-200 bg-white flex flex-col">
       {/* Render the Link and Image only if a valid draftId exists */}
       {draftId ? (
-        <Link href={`/sell/new?draftId=${draftId}`} className="relative w-full aspect-[4/5] h-[260px] rounded-t-2xl overflow-hidden">
+        <Link href={`/sell/new?draftId=${draftId}`} className="relative w-full aspect-[4/5] h-[230px] rounded-t-2xl overflow-hidden">
           <Image
             src={imageUrl}
             alt={draft.productName || 'Draft Image'}

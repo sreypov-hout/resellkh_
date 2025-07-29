@@ -20,8 +20,8 @@ export default async function ProductPage({ params }) {
 
   let productId;
   try {
-    const decoded = decodeURIComponent(encryptedProductId); // decode safe URL
-    productId = decryptId(decoded); // decrypt
+    const decoded = decodeURIComponent(encryptedProductId);
+    productId = decryptId(decoded);
   } catch (err) {
     console.error("Failed to decrypt product ID:", err);
     return <div className="text-center py-20 text-red-500">Invalid or corrupted product ID.</div>;
@@ -39,11 +39,11 @@ export default async function ProductPage({ params }) {
   }
 
   return (
-    <div className="mx-auto px-[7%] py-4 bg-white text-black">
+    <div className="mx-auto px-4 sm:px-6 lg:px-20 py-6 bg-white text-black max-w-screen-2xl">
       {/* Breadcrumb */}
-      <div className="flex items-center text-gray-500 mb-8">
+      <div className="flex items-center text-gray-500 mb-6 text-sm sm:text-base">
         <Link href="/" className="hover:text-black">Home</Link>
-        <svg className="mx-1" width="20" height="20" viewBox="0 0 20 21" fill="none">
+        <svg className="mx-2" width="16" height="16" viewBox="0 0 20 21" fill="none">
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -51,28 +51,30 @@ export default async function ProductPage({ params }) {
             fill="#343A40"
           />
         </svg>
-        <span className="text-orange-500 cursor-default">Detail</span>
+        <span className="text-orange-500">Detail</span>
       </div>
 
       {/* Product Gallery and Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-10">
         <ProductGallery product={productData} />
         <ProductDetails product={productData} />
       </div>
 
       <ContactSellerHeader />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-        <div>
-          <SellerInfo sellerId={productData.userId} />
-        </div>
-        <div className="lg:col-span-2">
-          <Reviews
-            sellerId={productData.userId}
-            productId={productData.productId}
-          />
-        </div>
-      </div>
+      {/* Seller Info and Reviews */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+  <div className="lg:col-span-1">
+    <SellerInfo sellerId={productData.userId} />
+  </div>
+  <div className="lg:col-span-2">
+    <Reviews
+      sellerId={productData.userId}
+      productId={productData.productId}
+    />
+  </div>
+</div>
+
 
       <MoreFromSeller sellerId={productData.userId} />
       <OtherProducts categoryId={productData.mainCategoryId} />

@@ -94,7 +94,7 @@ export default function SellerInfo({ sellerId }) {
       >
         <div className="w-12 h-12 bg-gray-300 rounded-full overflow-hidden">
           <Image
-            src={user.profileImage || '/default.jpg'}
+            src={user.profileImage || 'https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm'}
             alt="Seller"
             width={48}
             height={48}

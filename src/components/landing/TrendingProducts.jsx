@@ -59,12 +59,13 @@ export default function TrendingNow() {
 
   return (
     <section className="w-full pt-[50px]">
-      <div className="w-full">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-[15] mb-2">
+      <div className="w-full sm:px-6 lg:px-8">
+        {/* Header with arrows */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
           <h2 className="text-xl sm:text-xl font-bold text-gray-900">
             Trending now
           </h2>
-          <div className="flex gap-2 self-start sm:self-auto">
+          <div className="flex gap-2 self-end sm:self-auto">
             <button
               onClick={() => scroll("left")}
               className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
@@ -80,9 +81,10 @@ export default function TrendingNow() {
           </div>
         </div>
 
+        {/* Scrollable product cards */}
         <div
           ref={scrollRef}
-          className="flex gap-[26px] overflow-x-auto scroll-smooth no-scrollbar px-[2px] py-1"
+          className="flex gap-[20px] sm:gap-[24px] md:gap-[26px] overflow-x-auto scroll-smooth no-scrollbar pb-1"
         >
           {loading
             ? Array.from({ length: 6 }).map((_, index) => (

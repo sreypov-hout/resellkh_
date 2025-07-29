@@ -223,8 +223,8 @@ export default function ListingNearMePage() {
       </div>
 
       <div className="px-[7%]">
-        <div className="p-4 md:p-6">
-          <div className="p-4 rounded-[24px] border border-gray-200">
+        <div className="p-2 mt-2 md:p-6">
+          <div className="p-3 rounded-[24px] border border-gray-200">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <h2 className="text-sm md:text-lg lg:text-lg font-semibold text-gray-800">

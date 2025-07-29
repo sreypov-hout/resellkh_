@@ -46,7 +46,7 @@ const MoreFromSeller = ({ sellerId }) => {
           <h2 className="text-xl font-bold text-gray-900 mb-3">
             More from this seller
           </h2>
-          <div className="flex gap-2 self-start sm:self-auto">
+          <div className="flex gap-2 self-end sm:self-auto">
             <button
               onClick={() => scroll('left')}
               className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
