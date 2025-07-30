@@ -19,7 +19,10 @@ export default function PricingInput({
   const [rawInputPrice, setRawInputPrice] = useState("");
 
   useEffect(() => {
-    if (price === "" || price === null || isNaN(price)) {
+    const safePrice =
+      price === null || price === undefined || isNaN(price) ? "" : price;
+
+    if (safePrice === "") {
       setRawInputPrice("");
       setDisplayValue("");
       setPriceError("");
@@ -29,12 +32,12 @@ export default function PricingInput({
     let valueToSetAsRawInput;
     let valueToDisplay;
     if (currency === "USD") {
-      valueToSetAsRawInput = Number(price);
+      valueToSetAsRawInput = Number(safePrice);
       valueToDisplay = Number.isInteger(valueToSetAsRawInput)
         ? String(valueToSetAsRawInput)
         : valueToSetAsRawInput.toFixed(2);
     } else {
-      const khrValue = Math.round(price * EXCHANGE_RATE);
+      const khrValue = Math.round(safePrice * EXCHANGE_RATE);
       valueToSetAsRawInput = khrValue;
       valueToDisplay = khrValue.toString();
     }
@@ -49,7 +52,7 @@ export default function PricingInput({
         Math.ceil((valueToSetAsRawInput * 100) / EXCHANGE_RATE) / 100;
       setPrice(usdValueForParent);
     }
-  }, [price, currency]);
+  }, [price, currency, setPrice]);
 
   const handleInputChange = (e) => {
     const newValue = e.target.value;
@@ -96,6 +99,10 @@ export default function PricingInput({
 
     if (currency === "USD") {
       setPrice(potentialNumericValue);
+    } else {
+      const usdValueForParent =
+        Math.ceil((potentialNumericValue * 100) / EXCHANGE_RATE) / 100;
+      setPrice(usdValueForParent);
     }
   };
 
@@ -103,17 +110,22 @@ export default function PricingInput({
     setCurrency(newCurrency);
     setPriceError("");
 
-    let convertedRawInputPrice;
-    let convertedDisplayValue;
+    let convertedRawInputPrice = "";
+    let convertedDisplayValue = "";
 
-    if (rawInputPrice === "") {
-    } else if (newCurrency === "USD") {
-      convertedRawInputPrice =
-        Math.ceil((Number(rawInputPrice) * 100) / EXCHANGE_RATE) / 100;
-    } else {
-      convertedRawInputPrice = Math.round(
-        Number(rawInputPrice) * EXCHANGE_RATE
-      );
+    if (rawInputPrice !== "") {
+      if (newCurrency === "USD") {
+        convertedRawInputPrice =
+          Math.ceil((Number(rawInputPrice) * 100) / EXCHANGE_RATE) / 100;
+        convertedDisplayValue = Number.isInteger(convertedRawInputPrice)
+          ? String(convertedRawInputPrice)
+          : convertedRawInputPrice.toFixed(2);
+      } else {
+        convertedRawInputPrice = Math.round(
+          Number(rawInputPrice) * EXCHANGE_RATE
+        );
+        convertedDisplayValue = convertedRawInputPrice.toString();
+      }
     }
 
     setRawInputPrice(convertedRawInputPrice);
@@ -121,9 +133,8 @@ export default function PricingInput({
 
     if (convertedRawInputPrice !== "") {
       if (newCurrency === "USD") {
-        setPrice(convertedRawInputPrice); // Already USD
+        setPrice(convertedRawInputPrice);
       } else {
-        // KHR
         const usdValueForParent =
           Math.ceil((Number(convertedRawInputPrice) * 100) / EXCHANGE_RATE) /
           100;
@@ -134,6 +145,8 @@ export default function PricingInput({
     }
   };
 
+  const safeDiscount =
+    discount === null || discount === undefined ? "" : String(discount);
   const discountInUSD =
     price && discount ? (price * Number(discount)) / 100 : 0;
   const discountDisplay =
@@ -158,7 +171,6 @@ export default function PricingInput({
               value={displayValue}
               onChange={handleInputChange}
               placeholder={currency === "USD" ? "0.00" : "0"}
-              //
               className={`w-full h-[48px] pt-4 pl-10 pr-4 py-3 rounded-2xl bg-[#f1edef] text-black placeholder:text-gray-800 focus:outline-none ${
                 priceError ? "border-2 border-red-500" : ""
               }`}
@@ -206,14 +218,12 @@ export default function PricingInput({
             <input
               type="text"
               inputMode="decimal"
-              value={discount}
+              value={safeDiscount}
               onChange={(e) => {
                 const value = e.target.value;
                 if (
                   /^(?:100(?:\.0{1,2})?|\d{1,2}(?:\.\d{1,2})?)$/.test(value) ||
                   value === ""
-                  // /^\d{0,3}(\.\d{0,2})?$/.test(value) &&
-                  // Number(value) <= 100
                 ) {
                   setDiscount(value);
                 }
@@ -225,10 +235,10 @@ export default function PricingInput({
 
           <div
             className={`h-[48px] px-4 py-3 min-w-[100px] rounded-2xl border text-sm font-medium text-center flex items-center justify-center ${
-              Number(discount) === 100 ? "text-green-500" : "text-black"
+              Number(safeDiscount) === 100 ? "text-green-500" : "text-black"
             }`}
           >
-            {Number(discount) === 100
+            {Number(safeDiscount) === 100
               ? "Free"
               : `- ${discountDisplay} ${currency === "USD" ? "$" : "៛"}`}
           </div>
