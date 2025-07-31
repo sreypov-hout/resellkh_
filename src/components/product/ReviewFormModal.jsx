@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaStar } from "react-icons/fa";
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 // ReviewFormModal component
 export const ReviewFormModal = ({ isOpen, onClose, onSubmit, userId, token }) => {
   const [rating, setRating] = useState(0);
@@ -18,7 +18,7 @@ export const ReviewFormModal = ({ isOpen, onClose, onSubmit, userId, token }) =>
       try {
         if (!userId || !token) return;
 
-        const res = await fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/profile/${userId}`, {
+        const res = await fetch(`${API_BASE_URL}/profile/${userId}`, {
           headers: {
             Accept: '*/*',
             Authorization: `Bearer ${token}`,

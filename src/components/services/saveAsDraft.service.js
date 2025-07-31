@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const API_URL = "https://comics-upset-dj-clause.trycloudflare.com/api/v1/products";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const saveAsDraft = async (formData, accessToken) => {
   // --- FIX #1: Add a check for the access token ---
@@ -14,7 +13,7 @@ export const saveAsDraft = async (formData, accessToken) => {
   }
 
   try {
-    const response = await axios.post(`${API_URL}/save-as-draft`, formData, {
+    const response = await axios.post(`${API_BASE_URL}/products/save-as-draft`, formData, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "multipart/form-data",

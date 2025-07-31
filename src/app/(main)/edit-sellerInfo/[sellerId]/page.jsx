@@ -128,7 +128,7 @@ export default function SellerEditForm() {
     };
     
     try {
-      const response = await fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/sellers/${sellerId}`, {
+      const response = await fetch(`https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/sellers/${sellerId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
         body: JSON.stringify(payload),

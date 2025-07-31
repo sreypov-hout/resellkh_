@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://comics-upset-dj-clause.trycloudflare.com/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const getProductCountBySellerId = async (sellerId, token) => {
   try {

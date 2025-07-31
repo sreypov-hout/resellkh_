@@ -1,28 +1,22 @@
-// ====== src/components/sell/DealMethod.js ======
-'use client';
+"use client";
 
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Move } from "lucide-react";
-import dynamic from 'next/dynamic'; // Import dynamic for client-side component loading
+import dynamic from "next/dynamic";
 import { toast } from "react-hot-toast";
-import axios from "axios"; // Assuming axios is used or might be useful
 
-// Dynamically import MapPicker to ensure it's only rendered on the client side
-const MapPicker = dynamic(
-  () => import('./MapPicker'), // Path to your MapPicker component
-  { ssr: false } // This is crucial: disable server-side rendering for MapPicker
-);
+const MapPicker = dynamic(() => import("./MapPicker"), { ssr: false });
+
+const CAMBODIA_BOUNDS = {
+  minLat: 9.5,
+  maxLat: 15.0,
+  minLng: 102.0,
+  maxLng: 108.0,
+};
 
 const DealMethod = forwardRef(
   (
-    {
-      location,
-      setLocation,
-      telegram,
-      setTelegram,
-      setLatitude,
-      setLongitude,
-    },
+    { location, setLocation, telegram, setTelegram, setLatitude, setLongitude },
     ref
   ) => {
     const [mapVisible, setMapVisible] = useState(false);
@@ -30,89 +24,108 @@ const DealMethod = forwardRef(
     const [telegramError, setTelegramError] = useState("");
 
     const handleLocationPick = async ({ lat, lng }) => {
+      if (
+        lat < CAMBODIA_BOUNDS.minLat ||
+        lat > CAMBODIA_BOUNDS.maxLat ||
+        lng < CAMBODIA_BOUNDS.minLng ||
+        lng > CAMBODIA_BOUNDS.maxLng
+      ) {
+        toast.error("Please select a location within Cambodia.");
+        setMapVisible(false);
+        return;
+      }
+
       setLatitude(lat);
       setLongitude(lng);
 
       try {
-        const token = localStorage.getItem('token'); // Get token for backend authentication
-
-        // FIX: Corrected the URL to include the full backend path
+        const token = localStorage.getItem("token");
         const reverseGeocodeUrl = `/api/reverse-geocode?lat=${lat}&lon=${lng}`;
-        
+
         const res = await fetch(reverseGeocodeUrl, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         });
 
-        if (!res.ok) { // Check for non-2xx response status
-          const errorText = await res.text(); // Get raw response text for debugging
-          console.error(`Backend Reverse Geocoding Error: ${res.status} ${res.statusText} - ${errorText}`);
-          // Provide specific error message based on status
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error(
+            `Backend Reverse Geocoding Error: ${res.status} ${res.statusText} - ${errorText}`
+          );
           if (res.status === 401) {
-            toast.error("Unauthorized: Please log in to use location services.");
-          } else if (res.status === 404) {
-            toast.error("Location service not found on server."); // Specific toast for 404
+            toast.error(
+              "Unauthorized: Please log in to use location services."
+            );
           } else {
-            toast.error("Failed to get address for selected location. Please try again or enter manually.");
+            toast.error("Failed to get address for selected location.");
           }
-          throw new Error(`Reverse geocoding failed: ${res.status} ${res.statusText}`);
+          throw new Error(`Reverse geocoding failed: ${res.status}`);
         }
 
-        const data = await res.json(); // Parse JSON response
-        setLocation(data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`); 
+        const data = await res.json();
+        setLocation(
+          data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+        );
       } catch (error) {
-        console.error("Error fetching address (reverse geocoding):", error);
-        // Only show generic toast if specific one wasn't shown above
-        if (!error.message.includes("Reverse geocoding failed:")) {
-           toast.error("Failed to get address for selected location. Please try again or enter manually.");
-        }
-        setLocation(`${lat.toFixed(6)}, ${lng.toFixed(6)}`); // Fallback to coordinates
+        console.error("Error fetching address:", error);
+        setLocation(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       } finally {
-        setMapVisible(false); // Hide map after location selection attempt
+        setMapVisible(false);
       }
     };
 
     const handleTelegramChange = (e) => {
-      let value = e.target.value.trim();
-      if (value.startsWith("@")) {
-        value = value.substring(1);
-      }
+      const value = e.target.value;
       setTelegramInput(value);
-      if (telegramError) {
-        setTelegramError("");
-      }
+      if (telegramError) setTelegramError("");
     };
 
     useImperativeHandle(ref, () => ({
       validateTelegram: () => {
-        const username = telegramInput.trim();
+        let username = telegramInput.trim();
+
+        // Remove @ if present
+        if (username.startsWith("@")) {
+          username = username.substring(1);
+        }
+
+        // If empty, clear and return valid empty string
+        if (!username) {
+          setTelegram("");
+          setTelegramError("");
+          return "";
+        }
+
+        // Validate username format
         const isValid = /^[a-zA-Z0-9_]{5,32}$/.test(username);
 
-        if (username && !isValid) {
-          setTelegramError('Invalid Telegram username. Must be 5–32 characters and contain only letters, numbers, or underscores.');
-          toast.error('Invalid Telegram username. Please check format.');
-          return false;
-        }
-        
-        if (!username) {
-            setTelegram("");
-            setTelegramError("");
-            return true;
+        if (!isValid) {
+          toast.error("Invalid Telegram username.");
+          return null;
         }
 
-        setTelegram(`https://t.me/${username}`);
+        // Format as full URL and update state
+        const telegramUrl = `https://t.me/${username}`;
+        setTelegram(telegramUrl);
         setTelegramError("");
-        return true;
+        return telegramUrl;
       },
     }));
 
+    // Sync parent telegram prop to local input
     useEffect(() => {
-      if (telegram && telegram.startsWith("https://t.me/")) {
-        const username = telegram.replace("https://t.me/", "");
-        setTelegramInput(username);
-      } else if (telegram === "") {
+      if (telegram) {
+        if (telegram.startsWith("https://t.me/")) {
+          const username = telegram.replace("https://t.me/", "");
+          setTelegramInput(username);
+        } else if (telegram.startsWith("@")) {
+          setTelegramInput(telegram.substring(1));
+        } else {
+          setTelegramInput(telegram);
+        }
+      } else {
         setTelegramInput("");
       }
     }, [telegram]);
@@ -121,10 +134,8 @@ const DealMethod = forwardRef(
       <div className="p-5 border rounded-3xl bg-white space-y-4">
         <p className="font-semibold text-[17px]">Deal Method</p>
 
-        {/* Meet-up Location Field */}
         <div>
           <p className="text-sm text-gray-700 mb-1">Meet-up</p>
-
           {location && !mapVisible ? (
             <div className="space-y-2">
               <div className="mt-2 w-full rounded-2xl bg-gray-100 px-5 py-3 text-gray-800">
@@ -152,35 +163,33 @@ const DealMethod = forwardRef(
               </button>
             )
           )}
-
-          {/* Map picker popup: Dynamically loaded to prevent SSR errors */}
-          {mapVisible && (
-            <MapPicker
-              onLocationSelect={(latlng) => {
-                handleLocationPick(latlng);
-              }}
-              // Add initialCoords only if you have initial latitude/longitude state in DealMethod
-              // initialCoords={{ lat: latitude || 11.5564, lng: longitude || 104.9282 }}
-            />
-          )}
+          {mapVisible && <MapPicker onLocationSelect={handleLocationPick} />}
         </div>
 
-        {/* Telegram Field */}
         <div>
-          <label htmlFor="telegramInput" className="block text-sm font-medium text-gray-700 mb-1">
-              Telegram (username only)
+          <label
+            htmlFor="telegramInput"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Telegram (username only)
           </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black">@</span>
+            <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black">
+              @
+            </span>
             <input
               type="text"
               id="telegramInput"
               placeholder="username"
               value={telegramInput}
               onChange={handleTelegramChange}
-              className={`w-full pl-8 rounded-2xl bg-[#f1edef] px-5 py-3 placeholder-gray-500 text-gray-800 focus:outline-none ${telegramError ? 'border-red-500 border' : ''}`}
+              className={`w-full pl-8 rounded-2xl bg-[#f1edef] px-5 py-3 placeholder-gray-500 text-gray-800 focus:outline-none ${
+                telegramError ? "border-red-500 border" : ""
+              }`}
             />
-            {telegramError && <p className="text-red-500 text-xs mt-1">{telegramError}</p>}
+            {telegramError && (
+              <p className="text-red-500 text-xs mt-1">{telegramError}</p>
+            )}
           </div>
         </div>
       </div>
@@ -188,4 +197,5 @@ const DealMethod = forwardRef(
   }
 );
 
+DealMethod.displayName = "DealMethod";
 export default DealMethod;

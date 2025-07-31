@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ProductCart from '../domain/ProductCart';
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const PRODUCTS_PER_LOAD = 20;
 
 const OtherProducts = () => {
@@ -14,7 +14,7 @@ const OtherProducts = () => {
     const fetchProducts = async () => {
       try {
         const res = await fetch(
-          'https://comics-upset-dj-clause.trycloudflare.com/api/v1/products'
+          `${API_BASE_URL}/products`
         );
         if (!res.ok) throw new Error('Failed to fetch products');
 

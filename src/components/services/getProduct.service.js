@@ -1,6 +1,7 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const getProductById = async (productId) => {
   try {
-    const response = await fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/${productId}`, {
+    const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

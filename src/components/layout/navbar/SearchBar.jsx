@@ -8,7 +8,7 @@ const ImageScanModal = dynamic(() => import('./ImageScanModal'), {
   ssr: false,
 });
 
-const API_URL = 'https://comics-upset-dj-clause.trycloudflare.com/api/v1/products';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
@@ -47,11 +47,7 @@ export default function SearchBar() {
       setResults([]);
       setError(null);
 
-      // --- FIX #1: THE FETCH ERROR ---
-      // We now call the base API_URL without adding "?search=".
-      // This matches the working code in your ResultSearchPage and should prevent the "Failed to fetch" error.
-      // All filtering will be done on the client-side below.
-      fetch(API_URL, { signal })
+      fetch(`${API_BASE_URL}/products`, { signal })
         .then((res) => {
           if (!res.ok) {
             throw new Error('Network response was not ok');
@@ -59,14 +55,25 @@ export default function SearchBar() {
           return res.json();
         })
         .then((data) => {
-          // --- FIX #2: THE SEARCH LOGIC ---
-          // The filter now uses .startsWith() to find products that BEGIN WITH the query text.
+          // 1. Filter products that START WITH the query text.
           const filteredData = data.payload ? data.payload.filter(product =>
             product.productName.toLowerCase().startsWith(query.toLowerCase())
           ) : [];
+          
+          // ✨ 2. FIX: Remove duplicates from the filtered list
+          const seenNames = new Set();
+          const uniqueFilteredData = filteredData.filter(product => {
+            const lowerCaseName = product.productName.toLowerCase();
+            if (seenNames.has(lowerCaseName)) {
+                return false; // Exclude if name is already seen
+            } else {
+                seenNames.add(lowerCaseName);
+                return true; // Include if name is new
+            }
+          });
 
-          // Limit results to 10 items for the dropdown
-          const limitedResults = filteredData.slice(0, 10);
+          // 3. Limit the UNIQUE results to 10 items for the dropdown
+          const limitedResults = uniqueFilteredData.slice(0, 10);
           setResults(limitedResults);
         })
         .catch((err) => {

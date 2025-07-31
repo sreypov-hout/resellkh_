@@ -1,15 +1,15 @@
-// src/services/paymentsummary.service.js
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export const getPaymentReceiptByOrderId = async (orderId, token) => {
+export const getProductIdByNotificationId = async (notificationId, token) => {
+  // Renamed parameters and function for clarity
   try {
     const response = await fetch(
-      `${API_BASE_URL}/orders/seller/receipt/${orderId}`,
+      `${API_BASE_URL}/notifications/getproductidbynotid/${notificationId}`, // Use notificationId here
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          accept: "*/*",
+          Accept: "*/*",
           Authorization: `Bearer ${token}`,
         },
       }
@@ -34,11 +34,10 @@ export const getPaymentReceiptByOrderId = async (orderId, token) => {
     }
 
     const data = await response.json();
-    // IMPORTANT: Adjust 'data.payload' or 'data.orders' based on your actual API response structure
-    // If your API directly returns an array of payment records, use 'data || []'
-    return data.payload || data.orders || data || [];
+    // Here, `data` is the number (product ID), so just return it
+    return data;
   } catch (error) {
-    console.error("Error fetching payment summary:", error);
+    console.error("Error fetching product ID by notification ID:", error); // Updated error message
     throw error;
   }
 };

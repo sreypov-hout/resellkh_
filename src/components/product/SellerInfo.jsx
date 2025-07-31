@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { FaStar } from 'react-icons/fa';
 import { encryptId } from '@/utils/encryption';
 
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export default function SellerInfo({ sellerId }) {
   const [user, setUser] = useState(null);
   const [ratingData, setRatingData] = useState(null);
@@ -48,11 +50,11 @@ export default function SellerInfo({ sellerId }) {
         };
 
         const [profileRes, ratingRes] = await Promise.all([
-          fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/profile/${sellerId}`, { 
+          fetch(`${API_BASE_URL}/profile/${sellerId}`, { 
             method: 'GET', 
             headers 
           }),
-          fetch(`https://comics-upset-dj-clause.trycloudflare.com/api/v1/ratings/summary/${sellerId}`, { 
+          fetch(`${API_BASE_URL}/ratings/summary/${sellerId}`, { 
             method: 'GET', 
             headers 
           })
@@ -94,7 +96,7 @@ export default function SellerInfo({ sellerId }) {
       >
         <div className="w-12 h-12 bg-gray-300 rounded-full overflow-hidden">
           <Image
-            src={user.profileImage || '/default.jpg'}
+            src={user.profileImage || 'https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm'}
             alt="Seller"
             width={48}
             height={48}

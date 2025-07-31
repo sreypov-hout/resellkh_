@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Input from "@/components/ui/Input";
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export default function ResetPassword() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -48,7 +48,7 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      const response = await fetch("https://comics-upset-dj-clause.trycloudflare.com/api/v1/auths/reset-new-password", {
+      const response = await fetch(`${API_BASE_URL}/auths/reset-new-password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"

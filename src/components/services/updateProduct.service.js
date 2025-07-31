@@ -1,3 +1,4 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const updateProduct = async (
   productId,
   productData,
@@ -5,28 +6,31 @@ export const updateProduct = async (
   token
 ) => {
   try {
-    const formData = new FormData();
+    // Create query parameters for all product data
+    const queryParams = new URLSearchParams();
     for (const key in productData) {
       if (productData[key] !== null && productData[key] !== undefined) {
-        formData.append(key, productData[key]);
+        queryParams.append(key, productData[key]);
       }
     }
+
+    const formData = new FormData();
     if (newFiles && newFiles.length > 0) {
       newFiles.forEach((file) => {
         formData.append("files", file);
       });
     }
 
-    const response = await fetch(
-      ` https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/updateproduct/${productId}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      }
-    );
+    const url = `${API_BASE_URL}/products/updateproduct/${productId}?${queryParams.toString()}`;
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // Let browser set Content-Type for multipart/form-data
+      },
+      body: formData,
+    });
 
     if (!response.ok) {
       let errorMessage = "Failed to update product";

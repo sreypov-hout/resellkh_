@@ -1,7 +1,9 @@
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const deleteProduct = async (productId, token) => {
   try {
     const response = await fetch(
-      `https://comics-upset-dj-clause.trycloudflare.com/api/v1/products/${productId}`,
+      `${API_BASE_URL}/products/${productId}`,
       {
         method: "DELETE",
         headers: {

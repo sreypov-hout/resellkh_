@@ -1,32 +1,24 @@
-"use client"; // Add this at the top
-
+// ✅ This is correct
 import './globals.css';
-import { Poppins } from "next/font/google";
-import { BookmarkProvider } from '@/context/BookmarkContext';
-import { Toaster } from "react-hot-toast";
-import { SessionProvider } from "next-auth/react";
-import TokenStorage from '@/components/TokenStorage';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { Poppins } from 'next/font/google';
+import Providers from '@/components/Providers';
 
 const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-poppins',
 });
 
-export default function RootLayout({ children, session }) {
+export const metadata = {
+  title: 'Your App Title',
+  description: 'Your App Description',
+};
+
+export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.variable} font-sans`}>
-        <SessionProvider session={session}>
-          <ErrorBoundary>
-            <BookmarkProvider>
-              <Toaster position="right-bottom" />
-              <TokenStorage />
-              {children}
-            </BookmarkProvider>
-          </ErrorBoundary>
-        </SessionProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
