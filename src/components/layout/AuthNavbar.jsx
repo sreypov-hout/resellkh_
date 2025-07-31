@@ -308,31 +308,6 @@ export default function AuthNavbar() {
                 </Link>
 
                 <div className="relative" ref={profileRef}>
-<<<<<<< HEAD
-                  <Image
-                    src={user.avatar}
-                    alt="User Avatar"
-                    width={32}
-                    height={32}
-                    className="rounded-full object-cover w-[35px] h-[35px] cursor-pointer"
-                    onClick={() => setProfileOpen((prev) => !prev)}
-                  />
-                  {profileOpen && user && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-30">
-                      <Link href={`/profile/${getEncryptedProfileId(user.id)}`} className="cursor-pointer">
-                        <div className="flex items-center gap-3 px-4 py-3 border-b">
-                          <Image
-                            src={user.avatar}
-                            alt="User Avatar"
-                            width={50}
-                            height={50}
-                            className="rounded-full object-cover w-[50px] h-[50px]"
-                          />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 truncate w-[120px]">{user.name}</p>
-                            <p className="text-xs text-gray-500">View your profile</p>
-                          </div>
-=======
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
                   className="flex items-center space-x-1 p-1 rounded-full w-full h-full hover:bg-gray-100 transition-colors"
@@ -366,7 +341,6 @@ export default function AuthNavbar() {
                               e.currentTarget.src = DEFAULT_AVATAR_URL;
                             }}
                           />
->>>>>>> 1a49ecb5d6a283bd9a7523a0e7fb44e77dfdaf03
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">{user.name}</p>
