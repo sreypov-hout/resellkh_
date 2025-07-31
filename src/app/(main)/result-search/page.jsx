@@ -46,19 +46,8 @@ export default function ResultSearchPage() {
           product.productName.toLowerCase().includes(query.toLowerCase())
         );
 
-        // ✨ 2. FIX: Remove duplicates by productName
-        const seenNames = new Set();
-        const uniqueFiltered = filtered.filter(product => {
-          const lowerCaseName = product.productName.toLowerCase();
-          if (seenNames.has(lowerCaseName)) {
-            return false; // Exclude if name is already seen
-          } else {
-            seenNames.add(lowerCaseName);
-            return true; // Include if name is new
-          }
-        });
-
-        setProducts(uniqueFiltered);
+        // ✨ 2. FIX: Removed de-duplication. The results page should show ALL matching products.
+        setProducts(filtered);
       })
       .catch((err) => {
         console.error(err);

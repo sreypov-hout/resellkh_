@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import useSWR from 'swr'; // --- ⭐️ 1. IMPORT useSWR ---
+import useSWR from 'swr';
 import ProductCart from "../domain/ProductCart";
 import { productService } from "../services/allProduct.service";
 import { eventService } from "../services/even.service";
@@ -15,38 +15,39 @@ const SkeletonCard = () => (
   </div>
 );
 
-// --- ⭐️ 3. DEFINE THE FETCHER FUNCTION FOR SWR ---
+// Define the fetcher function for SWR
 const fetcher = () => productService.fetchRecommendedProducts();
 
 export default function RecommendedList() {
   const [visibleCount, setVisibleCount] = useState(25);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // --- ⭐️ 4. USE SWR FOR DATA FETCHING ---
+  // Use SWR for data fetching, caching, and revalidation
   const { 
-    data: items = [], // Default to an empty array
+    data: items = [], // Default to an empty array to prevent errors
     error, 
     isLoading, 
-    mutate // This function lets us trigger a re-fetch manually
+    mutate // Function to trigger a manual re-fetch
   } = useSWR(
     'recommendedProducts', // A unique key for this data
     fetcher, 
     {
-      refreshInterval: 30000, // Poll for new data every 30 seconds
-      revalidateOnFocus: true, // Automatically refresh when the user focuses the tab
-      revalidateOnReconnect: true // Automatically refresh on reconnect
+      refreshInterval: 30000,      // Poll for new data every 30 seconds
+      revalidateOnFocus: true,     // Automatically refresh when the user focuses the tab
+      revalidateOnReconnect: true  // Automatically refresh on network reconnect
     }
   );
 
-  // --- ⭐️ 5. LISTEN FOR THE 'productAdded' EVENT ---
+  // Listen for the 'productAdded' event to trigger a refresh
   useEffect(() => {
     const handleProductAdded = () => {
       console.log("New product added event received, revalidating list...");
-      mutate(); // Trigger an immediate re-fetch
+      mutate(); // Trigger an immediate re-fetch and sort
     };
 
     eventService.on('productAdded', handleProductAdded);
 
+    // Cleanup listener on component unmount
     return () => {
       eventService.remove('productAdded', handleProductAdded);
     };
@@ -55,12 +56,14 @@ export default function RecommendedList() {
 
   const handleViewMore = () => {
     setLoadingMore(true);
+    // Simulate network delay for a smoother user experience
     setTimeout(() => {
       setVisibleCount((prev) => prev + 25);
       setLoadingMore(false);
     }, 600);
   };
 
+  // Memoize the items to show to prevent re-slicing on every render
   const itemsToShow = items.slice(0, visibleCount);
 
   return (
@@ -71,8 +74,8 @@ export default function RecommendedList() {
         </h2>
 
         {error && (
-          <p className="text-red-500 mb-4">
-            Failed to load recommended products: {error.message}
+          <p className="text-red-500 mb-4 text-center">
+            Failed to load recommended products. Please try again later.
           </p>
         )}
 
@@ -102,21 +105,20 @@ export default function RecommendedList() {
                     title={item.productName}
                     description={item.description}
                     price={finalPrice.toFixed(2)}
-                    originalPrice={hasDiscount ? originalPrice : null}
+                    originalPrice={hasDiscount ? originalPrice.toFixed(2) : null}
                     discountText={hasDiscount ? `${discountPercent}% OFF` : null}
                   />
                 );
               })}
         </div>
 
+        {/* "View More" Button */}
         {!isLoading && visibleCount < items.length && (
           <div className="text-center mt-8 md:mt-10">
             <button
               onClick={handleViewMore}
               disabled={loadingMore}
-              className={`px-6 py-2 md:px-8 md:py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition flex items-center justify-center mx-auto ${
-                loadingMore ? "opacity-75 cursor-not-allowed" : ""
-              }`}
+              className={`px-6 py-2 md:px-8 md:py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-colors flex items-center justify-center mx-auto disabled:opacity-75 disabled:cursor-not-allowed`}
             >
               {loadingMore ? (
                 <>

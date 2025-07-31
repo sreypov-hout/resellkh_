@@ -60,7 +60,7 @@ export default function SearchBar() {
             product.productName.toLowerCase().startsWith(query.toLowerCase())
           ) : [];
           
-          // ✨ 2. FIX: Remove duplicates from the filtered list
+          // ✨ 2. FIX: Remove duplicates from the filtered list for the dropdown. This is correct.
           const seenNames = new Set();
           const uniqueFilteredData = filteredData.filter(product => {
             const lowerCaseName = product.productName.toLowerCase();
