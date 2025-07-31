@@ -1,3 +1,4 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const updateProduct = async (
   productId,
   productData,
@@ -20,7 +21,7 @@ export const updateProduct = async (
       });
     }
 
-    const url = `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/updateproduct/${productId}?${queryParams.toString()}`;
+    const url = `${API_BASE_URL}/products/updateproduct/${productId}?${queryParams.toString()}`;
 
     const response = await fetch(url, {
       method: "PUT",

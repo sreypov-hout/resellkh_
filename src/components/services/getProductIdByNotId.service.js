@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const getProductIdByNotificationId = async (notificationId, token) => {
   // Renamed parameters and function for clarity

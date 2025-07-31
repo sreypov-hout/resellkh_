@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import ProductCart from "@/components/domain/ProductCart"; // Assuming this is the responsive version
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 // Skeleton placeholder that adapts to the responsive layout
 const SkeletonCard = () => (
     <div className="flex-shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 p-2">
@@ -43,7 +43,7 @@ export default function TrendingNow() {
         async function fetchTrending() {
             try {
                 const res = await fetch(
-                    "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products"
+                    `${API_BASE_URL}/products`
                 );
                 if (!res.ok) throw new Error(`API Error: ${res.status}`);
 

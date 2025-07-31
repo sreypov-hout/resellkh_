@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from 'react-hot-toast';
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export default function OTPVerification() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function OTPVerification() {
     if (timer <= 0) {
       setTimer(60);
       toast.success("OTP resent.");
-      fetch("https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/auths/resend-otp", {
+      fetch(`${API_BASE_URL}/auths/resend-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -91,7 +91,7 @@ export default function OTPVerification() {
   try {
     setLoading(true);
 
-    const res = await fetch("https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/auths/verify-otp", {
+    const res = await fetch(`${API_BASE_URL}/auths/verify-otp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, otp: code }),

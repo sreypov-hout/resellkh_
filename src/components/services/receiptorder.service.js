@@ -1,5 +1,5 @@
 // src/services/paymentsummary.service.js
-const API_BASE_URL = "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const getPaymentReceiptByOrderId = async (orderId, token) => {
   try {

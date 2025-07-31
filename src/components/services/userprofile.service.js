@@ -1,5 +1,5 @@
-const API_BASE_URL = "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 /**
  * Fetch the profile of a user by ID using their JWT token.
  * @param {string|number} userId - The ID of the user.

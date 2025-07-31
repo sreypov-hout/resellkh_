@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 // Skeleton Box component
 const SkeletonBox = ({ className }) => (
   <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
@@ -97,7 +97,7 @@ const ProductDetails = ({ product }) => {
     }
 
     const quantityToAdd = 1;
-    const apiUrl = `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/cart/add?productId=${id}&quantity=${quantityToAdd}`;
+    const apiUrl = `${API_BASE_URL}/cart/add?productId=${id}&quantity=${quantityToAdd}`;
 
     // Optimistic UI update
     window.dispatchEvent(

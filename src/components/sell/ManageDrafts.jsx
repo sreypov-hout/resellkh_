@@ -10,7 +10,7 @@ export default function ManageDrafts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { data: session, status } = useSession();
-
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   useEffect(() => {
     const fetchDrafts = async () => {
       setLoading(true);
@@ -24,7 +24,7 @@ export default function ManageDrafts() {
           if (!userId || !token) throw new Error('User ID or access token is missing.');
 
           const res = await axios.get(
-            `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
+            `${API_BASE_URL}/products/drafts/user/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,

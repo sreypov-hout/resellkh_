@@ -1,3 +1,4 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const postProduct = async (productData) => {
   try {
     const token = localStorage.getItem('token');
@@ -38,7 +39,7 @@ export const postProduct = async (productData) => {
     }
 
     const response = await fetch(
-      `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/upload?${queryParams.toString()}`,
+      `${API_BASE_URL}/products/upload?${queryParams.toString()}`,
       {
         method: 'POST',
         headers: {

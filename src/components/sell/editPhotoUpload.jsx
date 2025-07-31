@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 async function getMediaTypeFromUrl(url) {
     try {
         const response = await fetch(url, { method: 'HEAD' });
@@ -202,7 +202,7 @@ export default function EditPhotoUploader({ initialFiles = [], onFilesChange, pr
                 }
 
                 const response = await fetch(
-                    `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/${productId}/files?fileUrl=${encodeURIComponent(itemToRemove.previewUrl)}`,
+                    `${API_BASE_URL}/products/${productId}/files?fileUrl=${encodeURIComponent(itemToRemove.previewUrl)}`,
                     {
                         method: 'DELETE',
                         headers: {

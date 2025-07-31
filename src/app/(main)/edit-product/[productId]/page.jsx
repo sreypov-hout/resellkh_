@@ -14,6 +14,7 @@ import { deleteProduct } from "@/components/services/deleteProduct.service";
 import { updateProduct } from "@/components/services/updateProduct.service";
 import toast from "react-hot-toast";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const staticCategories = [
     { id: 1, name: "Accessories" },
     { id: 2, name: "Beauty" },
@@ -114,7 +115,7 @@ export default function EditProductPage({ params }) {
                     setIsLoadingProduct(true);
                     const token = localStorage.getItem("token");
                     const response = await fetch(
-                        `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/getproductbyuserid/${session.user.id}`,
+                        `${API_BASE_URL}/products/getproductbyuserid/${session.user.id}`,
                         { headers: { Authorization: `Bearer ${token}` } }
                     );
 

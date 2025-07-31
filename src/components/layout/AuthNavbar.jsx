@@ -57,7 +57,7 @@ export default function AuthNavbar() {
     { name: "Vehicle", key: "vehicle" },
     { name: "Other", key: "other" },
   ];
-
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   useEffect(() => {
     const loadUser = async () => {
       if (status === "authenticated" && session?.user?.id && session?.accessToken) {
@@ -123,7 +123,7 @@ export default function AuthNavbar() {
     const fetchCartCount = async () => {
       try {
         const res = await fetch(
-          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/cart/count?userId=${user.id}`,
+          `${API_BASE_URL}/cart/count?userId=${user.id}`,
           { headers: { Authorization: `Bearer ${session.accessToken}` } }
         );
 

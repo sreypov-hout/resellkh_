@@ -2,43 +2,36 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { encryptId } from "@/utils/encryption";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Clock, BellOff } from "lucide-react"; // Using modern icons
+
+import { encryptId } from "@/utils/encryption";
 import { getProductIdByNotificationId } from "@/components/services/getProductIdByNotId.service";
 import {
   fetchAllNotifications,
   markNotificationAsRead,
   parseJwt,
   formatTimestamp,
-} from "@/components/services/notification.service"; // Adjust path if needed
+} from "@/components/services/notification.service";
 
-// Categorize notifications
+// Categorize notifications (Your original logic)
 const categorizeByTime = (notifications) => {
   const now = new Date();
-  const today = [];
-  const lastWeek = [];
-  const older = [];
+  const today = [], lastWeek = [], older = [];
 
   notifications.forEach((notification) => {
     const notificationDate = new Date(notification.createdAt);
-    const diffInDays = Math.floor(
-      (now - notificationDate) / (1000 * 60 * 60 * 24)
-    );
-
-    if (diffInDays < 1) {
-      today.push(notification);
-    } else if (diffInDays < 7) {
-      lastWeek.push(notification);
-    } else {
-      older.push(notification);
-    }
+    const diffInDays = Math.floor((now - notificationDate) / (1000 * 60 * 60 * 24));
+    if (diffInDays < 1) today.push(notification);
+    else if (diffInDays < 7) lastWeek.push(notification);
+    else older.push(notification);
   });
-
   return { today, lastWeek, older };
 };
 
 export default function Notifications() {
-  let title = "";
+  // --- Your original state and logic ---
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -106,15 +99,10 @@ export default function Notifications() {
     setExpandedNotifications(newExpanded);
 
     if (notification.unread) {
-      const originalNotifications = notifications;
-
+      const originalNotifications = [...notifications];
       setNotifications((prev) =>
         prev.map((n) => (n.id === notificationId ? { ...n, unread: false } : n))
       );
-      // if (notification.id = notifcationId && notification.title = "added to cart") {
-      //   Router.pus
-      // }
-
       try {
         const token = localStorage.getItem("token");
         const userData = parseJwt(token);
@@ -130,115 +118,96 @@ export default function Notifications() {
       }
     }
   };
+  // --- End of your original logic ---
 
   const filteredNotifications = notifications.filter((n) =>
     activeTab === "all" ? true : n.unread
   );
 
   const { today, lastWeek, older } = categorizeByTime(filteredNotifications);
-  const allCount = notifications.length;
   const unreadCount = notifications.filter((n) => n.unread).length;
 
-  if (loading) return <NotificationLoadingState />;
-  if (error) return <NotificationErrorState error={error} />;
-
   return (
-    <section className="w-full px-[7%] py-6">
-      <div className="bg-white border border-gray-300 rounded-[24px] p-6 sm:p-10 shadow-sm">
-        <h1 className="text-xl sm:text-2xl font-semibold mb-6">
-          Notifications
-        </h1>
+    <section className="bg-slate-100 w-full px-[7%] min-h-screen py-8 sm:py-12">
+      <div className="w-full mx-auto px-2">
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-4 sm:p-8 shadow-lg shadow-slate-200/50">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-6">
+            Notifications
+          </h1>
 
-        <NotificationTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          allCount={allCount}
-          unreadCount={unreadCount}
-        />
+          <NotificationTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            allCount={notifications.length}
+            unreadCount={unreadCount}
+          />
 
-        {filteredNotifications.length === 0 ? (
-          <NoNotificationsMessage activeTab={activeTab} />
-        ) : (
-          <>
-            {today.length > 0 && (
-              <NotificationSection
-                title="Today"
-                data={today}
-                expandedNotifications={expandedNotifications}
-                onNotificationClick={handleNotificationClick}
-                token={token}
-              />
+          <div className="mt-8">
+            {loading ? (
+              <NotificationLoadingState />
+            ) : error ? (
+              <NotificationErrorState error={error} />
+            ) : filteredNotifications.length === 0 ? (
+              <NoNotificationsMessage activeTab={activeTab} />
+            ) : (
+              <>
+                <NotificationSection
+                  title="Today"
+                  data={today}
+                  onNotificationClick={handleNotificationClick}
+                  expandedNotifications={expandedNotifications}
+                  token={token}
+                />
+                <NotificationSection
+                  title="Last Week"
+                  data={lastWeek}
+                  onNotificationClick={handleNotificationClick}
+                  expandedNotifications={expandedNotifications}
+                  token={token}
+                />
+                <NotificationSection
+                  title="Earlier"
+                  data={older}
+                  onNotificationClick={handleNotificationClick}
+                  expandedNotifications={expandedNotifications}
+                  token={token}
+                />
+              </>
             )}
-            {lastWeek.length > 0 && (
-              <NotificationSection
-                title="Last week"
-                data={lastWeek}
-                expandedNotifications={expandedNotifications}
-                onNotificationClick={handleNotificationClick}
-                token={token}
-              />
-            )}
-            {older.length > 0 && (
-              <NotificationSection
-                title="Earlier"
-                data={older}
-                expandedNotifications={expandedNotifications}
-                onNotificationClick={handleNotificationClick}
-                token={token}
-              />
-            )}
-          </>
-        )}
-      </div>
-    </section>
-  );
-}
-
-// Subcomponents
-
-function NotificationLoadingState() {
-  return (
-    <section className="w-full px-[7%] py-6">
-      <div className="bg-white border border-gray-300 rounded-[24px] p-6 sm:p-10 shadow-sm">
-        <div className="flex justify-center items-center py-10">
-          <div className="text-gray-500">Loading notifications...</div>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function NotificationErrorState({ error }) {
-  return (
-    <section className="w-full px-[7%] py-6">
-      <div className="bg-white border border-gray-300 rounded-[24px] p-6 sm:p-10 shadow-sm">
-        <div className="flex justify-center items-center py-10">
-          <div className="text-red-500">Error: {error}</div>
-        </div>
-      </div>
-    </section>
-  );
-}
+// --- Modernized Subcomponents ---
 
 function NotificationTabs({ activeTab, setActiveTab, allCount, unreadCount }) {
   return (
-    <div className="flex justify-center items-center gap-10 border-b pb-4 mb-6 text-sm sm:text-base">
+    <div className="flex items-center gap-2 rounded-full bg-slate-100 p-1.5">
       {["all", "unread"].map((tab) => {
         const isActive = activeTab === tab;
         const count = tab === "all" ? allCount : unreadCount;
-
         return (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex items-center gap-2 font-medium relative pb-1 transition ${
-              isActive ? "text-black border-b-2 border-black" : "text-gray-600"
+            className={`relative w-full rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+              isActive ? "text-white" : "text-slate-600 hover:bg-slate-200/70"
             }`}
           >
-            <span className="bg-orange-500 text-black text-[10px] sm:text-xs px-2 py-0.5 rounded-full">
-              {count}
+            {isActive && (
+              <motion.span
+                layoutId="active_pill"
+                className="absolute inset-0 z-0 rounded-full bg-orange-500"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              {tab === "all" ? "All" : "Unread"}
+              <span className={`min-w-[24px] rounded-full px-1.5 py-0.5 text-xs ${isActive ? 'bg-white/20' : 'bg-slate-200 text-slate-500'}`}>{count}</span>
             </span>
-            <span>{tab === "all" ? "All" : "Unread"}</span>
           </button>
         );
       })}
@@ -246,153 +215,104 @@ function NotificationTabs({ activeTab, setActiveTab, allCount, unreadCount }) {
   );
 }
 
-function NotificationSection({
-  title,
-  data,
-  expandedNotifications,
-  onNotificationClick,
-  token,
-}) {
-  const router = useRouter();
-  const [
-    fetchingProductIdForNotification,
-    setFetchingProductIdForNotification,
-  ] = useState(null);
-  if (!data.length) return null;
+const NotificationItemSkeleton = () => (
+  <div className="flex animate-pulse items-start gap-4 py-4">
+    <div className="h-11 w-11 rounded-full bg-slate-200"></div>
+    <div className="flex-1 space-y-3">
+      <div className="h-4 w-1/3 rounded bg-slate-200"></div>
+      <div className="h-3 w-full rounded bg-slate-200"></div>
+      <div className="h-3 w-3/4 rounded bg-slate-200"></div>
+    </div>
+  </div>
+);
 
-  const truncateText = (text, maxLength = 100) => {
-    if (text.length <= maxLength) return text;
-    const truncated = text.substring(0, maxLength);
-    const lastSpace = truncated.lastIndexOf(" ");
-    return lastSpace > 0
-      ? truncated.substring(0, lastSpace) + "..."
-      : truncated + "...";
-  };
-  const handleViewFavoriteClick = async (e, notificationId) => {
-    e.stopPropagation(); // Prevent the main notification click handler from firing
+const NotificationLoadingState = () => (
+  <div className="space-y-2">
+    {[...Array(5)].map((_, i) => <NotificationItemSkeleton key={i} />)}
+  </div>
+);
 
-    if (!token) {
-      console.error(
-        "Authentication token is missing. Cannot fetch product ID."
-      );
-      alert("Please log in to view favorite products."); // User-friendly message
-      return;
-    }
 
-    setFetchingProductIdForNotification(notificationId); // Set loading state for this specific notification
-
-    try {
-      // Fetch the actual product ID from the backend using the notification ID
-      // Assuming getProductIdByNotificationId accepts (notificationId, token)
-      const res = await getProductIdByNotificationId(notificationId, token);
-
-      const fetchedProductId = res.payload;
-
-      if (fetchedProductId) {
-        // Ensure the fetchedProductId is compatible with encryptId (e.g., number or string)
-        router.push(
-          `/product/${encodeURIComponent(encryptId(fetchedProductId))}`
-        );
-      } else {
-        // Handle case where product ID is not returned (e.g., 404 from API)
-        console.warn(
-          `Product ID not found for notification ID: ${notificationId}.`
-        );
-        alert("The associated product could not be found.");
-      }
-    } catch (error) {
-      console.error(
-        "Error fetching product ID for favorite notification:",
-        error
-      );
-      alert(`Failed to load product: ${error.message}`);
-    } finally {
-      setFetchingProductIdForNotification(null); // Clear loading state
-    }
-  };
-
+function NotificationSection({ title, data, ...props }) {
+  if (!data || data.length === 0) return null;
   return (
-    <div className="mb-8">
-      <h2 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-        <span role="img" aria-label="Time-based section">
-          🕒
-        </span>{" "}
+    <div className="mb-6">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-500">
+        <Clock className="h-4 w-4" />
         {title}
       </h2>
-      <div className="space-y-4">
-        {" "}
-        {data.map((item) => {
-          const isExpanded = expandedNotifications.has(item.id);
-          const shouldTruncate = item.content.length > 100;
-          const displayContent = isExpanded
-            ? item.content
-            : truncateText(item.content, 100);
-          const isFetchingThisProduct =
-            fetchingProductIdForNotification === item.id;
+      <div className="space-y-2">
+        {data.map((item) => (
+          <NotificationItem key={item.id} item={item} {...props} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-          return (
-            <div key={item.id} className="flex items-start gap-3 sm:gap-5">
-              <Image
-                src={item.avatar || "/image-notifications.png"}
-                alt="notification icon"
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover"
-              />
+function NotificationItem({ item, expandedNotifications, onNotificationClick, token }) {
+    const router = useRouter();
+    const [isFetchingFavorite, setIsFetchingFavorite] = useState(false);
+    const isExpanded = expandedNotifications.has(item.id);
+    const shouldTruncate = item.content.length > 100;
 
-              <div className="flex-1 relative">
-                <div
-                  className={`w-full rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:justify-between sm:items-start cursor-pointer transition-colors hover:opacity-90 ${
-                    item.unread ? "bg-[#eee7e7]" : "bg-gray-100"
-                  }`}
-                  onClick={() => onNotificationClick(item.id)}
+    const handleViewFavoriteClick = async (e) => {
+        e.stopPropagation();
+        if (!token) return alert("Please log in to view products.");
+        setIsFetchingFavorite(true);
+        try {
+            const res = await getProductIdByNotificationId(item.id, token);
+            if (res.payload) {
+                router.push(`/product/${encodeURIComponent(encryptId(res.payload))}`);
+            } else {
+                alert("The associated product could not be found.");
+            }
+        } catch (error) {
+            alert(`Failed to load product: ${error.message}`);
+        } finally {
+            setIsFetchingFavorite(false);
+        }
+    };
+    
+  return (
+    <div
+      onClick={() => onNotificationClick(item.id)}
+      className={`group relative flex cursor-pointer items-start gap-4 rounded-2xl p-4 transition-all duration-200 ${
+        item.unread ? "bg-orange-50/80 hover:bg-orange-100/60" : "bg-white hover:bg-slate-50"
+      }`}
+    >
+      {item.unread && <div className="absolute left-1.5 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-orange-500"></div>}
+      <Image src={item.avatar || "/image-notifications.png"} alt="icon" width={44} height={44} className="h-11 w-11 rounded-full object-cover" />
+      <div className="flex-1">
+        <div className="flex items-start justify-between">
+            <h3 className="pr-4 font-semibold text-slate-800">{item.type}</h3>
+            <span className="flex-shrink-0 text-xs text-slate-400">{item.timestamp}</span>
+        </div>
+        <p className="mt-1 text-sm leading-relaxed text-slate-600">
+          {isExpanded ? item.content : `${item.content.substring(0, 100)}${shouldTruncate ? "..." : ""}`}
+          {shouldTruncate && (
+            <span
+              className="ml-1 cursor-pointer font-medium text-blue-600 hover:text-blue-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNotificationClick(item.id);
+              }}
+            >
+              {isExpanded ? " Show Less" : " Read More"}
+            </span>
+          )}
+        </p>
+        {item.type === "Favourite" && (
+            <div className="mt-3">
+                <button
+                    onClick={handleViewFavoriteClick}
+                    disabled={isFetchingFavorite}
+                    className="rounded-lg bg-slate-200/80 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-300/70 disabled:opacity-60"
                 >
-                  <div className="flex-1">
-                    <h3 className="text-sm sm:text-base font-semibold text-black">
-                      {" "}
-                      {item.type}
-                    </h3>
-                    <p className="text-sm text-gray-700 mt-1 leading-relaxed">
-                      {" "}
-                      {displayContent}{" "}
-                      {shouldTruncate && (
-                        <span
-                          className="text-blue-600 hover:text-blue-800 ml-1 font-medium cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onNotificationClick(item.id);
-                          }}
-                        >
-                          {" "}
-                          {isExpanded ? " show less" : " read more"}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 mt-2 sm:mt-0">
-                    <span className="text-xs text-gray-500 whitespace-nowrap">
-                      {" "}
-                      {item.timestamp}
-                    </span>{" "}
-                    {item.unread && (
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                    )}
-                  </div>
-                </div>{" "}
-                {item.type === "Favourite" && (
-                  <button
-                    className="absolute bottom-2 right-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium py-2 px-4 rounded-full shadow-md z-10"
-                    onClick={(e) => handleViewFavoriteClick(e, item.id)}
-                    disabled={isFetchingThisProduct}
-                  >
-                    {" "}
-                    {isFetchingThisProduct ? "Loading..." : "View Favorite"}
-                  </button>
-                )}
-              </div>
+                    {isFetchingFavorite ? "Loading..." : "View Favorite Product"}
+                </button>
             </div>
-          );
-        })}
+        )}
       </div>
     </div>
   );
@@ -401,15 +321,20 @@ function NotificationSection({
 function NoNotificationsMessage({ activeTab }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <img
-        src="/images/story set/no notification.jpg"
-        alt="No Notifications"
-        className="w-[320px] h-auto mb-6"
-      />
-      <p className="text-sm text-gray-600">
-        You don’t have any <span className="font-semibold">{activeTab}</span>{" "}
-        notifications yet.
+      <BellOff className="h-16 w-16 text-slate-300" />
+      <h3 className="mt-4 text-lg font-semibold text-slate-800">No notifications yet</h3>
+      <p className="mt-1 text-sm text-slate-500">
+        You have no {activeTab === 'unread' && 'unread'} notifications at the moment.
       </p>
+    </div>
+  );
+}
+
+function NotificationErrorState({ error }) {
+  return (
+    <div className="flex flex-col items-center justify-center rounded-2xl bg-red-50 p-8 text-center text-red-700">
+        <h3 className="font-bold">Something went wrong</h3>
+        <p className="mt-1 text-sm text-red-600">{error.message || "An unknown error occurred."}</p>
     </div>
   );
 }

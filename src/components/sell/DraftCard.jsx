@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { FiX } from 'react-icons/fi';
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export default function DraftCard({ draft, onDelete, token }) { // Accept token as a prop
   const router = useRouter();
 
@@ -33,7 +33,7 @@ export default function DraftCard({ draft, onDelete, token }) { // Accept token 
 
     try {
       const res = await fetch(
-        `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/${draftId}/user/${userId}`,
+        `${API_BASE_URL}/products/${draftId}/user/${userId}`,
         {
           method: 'DELETE',
           headers: {

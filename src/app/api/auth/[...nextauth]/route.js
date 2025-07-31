@@ -3,10 +3,10 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const backendURL =
   process.env.NEXT_PUBLIC_API_URL ||
-  "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1";
+  API_BASE_URL;
 
 export const authOptions = {
   providers: [

@@ -31,6 +31,7 @@ const ProfileBannerSkeleton = () => (
 /**
  * @description Renders a skeleton placeholder for the profile tabs and content.
  */
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const ProfileTabsSkeleton = () => (
   <div className="mt-8">
     <div className="flex border-b border-gray-200">
@@ -95,13 +96,13 @@ export default function SellerProfileClient({ sellerId }) {
       try {
         const [profileRes, ratingRes] = await Promise.all([
           fetch(
-            `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/profile/${numericSellerId}`,
+            `${API_BASE_URL}/profile/${numericSellerId}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           ),
           fetch(
-            `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/ratings/summary/${numericSellerId}`,
+            `${API_BASE_URL}/ratings/summary/${numericSellerId}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }

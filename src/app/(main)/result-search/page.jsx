@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import ProductCart from "@/components/domain/ProductCart";
 
-const API_URL = 'https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const SkeletonCard = () => (
   <div className="animate-pulse">
@@ -33,7 +33,7 @@ export default function ResultSearchPage() {
     setLoading(true);
     setError(null);
 
-    fetch(API_URL)
+    fetch(`${API_BASE_URL}/products`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch products");
         return res.json();
@@ -41,12 +41,24 @@ export default function ResultSearchPage() {
       .then((data) => {
         const allProducts = data.payload || [];
 
-        // 🔍 Filter products by productName (case-insensitive)
+        // 🔍 1. Filter products by productName (case-insensitive)
         const filtered = allProducts.filter((product) =>
           product.productName.toLowerCase().includes(query.toLowerCase())
         );
 
-        setProducts(filtered);
+        // ✨ 2. FIX: Remove duplicates by productName
+        const seenNames = new Set();
+        const uniqueFiltered = filtered.filter(product => {
+          const lowerCaseName = product.productName.toLowerCase();
+          if (seenNames.has(lowerCaseName)) {
+            return false; // Exclude if name is already seen
+          } else {
+            seenNames.add(lowerCaseName);
+            return true; // Include if name is new
+          }
+        });
+
+        setProducts(uniqueFiltered);
       })
       .catch((err) => {
         console.error(err);

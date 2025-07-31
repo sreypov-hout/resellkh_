@@ -1,4 +1,4 @@
-const API_BASE = "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/favourites";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function fetchFavouritesByUserId(userId, token) {
   if (!userId || !token) {
@@ -6,7 +6,7 @@ export async function fetchFavouritesByUserId(userId, token) {
   }
 
   try {
-    const response = await fetch(`${API_BASE}/with-products/${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/favourites/with-products/${userId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -31,7 +31,7 @@ export async function addToFavourites(body, token) {
   if (!token) throw new Error("Authentication required");
 
   try {
-    const response = await fetch(API_BASE, {
+    const response = await fetch(`${API_BASE_URL}/favourites`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -59,7 +59,7 @@ export async function removeFromFavourites(productId, userId, token) {
 
   try {
     const response = await fetch(
-      `${API_BASE}?userId=${userId}&productId=${productId}`,
+      `${API_BASE_URL}/favourites?userId=${userId}&productId=${productId}`,
       {
         method: "DELETE",
         headers: {

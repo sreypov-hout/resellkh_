@@ -11,7 +11,7 @@ const SkeletonCard = () => (
     <div className="h-4 bg-gray-300 rounded-full w-1/3" />
   </div>
 );
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export default function ListingsWithFilter({ userId }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ export default function ListingsWithFilter({ userId }) {
         if (!userId) throw new Error("User ID not provided");
 
         const response = await fetch(
-          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/getproductbyuserid/${userId}`,
+          `${API_BASE_URL}/products/getproductbyuserid/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

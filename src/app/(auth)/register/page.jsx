@@ -8,7 +8,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { signIn } from "next-auth/react";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export default function Register() {
   const router = useRouter();
 
@@ -67,7 +67,7 @@ export default function Register() {
       setLoading(true);
       setSubmitError("");
       try {
-        const response = await fetch('https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/auths/register', {
+        const response = await fetch(`${API_BASE_URL}/auths/register`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

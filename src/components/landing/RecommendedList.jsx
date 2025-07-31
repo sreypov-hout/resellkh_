@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import useSWR from 'swr'; // --- ⭐️ 1. IMPORT useSWR ---
 import ProductCart from "../domain/ProductCart";
 import { productService } from "../services/allProduct.service";
+import { eventService } from "../services/even.service";
 
 // Skeleton loader for loading state
 const SkeletonCard = () => (
@@ -13,29 +15,43 @@ const SkeletonCard = () => (
   </div>
 );
 
-export default function RecommendedList() {
-  const [items, setItems] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(25);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState(null);
+// --- ⭐️ 3. DEFINE THE FETCHER FUNCTION FOR SWR ---
+const fetcher = () => productService.fetchRecommendedProducts();
 
+export default function RecommendedList() {
+  const [visibleCount, setVisibleCount] = useState(25);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // --- ⭐️ 4. USE SWR FOR DATA FETCHING ---
+  const { 
+    data: items = [], // Default to an empty array
+    error, 
+    isLoading, 
+    mutate // This function lets us trigger a re-fetch manually
+  } = useSWR(
+    'recommendedProducts', // A unique key for this data
+    fetcher, 
+    {
+      refreshInterval: 30000, // Poll for new data every 30 seconds
+      revalidateOnFocus: true, // Automatically refresh when the user focuses the tab
+      revalidateOnReconnect: true // Automatically refresh on reconnect
+    }
+  );
+
+  // --- ⭐️ 5. LISTEN FOR THE 'productAdded' EVENT ---
   useEffect(() => {
-    const fetchRecommended = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const products = await productService.fetchRecommendedProducts();
-        setItems(products);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+    const handleProductAdded = () => {
+      console.log("New product added event received, revalidating list...");
+      mutate(); // Trigger an immediate re-fetch
     };
 
-    fetchRecommended();
-  }, []);
+    eventService.on('productAdded', handleProductAdded);
+
+    return () => {
+      eventService.remove('productAdded', handleProductAdded);
+    };
+  }, [mutate]);
+
 
   const handleViewMore = () => {
     setLoadingMore(true);
@@ -56,13 +72,13 @@ export default function RecommendedList() {
 
         {error && (
           <p className="text-red-500 mb-4">
-            Failed to load recommended products: {error}
+            Failed to load recommended products: {error.message}
           </p>
         )}
 
         {/* Grid: fully responsive */}
         <div className="grid grid-cols-2 md:grid-cols-3 md:gap-5 lg:grid-cols-4 xl:grid-cols-5 xl:px-1 gap-3 justify-items-center">
-          {loading
+          {isLoading
             ? Array.from({ length: 10 }).map((_, i) => (
                 <SkeletonCard key={`skeleton-${i}`} />
               ))
@@ -93,7 +109,7 @@ export default function RecommendedList() {
               })}
         </div>
 
-        {!loading && visibleCount < items.length && (
+        {!isLoading && visibleCount < items.length && (
           <div className="text-center mt-8 md:mt-10">
             <button
               onClick={handleViewMore}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FiMail } from "react-icons/fi";
 import Input from "@/components/ui/Input";
 import { useRouter } from "next/navigation"; // ✅ For navigation
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ export default function ForgotPassword() {
     setMessage("");
 
     try {
-      const url = `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/auths/forgot-password?email=${encodeURIComponent(email)}`;
+      const url = `${API_BASE_URL}/auths/forgot-password?email=${encodeURIComponent(email)}`;
 
       const res = await fetch(url, {
         method: "POST",

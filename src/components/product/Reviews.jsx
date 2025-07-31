@@ -5,7 +5,7 @@ import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import { ReviewFormModal } from "@/components/product/ReviewFormModal";
 import { useRouter } from "next/navigation";
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const SkeletonCard = () => (
   <div className="flex space-x-4 pb-6 animate-pulse">
     <div className="w-12 h-12 bg-gray-300 rounded-full" />
@@ -48,7 +48,7 @@ export default function Reviews({ sellerId }) {
       setError(null);
       try {
         const res = await fetch(
-          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/ratings/${sellerId}`,
+          `${API_BASE_URL}/ratings/${sellerId}`,
           {
             headers: {
               Accept: "application/json",
@@ -96,7 +96,7 @@ export default function Reviews({ sellerId }) {
         return;
       }
 
-      const res = await fetch("https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/ratings", {
+      const res = await fetch(`${API_BASE_URL}/ratings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -16,7 +16,7 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const router = useRouter();
   const { status } = useSession();
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
  const handleLogin = async (e) => {
   e.preventDefault();
   setLoading(true);
@@ -25,7 +25,7 @@ export default function LoginForm() {
   try {
     // Step 1: Call your backend to validate credentials
     const response = await fetch(
-      "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/auths/login",
+      `${API_BASE_URL}/auths/login`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

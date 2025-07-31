@@ -13,7 +13,10 @@ import { postProduct } from "@/components/services/postProduct.service";
 import { toast } from "react-hot-toast";
 import { encryptId } from "@/utils/encryption";
 import axios from "axios";
-import { getUploadedFiles } from "@/utils/fileStore"; // FIX: Import the file store
+import { getUploadedFiles } from "@/utils/fileStore";
+// --- ⭐️ 1. IMPORT THE EVENT SERVICE ---
+import { eventService } from "@/components/services/even.service";
+
 
 const staticCategories = [
   { id: 1, name: "Accessories" },
@@ -52,9 +55,7 @@ export const SellNewPage = () => {
   const [navigationTarget, setNavigationTarget] = useState(null);
   const isNavigatingRef = useRef(false);
   const [userDrafts, setUserDrafts] = useState([]);
-
-  // FIX: This new useEffect hook runs once to get files from the store.
-  // It only runs if we are NOT loading a draft.
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   useEffect(() => {
     if (!draftId) {
       const initialFiles = getUploadedFiles();
@@ -64,14 +65,12 @@ export const SellNewPage = () => {
     }
   }, [draftId]);
 
-  // Effect to redirect unauthenticated users
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login?redirect=/sell");
     }
   }, [status, router]);
 
-  // useEffect for loading a SINGLE draft (when draftId is in the URL)
   useEffect(() => {
     if (!draftId || !session?.accessToken) return;
 
@@ -85,7 +84,7 @@ export const SellNewPage = () => {
     const fetchSpecificDraft = async () => {
       try {
         const response = await axios.get(
-          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/drafts/${draftId}`,
+          `${API_BASE_URL}/products/drafts/${draftId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -129,10 +128,100 @@ export const SellNewPage = () => {
     fetchSpecificDraft();
   }, [draftId, session?.accessToken, router]);
 
-  // All other hooks and functions (handleListNow, handleSaveDraft, etc.) remain the same.
-  // ... (paste the rest of your existing SellNewPage component code here) ...
-  // The following is the unchanged remainder of the component:
+  const handleListNow = async () => {
+    if (!files.length) return toast.error("Please upload at least one image");
+    if (!title.trim()) return toast.error("Product name is required");
+    if (!condition) return toast.error("Please select product condition");
+    if (!price || isNaN(parseFloat(price)))
+      return toast.error("Please enter a valid price");
+    if (!category) return toast.error("Please select a category");
+    if (!location.trim()) return toast.error("Location is required");
 
+    const telegramUrl = dealMethodRef.current?.validateTelegram?.();
+    if (telegramUrl === null) return;
+
+    setIsLoading(true);
+
+    try {
+      const token = session?.accessToken || localStorage.getItem("token");
+      if (!token) {
+        toast.error("You must be logged in to list an item.");
+        setIsLoading(false);
+        router.push("/login");
+        return;
+      }
+
+      const selectedCategory = staticCategories.find(
+        (cat) => cat.name === category
+      );
+      const mainCategoryId = selectedCategory ? selectedCategory.id : 0;
+
+      const productData = {
+        productName: title,
+        userId: session.user.id,
+        mainCategoryId,
+        productPrice: parseFloat(price),
+        discountPercent: parseFloat(discount) || 0,
+        productStatus: "ON SALE",
+        description,
+        location,
+        latitude,
+        longitude,
+        condition,
+        telegramUrl: telegramUrl || "",
+        files,
+      };
+
+      if (draftId) {
+        const formData = new FormData();
+        Object.keys(productData).forEach((key) => {
+          if (key !== "files") {
+            formData.append(key, productData[key]);
+          }
+        });
+        productData.files.forEach((file) => {
+          if (file instanceof File) {
+            formData.append("files", file);
+          }
+        });
+
+        await axios.put(
+          `${API_BASE_URL}/products/update-draft/${draftId}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        toast.success("Item published successfully!");
+      } else {
+        await postProduct(productData);
+        toast.success("Item listed successfully!");
+      }
+
+      // --- ⭐️ 2. DISPATCH EVENT ON SUCCESS ---
+      // This tells other components to refresh their data.
+      eventService.dispatch('productAdded');
+
+      const encryptedId = encodeURIComponent(encryptId(session.user.id));
+      router.push(`/profile/${encryptedId}`);
+    } catch (error) {
+      console.error("Submit error:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to list item. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // The rest of your functions (handleSaveDraft, etc.) and JSX remain unchanged.
+  // I am including them below for completeness.
+  
   useEffect(() => {
     const fetchAllUserDrafts = async () => {
       if (
@@ -144,7 +233,7 @@ export const SellNewPage = () => {
         const userId = session.user.id;
         try {
           const response = await axios.get(
-            `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
+            `${API_BASE_URL}/products/drafts/user/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -260,7 +349,7 @@ export const SellNewPage = () => {
       });
       let response;
       const baseUrl =
-        "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/";
+        `${API_BASE_URL}/products/`;
       if (draftId) {
         response = await axios.put(
           `${baseUrl}drafts/${draftId}?${params.toString()}`,
@@ -293,7 +382,7 @@ export const SellNewPage = () => {
         if (session?.user?.id) {
           const userId = session.user.id;
           const updatedDraftsResponse = await axios.get(
-            `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/drafts/user/${userId}`,
+            `${API_BASE_URL}/products/drafts/user/${userId}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           if (
@@ -336,96 +425,6 @@ export const SellNewPage = () => {
       router.push(navigationTarget);
     } else {
       router.back();
-    }
-  };
-
-  const handleListNow = async () => {
-    if (!files.length) return toast.error("Please upload at least one image");
-    if (!title.trim()) return toast.error("Product name is required");
-    if (!condition) return toast.error("Please select product condition");
-    if (!price || isNaN(parseFloat(price)))
-      return toast.error("Please enter a valid price");
-    if (!category) return toast.error("Please select a category");
-    if (!location.trim()) return toast.error("Location is required");
-
-    // Validate Telegram and get the URL
-    const telegramUrl = dealMethodRef.current?.validateTelegram?.();
-    if (telegramUrl === null) return; // Validation failed
-
-    setIsLoading(true);
-
-    try {
-      const token = session?.accessToken || localStorage.getItem("token");
-      if (!token) {
-        toast.error("You must be logged in to list an item.");
-        setIsLoading(false);
-        router.push("/login");
-        return;
-      }
-
-      const selectedCategory = staticCategories.find(
-        (cat) => cat.name === category
-      );
-      const mainCategoryId = selectedCategory ? selectedCategory.id : 0;
-
-      const productData = {
-        productName: title,
-        userId: session.user.id,
-        mainCategoryId,
-        productPrice: parseFloat(price),
-        discountPercent: parseFloat(discount) || 0,
-        productStatus: "ON SALE",
-        description,
-        location,
-        latitude,
-        longitude,
-        condition,
-        telegramUrl: telegramUrl || "", // Use the validated URL
-        files,
-      };
-
-      let result;
-      if (draftId) {
-        const formData = new FormData();
-        Object.keys(productData).forEach((key) => {
-          if (key !== "files") {
-            formData.append(key, productData[key]);
-          }
-        });
-        productData.files.forEach((file) => {
-          if (file instanceof File) {
-            formData.append("files", file);
-          }
-        });
-
-        const response = await axios.put(
-          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/update-draft/${draftId}`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        result = response.data;
-        toast.success("Item published successfully!");
-      } else {
-        result = await postProduct(productData);
-        toast.success("Item listed successfully!");
-      }
-
-      const encryptedId = encodeURIComponent(encryptId(session.user.id));
-      router.push(`/profile/${encryptedId}`);
-    } catch (error) {
-      console.error("Submit error:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to list item. Please try again.";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
     }
   };
 

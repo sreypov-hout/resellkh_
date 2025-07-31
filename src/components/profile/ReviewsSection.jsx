@@ -10,14 +10,15 @@ const ReviewsSection = ({ setActiveTab, sellerId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [visibleCount, setVisibleCount] = useState(3);
-
+  const [loadingMore, setLoadingMore] = useState(false); // --- 1. Add loadingMore state ---
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   useEffect(() => {
     const token = localStorage.getItem("token");
 
     const fetchReviews = async () => {
       try {
         const response = await fetch(
-          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/ratings/${sellerId}`,
+          `${API_BASE_URL}/ratings/${sellerId}`,
           {
             headers: {
               Accept: "application/json",
@@ -38,7 +39,7 @@ const ReviewsSection = ({ setActiveTab, sellerId }) => {
     };
 
     fetchReviews();
-  }, []);
+  }, [sellerId]);
 
   const sortedReviews = [...reviews].sort((a, b) => {
     const dateA = new Date(a.createdAt);
@@ -46,7 +47,15 @@ const ReviewsSection = ({ setActiveTab, sellerId }) => {
     return sortOrder === "Newest" ? dateB - dateA : dateA - dateB;
   });
 
-  const handleViewMore = () => setVisibleCount((prev) => prev + 3);
+  // --- 2. Update the handleViewMore function ---
+  const handleViewMore = () => {
+    setLoadingMore(true);
+    // Simulate a delay for fetching more reviews
+    setTimeout(() => {
+      setVisibleCount((prev) => prev + 3);
+      setLoadingMore(false);
+    }, 500); // 500ms delay
+  };
 
   const averageRating =
     reviews.length > 0
@@ -98,7 +107,7 @@ const ReviewsSection = ({ setActiveTab, sellerId }) => {
           } flex sm:flex-row md:flex-row justify-between items-start md:items-center mb-6 pb-4 ${
             reviews.length > 0 ? "border-b border-gray-300" : ""
           }`}
->
+        >
           <div>
             <h2 className="text-lg font-semibold text-gray-800">Reviews</h2>
             {reviews.length > 0 && (
@@ -216,7 +225,7 @@ const ReviewsSection = ({ setActiveTab, sellerId }) => {
                     )}
                   </div>
                   <div className="flex-1">
-                    <div class="mb-1">
+                    <div className="mb-1">
                       <h4 className="font-semibold text-gray-900">
                         {review.reviewerName || "Anonymous"}
                       </h4>
@@ -252,14 +261,23 @@ const ReviewsSection = ({ setActiveTab, sellerId }) => {
                 </div>
               ))}
             </div>
-
+            
+            {/* --- 3. Update the button's JSX --- */}
             {visibleCount < sortedReviews.length && (
               <div className="flex justify-center mt-4">
                 <button
                   onClick={handleViewMore}
-                  className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium px-4 py-1.5 rounded-full transition-colors duration-200"
+                  disabled={loadingMore} // Disable button when loading
+                  className="bg-orange-500 hover:bg-orange-600 text-white text-md font-medium px-4 py-2 rounded-full transition-colors duration-200 flex items-center justify-center w-32"
                 >
-                  View more
+                  {loadingMore ? (
+                     <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
+                  Loading...
+                    </>
+                  ) : (
+                    "View more"
+                  )}
                 </button>
               </div>
             )}

@@ -36,7 +36,7 @@ const provinceOptions = [
   "Tbong Khmum",
   "Bavet",
 ];
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export default function EditProfilePage({ sellerId }) {
   const [formData, setFormData] = useState({
     username: "",
@@ -86,7 +86,7 @@ export default function EditProfilePage({ sellerId }) {
         const token = localStorage.getItem("token");
 
         const res = await fetch(
-          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/profile/${sellerId}`,
+          `${API_BASE_URL}/profile/${sellerId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -405,7 +405,7 @@ export default function EditProfilePage({ sellerId }) {
 
     try {
       const res = await fetch(
-        "https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/profile/edit",
+        `${API_BASE_URL}/profile/edit`,
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
