@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from "react"; // Added useRef
+import { useState, useEffect, useMemo, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import EditPhotoUploader from "@/components/sell/editPhotoUpload";
@@ -27,11 +27,50 @@ const staticCategories = [
     { id: 10, name: "Other" },
 ];
 
+// Skeleton component for a better loading experience
+const EditPageSkeleton = () => (
+    <div className="mx-auto px-[7%] py-8 animate-pulse">
+        <div className="h-7 w-48 bg-gray-300 rounded-md mb-4"></div>
+        <div className="flex flex-col md:flex-row gap-8">
+            {/* Left Column: Photo Uploader Skeleton */}
+            <div className="flex-1 space-y-4">
+                <div className="h-80 w-full bg-gray-300 rounded-lg"></div>
+            </div>
+            {/* Right Column: Form Fields Skeleton */}
+            <div className="w-full md:w-1/2 space-y-8">
+                {/* Repeats for each form section */}
+                <div className="space-y-2">
+                    <div className="h-4 w-24 bg-gray-300 rounded"></div>
+                    <div className="h-10 w-full bg-gray-300 rounded-md"></div>
+                </div>
+                <div className="space-y-2">
+                    <div className="h-4 w-24 bg-gray-300 rounded"></div>
+                    <div className="h-10 w-full bg-gray-300 rounded-md"></div>
+                </div>
+                 <div className="space-y-2">
+                    <div className="h-4 w-20 bg-gray-300 rounded"></div>
+                    <div className="h-10 w-full bg-gray-300 rounded-md"></div>
+                </div>
+                 <div className="space-y-2">
+                    <div className="h-4 w-20 bg-gray-300 rounded"></div>
+                    <div className="h-24 w-full bg-gray-300 rounded-md"></div>
+                </div>
+            </div>
+        </div>
+        {/* Bottom Buttons Skeleton */}
+        <div className="flex justify-between mt-8">
+            <div className="h-10 w-24 bg-gray-300 rounded-full"></div>
+            <div className="h-10 w-36 bg-gray-300 rounded-full"></div>
+        </div>
+    </div>
+);
+
+
 export default function EditProductPage({ params }) {
-    const { productId } = params;
+    const { productId } = use(params);
     const router = useRouter();
     const { data: session, status } = useSession();
-    const dealMethodRef = useRef(null); // Added this line
+    const dealMethodRef = useRef(null);
 
     const [filesToSave, setFilesToSave] = useState([]);
     const [category, setCategory] = useState("");
@@ -49,6 +88,7 @@ export default function EditProductPage({ params }) {
     const [isLoadingProduct, setIsLoadingProduct] = useState(true);
     const [error, setError] = useState(null);
     const [originalProduct, setOriginalProduct] = useState(null);
+    const [showDeletePopup, setShowDeletePopup] = useState(false);
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -70,6 +110,7 @@ export default function EditProductPage({ params }) {
         if (productId && status === "authenticated") {
             const fetchProductData = async () => {
                 try {
+                    // Set loading state to true
                     setIsLoadingProduct(true);
                     const token = localStorage.getItem("token");
                     const response = await fetch(
@@ -105,6 +146,7 @@ export default function EditProductPage({ params }) {
                     console.error("Fetch error:", err);
                     setError(err.message);
                 } finally {
+                    // Set loading state to false after fetch completes
                     setIsLoadingProduct(false);
                 }
             };
@@ -126,8 +168,8 @@ export default function EditProductPage({ params }) {
         setFilesToSave(newFiles.filter(file => file instanceof File));
     }, []);
 
-    const handleDelete = async () => {
-        if (!window.confirm("Are you sure you want to delete this product?")) return;
+    const handleConfirmDelete = async () => {
+        setShowDeletePopup(false);
         setIsLoading(true);
         try {
             await deleteProduct(productId, session.accessToken);
@@ -147,9 +189,8 @@ export default function EditProductPage({ params }) {
         if (!condition) return toast.error("Please select product condition");
         if (!price || isNaN(parseFloat(price))) return toast.error("Please enter a valid price");
 
-        // Validate Telegram URL
         const telegramUrl = dealMethodRef.current?.validateTelegram?.();
-        if (telegramUrl === null) return; // Validation failed
+        if (telegramUrl === null) return;
 
         setIsLoading(true);
         const cat = staticCategories.find((c) => c.name === category);
@@ -163,7 +204,7 @@ export default function EditProductPage({ params }) {
             description: description,
             location: location,
             condition: condition,
-            telegramUrl: telegramUrl || '', // Use the validated URL
+            telegramUrl: telegramUrl || '',
             latitude: latitude,
             longitude: longitude,
             productStatus: originalProduct?.productStatus || "ON SALE",
@@ -192,7 +233,7 @@ export default function EditProductPage({ params }) {
     };
 
     if (isLoadingProduct) {
-        return <div className="text-center p-8">Loading...</div>;
+        return <EditPageSkeleton />;
     }
 
     if (error) {
@@ -201,6 +242,43 @@ export default function EditProductPage({ params }) {
 
     return (
         <div className="mx-auto px-[7%] py-8">
+            {/* --- Delete Confirmation Popup --- */}
+            {showDeletePopup && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                    onClick={() => setShowDeletePopup(false)}
+                >
+                    <div
+                        className="bg-white rounded-xl shadow-lg p-6 w-[90%] max-w-md text-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <p className="text-lg font-medium mb-4">
+                            Are you sure you want to delete this product?
+                        </p>
+                        <div className="flex justify-center gap-4">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleConfirmDelete();
+                                }}
+                                className="px-4 py-2 rounded-full bg-orange-500 text-white"
+                            >
+                                Yes
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowDeletePopup(false);
+                                }}
+                                className="px-4 py-2 rounded-full bg-gray-400 text-white"
+                            >
+                                No
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
             <h1 className="text-xl font-semibold text-gray-800 mb-4">Edit Product</h1>
             <div className="flex flex-col md:flex-row gap-8">
                 <div className="flex-1 space-y-4">
@@ -223,7 +301,7 @@ export default function EditProductPage({ params }) {
                                 setDescription={setDescription} 
                             />
                             <DealMethod 
-                                ref={dealMethodRef} // Added ref here
+                                ref={dealMethodRef}
                                 location={location} 
                                 setLocation={setLocation} 
                                 telegram={telegram} 
@@ -244,7 +322,7 @@ export default function EditProductPage({ params }) {
             <div className="flex justify-between mt-8">
                 <button 
                     disabled={isLoading} 
-                    onClick={handleDelete} 
+                    onClick={() => setShowDeletePopup(true)}
                     className="px-6 py-2 rounded-full text-white bg-red-500 hover:bg-red-600 disabled:bg-gray-400"
                 >
                     {isLoading ? "Deleting..." : "Delete"}

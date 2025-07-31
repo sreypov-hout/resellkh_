@@ -6,9 +6,37 @@ import Cart from "@/components/profile/someComponent/Cart";
 import { fetchNearbyProducts } from "@/components/services/nearBy.service";
 import ProductCart from "@/components/domain/ProductCart";
 
-// --- Helper Components for different UI states ---
 
-// Loading Spinner Component
+// --- Helper function to calculate distance ---
+/**
+ * Calculates the distance between two points using the Haversine formula.
+ * @param {number} lat1 User's latitude
+ * @param {number} lon1 User's longitude
+ * @param {number} lat2 Product's latitude
+ * @param {number} lon2 Product's longitude
+ * @returns {number} Distance in kilometers
+ */
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the Earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+}
+
+
+// --- Helper Components for different UI states (Unchanged) ---
+
 const LoadingState = () => (
   <div className="flex flex-col items-center justify-center py-16 text-center">
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
@@ -18,7 +46,6 @@ const LoadingState = () => (
   </div>
 );
 
-// Location Error Component
 const LocationErrorState = ({ error, onRetry }) => (
   <div className="flex flex-col items-center justify-center py-16 text-center">
     <div className="text-red-500 mb-4">
@@ -41,7 +68,6 @@ const LocationErrorState = ({ error, onRetry }) => (
   </div>
 );
 
-// API/General Error Component
 const ApiErrorState = ({ error, onRetry }) => (
   <div className="flex flex-col items-center justify-center py-16 text-center">
     <div className="text-red-500 mb-4">
@@ -60,7 +86,6 @@ const ApiErrorState = ({ error, onRetry }) => (
   </div>
 );
 
-// Empty State Component
 const EmptyState = () => (
   <div className="flex flex-col items-center justify-center py-16 text-center">
     <img
@@ -73,6 +98,7 @@ const EmptyState = () => (
   </div>
 );
 
+
 // --- Main Page Component ---
 
 export default function ListingNearMePage() {
@@ -81,13 +107,11 @@ export default function ListingNearMePage() {
   const [error, setError] = useState(null);
   const [locationError, setLocationError] = useState(null);
 
-  // Function to get user's location, wrapped in a Promise
   const getUserLocation = () => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         return reject(new Error("Geolocation is not supported by your browser."));
       }
-
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
@@ -111,49 +135,60 @@ export default function ListingNearMePage() {
         {
           enableHighAccuracy: true,
           timeout: 10000,
-          maximumAge: 600000, // Cache location for 10 minutes
+          maximumAge: 600000,
         }
       );
     });
   };
 
-  // Main data fetching logic, wrapped in useCallback for stability
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     setLocationError(null);
 
     try {
-      // 1. Get user's location
-      const location = await getUserLocation();
-
-      // 2. Fetch nearby products using the location
+      const userLocation = await getUserLocation();
       const nearbyProducts = await fetchNearbyProducts(
-        location.latitude,
-        location.longitude
+        userLocation.latitude,
+        userLocation.longitude
       );
-      setProducts(nearbyProducts);
+
+      // Calculate distance for each product and sort them
+      const productsWithDistance = nearbyProducts
+        .map((product) => {
+          // Assuming product object has latitude and longitude properties
+          if (typeof product.latitude === 'number' && typeof product.longitude === 'number') {
+            const distance = getDistanceFromLatLonInKm(
+              userLocation.latitude,
+              userLocation.longitude,
+              product.latitude,
+              product.longitude
+            );
+            return { ...product, distance };
+          }
+          // Fallback for products without location data, push them to the end
+          return { ...product, distance: Infinity };
+        })
+        .sort((a, b) => a.distance - b.distance); // Sort by distance ascending
+
+      setProducts(productsWithDistance);
 
     } catch (err) {
-      // 3. Handle errors separately (location vs. other API errors)
       if (err.message.includes("Geolocation") || err.message.includes("location")) {
         setLocationError(err.message);
       } else {
         setError("An unexpected error occurred while fetching products.");
       }
-      console.error("Fetching data error:", err); // Log error for debugging
+      console.error("Fetching data error:", err);
     } finally {
-      // 4. Stop loading state
       setLoading(false);
     }
   }, []);
 
-  // Effect to fetch data when the component mounts
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // Transform API product data to match what the Cart component expects
   const transformProduct = (product) => {
     const price =
       typeof product.productPrice === "number" && typeof product.discountPercent === "number"
@@ -190,11 +225,17 @@ export default function ListingNearMePage() {
       <div className="grid grid-cols-2 sm:grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
         {products.map((product) => {
           const transformedProduct = transformProduct(product);
-          return <ProductCart key={transformedProduct.id} {...transformedProduct} />;
+          // Pass the original product ID as the key for stability
+          return <ProductCart key={product.productId} {...transformedProduct} />;
         })}
       </div>
     );
   };
+  
+  // Calculate max distance for display
+  const validProducts = products.filter(p => isFinite(p.distance));
+  const maxDistance = validProducts.length > 0 ? Math.ceil(validProducts[validProducts.length - 1].distance) : 0;
+
 
   return (
     <>
@@ -229,7 +270,9 @@ export default function ListingNearMePage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <h2 className="text-sm md:text-lg lg:text-lg font-semibold text-gray-800">
                 {loading
-                  ? "Loading..."
+                  ? "Finding listings..."
+                  : locationError || error 
+                  ? "Listings Near You"
                   : `${products.length} listings found near you`}
               </h2>
               <div className="flex items-center gap-2 text-gray-600 text-sm whitespace-nowrap">
@@ -261,7 +304,11 @@ export default function ListingNearMePage() {
                     strokeLinejoin="round"
                   />
                 </svg>
-                <span>Less than 5km</span>
+                 <span>
+                    {loading || !validProducts.length
+                        ? "Sorted by distance"
+                        : `Showing results up to ~${maxDistance} km away`}
+                </span>
               </div>
             </div>
 

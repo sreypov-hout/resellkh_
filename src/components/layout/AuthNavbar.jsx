@@ -10,7 +10,7 @@ import { useSession, signOut } from "next-auth/react";
 import ImageScanModal from "./navbar/ImageScanModal";
 import ConfirmLogout from "./navbar/Confirmlogout";
 import { encryptId } from "@/utils/encryption";
-import { Heart, Bell, Menu, X, ChevronDown } from "lucide-react";
+import { Heart, Bell, Menu, X, ChevronDown, Search } from "lucide-react"; // Import Search icon
 import { parseJwt, fetchAllNotifications } from '@/components/services/notification.service';
 import { fetchUserProfile } from "../services/userprofile.service";
 
@@ -24,14 +24,18 @@ export default function AuthNavbar() {
   const [cartItemCount, setCartItemCount] = useState(0);
   const [hasUnread, setHasUnread] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const profileRef = useRef(null);
   const desktopCategoryRef = useRef(null);
   const mobileCategoryRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const mobileSearchRef = useRef(null);
   const isSigningOut = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
+  const DEFAULT_AVATAR_URL = "https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm";
+
 
   const categoryMap = {
     accessories: 1, beauty: 2, equipment_bag_shoes: 3, book: 4, fashion: 5,
@@ -54,7 +58,6 @@ export default function AuthNavbar() {
     { name: "Other", key: "other" },
   ];
 
-  // Effect to set user state from session
   useEffect(() => {
     const loadUser = async () => {
       if (status === "authenticated" && session?.user?.id && session?.accessToken) {
@@ -66,7 +69,7 @@ export default function AuthNavbar() {
           setUser({
             id: profileData.userId,
             name: `${profileData.firstName || ""} ${profileData.lastName || ""}`,
-            avatar: profileData.profileImage || "https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm",
+            avatar: profileData.profileImage || DEFAULT_AVATAR_URL,
           });
           
           localStorage.setItem("token", token);
@@ -86,8 +89,20 @@ export default function AuthNavbar() {
 
     loadUser();
   }, [session, status]);
+  
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      const updatedUser = event.detail;
+      setUser(updatedUser);
+    };
+  
+    window.addEventListener('profile-updated', handleProfileUpdate);
+  
+    return () => {
+      window.removeEventListener('profile-updated', handleProfileUpdate);
+    };
+  }, []);
 
-  // Handle 401 errors and fetch user data
   useEffect(() => {
     if (!user || !session?.accessToken) {
       setCartItemCount(0);
@@ -151,7 +166,6 @@ export default function AuthNavbar() {
     return () => window.removeEventListener("cart-updated", handleCartUpdate);
   }, [user, session]);
 
-  // Effect to handle clicks outside of dropdowns and mobile menu
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -166,16 +180,20 @@ export default function AuthNavbar() {
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
         setMobileMenuOpen(false);
       }
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(event.target) &&
+          !event.target.closest('.search-toggle-button')) {
+        setMobileSearchOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   
-  // Close dropdowns on route change
   useEffect(() => {
     setProfileOpen(false);
     setCategoryOpen(false);
     setMobileMenuOpen(false);
+    setMobileSearchOpen(false);
   }, [pathname]);
 
   const handleLogout = () => {
@@ -221,12 +239,12 @@ export default function AuthNavbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
+          <nav className="hidden md:flex items-center mt-2 space-x-1 lg:space-x-2 ">
             {topCategories.map((cat) => (
               <Link
                 key={cat.key}
                 href={`/category/${categoryMap[cat.key]}`}
-                className={`px-3 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors ${
+                className={`px-3  rounded-lg text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors ${
                   cat.showOn === "lg" ? "hidden lg:block" : ""
                 }`}
               >
@@ -236,7 +254,7 @@ export default function AuthNavbar() {
             <div className="relative" ref={desktopCategoryRef}>
               <button
                 onClick={() => setCategoryOpen(!categoryOpen)}
-                className="flex items-center px-3 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+                className="flex items-center px-3  rounded-lg text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
               >
                 Categories
                 <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${
@@ -260,14 +278,14 @@ export default function AuthNavbar() {
           </nav>
 
           {/* User Actions - Desktop */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center space-x-2 mt-2 ">
             {!user ? (
               <>
                 <Link href="/register" className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors">
                   Register
                 </Link>
                 <Link href="/login" className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors">
-                  Log in
+                  Login
                 </Link>
                 <button
                   onClick={handleSellClick}
@@ -279,11 +297,11 @@ export default function AuthNavbar() {
             ) : (
               <>
                 <Link href="/favourites" className="p-2 rounded-full hover:bg-gray-100 text-gray-700 hover:text-orange-500 transition-colors">
-                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2"><path d="M3 3C3 2.20435 3.31607 1.44129 3.87868 0.87868C4.44129 0.316071 5.20435 0 6 0L18 0C18.7956 0 19.5587 0.316071 20.1213 0.87868C20.6839 1.44129 21 2.20435 21 3V23.25C20.9999 23.3857 20.9631 23.5188 20.8933 23.6351C20.8236 23.7515 20.7236 23.8468 20.604 23.9108C20.4844 23.9748 20.3497 24.0052 20.2142 23.9988C20.0787 23.9923 19.9474 23.9492 19.8345 23.874L12 19.6515L4.1655 23.874C4.05256 23.9492 3.92135 23.9923 3.78584 23.9988C3.65033 24.0052 3.5156 23.9748 3.396 23.9108C3.2764 23.8468 3.17641 23.7515 3.10667 23.6351C3.03694 23.5188 3.00007 23.3857 3 23.25V3ZM6 1.5C5.60218 1.5 5.22064 1.65804 4.93934 1.93934C4.65804 2.22064 4.5 2.60218 4.5 3V21.849L11.5845 18.126C11.7076 18.0441 11.8521 18.0004 12 18.0004C12.1479 18.0004 12.2924 18.0441 12.4155 18.126L19.5 21.849V3C19.5 2.60218 19.342 2.22064 19.0607 1.93934C18.7794 1.65804 18.3978 1.5 18 1.5H6Z" fill="black" /></svg>
+                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-0"><path d="M3 3C3 2.20435 3.31607 1.44129 3.87868 0.87868C4.44129 0.316071 5.20435 0 6 0L18 0C18.7956 0 19.5587 0.316071 20.1213 0.87868C20.6839 1.44129 21 2.20435 21 3V23.25C20.9999 23.3857 20.9631 23.5188 20.8933 23.6351C20.8236 23.7515 20.7236 23.8468 20.604 23.9108C20.4844 23.9748 20.3497 24.0052 20.2142 23.9988C20.0787 23.9923 19.9474 23.9492 19.8345 23.874L12 19.6515L4.1655 23.874C4.05256 23.9492 3.92135 23.9923 3.78584 23.9988C3.65033 24.0052 3.5156 23.9748 3.396 23.9108C3.2764 23.8468 3.17641 23.7515 3.10667 23.6351C3.03694 23.5188 3.00007 23.3857 3 23.25V3ZM6 1.5C5.60218 1.5 5.22064 1.65804 4.93934 1.93934C4.65804 2.22064 4.5 2.60218 4.5 3V21.849L11.5845 18.126C11.7076 18.0441 11.8521 18.0004 12 18.0004C12.1479 18.0004 12.2924 18.0441 12.4155 18.126L19.5 21.849V3C19.5 2.60218 19.342 2.22064 19.0607 1.93934C18.7794 1.65804 18.3978 1.5 18 1.5H6Z" fill="black" /></svg>
                 </Link>
 
                 <Link href="/notifications" className="p-2 rounded-full hover:bg-gray-100 text-gray-700 hover:text-orange-500 transition-colors relative">
-                  <svg className="w-6 h-6 stroke-[1.5] stroke-gray-900 mr-2" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.0243 3.63745C10.8868 3.63745 7.52426 6.99995 7.52426 11.1375V14.75C7.52426 15.5125 7.19926 16.6749 6.81176 17.3249L5.37426 19.7125C4.48676 21.1875 5.09926 22.825 6.72426 23.375C12.1118 25.175 17.9243 25.175 23.3118 23.375C24.8243 22.875 25.4868 21.0875 24.6618 19.7125L23.2243 17.3249C22.8493 16.6749 22.5243 15.5125 22.5243 14.75V11.1375C22.5243 7.01245 19.1493 3.63745 15.0243 3.63745Z" /><path d="M17.3379 4.00005C16.9504 3.88755 16.5504 3.80005 16.1379 3.75005C14.9379 3.60005 13.7879 3.68755 12.7129 4.00005C13.0754 3.07505 13.9754 2.42505 15.0254 2.42505C16.0754 2.42505 16.9754 3.07505 17.3379 4.00005Z" /><path d="M18.7754 23.825C18.7754 25.8875 17.0879 27.575 15.0254 27.575C14.0004 27.575 13.0504 27.15 12.3754 26.475C11.7004 25.8 11.2754 24.85 11.2754 23.825" /></svg>
+                  <svg className="w-6 h-6 stroke-[1.5] stroke-gray-900 mr-0" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.0243 3.63745C10.8868 3.63745 7.52426 6.99995 7.52426 11.1375V14.75C7.52426 15.5125 7.19926 16.6749 6.81176 17.3249L5.37426 19.7125C4.48676 21.1875 5.09926 22.825 6.72426 23.375C12.1118 25.175 17.9243 25.175 23.3118 23.375C24.8243 22.875 25.4868 21.0875 24.6618 19.7125L23.2243 17.3249C22.8493 16.6749 22.5243 15.5125 22.5243 14.75V11.1375C22.5243 7.01245 19.1493 3.63745 15.0243 3.63745Z" /><path d="M17.3379 4.00005C16.9504 3.88755 16.5504 3.80005 16.1379 3.75005C14.9379 3.60005 13.7879 3.68755 12.7129 4.00005C13.0754 3.07505 13.9754 2.42505 15.0254 2.42505C16.0754 2.42505 16.9754 3.07505 17.3379 4.00005Z" /><path d="M18.7754 23.825C18.7754 25.8875 17.0879 27.575 15.0254 27.575C14.0004 27.575 13.0504 27.15 12.3754 26.475C11.7004 25.8 11.2754 24.85 11.2754 23.825" /></svg>
                   {hasUnread && (
                     <span className="absolute top-1 left-6 h-2 w-2 bg-red-500 rounded-full"></span>
                   )}
@@ -294,7 +312,7 @@ export default function AuthNavbar() {
                   onClick={() => setProfileOpen(!profileOpen)}
                   className="flex items-center space-x-1 p-1 rounded-full w-full h-full hover:bg-gray-100 transition-colors"
                 >
-                  <div className="w-9 h-9 rounded-full border-2 border-gray-200 hover:border-orange-300 transition-colors bg-gray-100 overflow-hidden">
+                  <div className="w-9 h-9 rounded-full border-2 border-gray-200 hover:border-orange-300 transition-colors bg-gray-100 overflow-hidden flex-shrink-0">
                     <Image
                       src={user.avatar}
                       alt="User Avatar"
@@ -302,7 +320,7 @@ export default function AuthNavbar() {
                       height={36}
                       className="object-cover w-full h-full"
                       onError={(e) => {
-                        e.currentTarget.style.display = "none"; // Hides broken image
+                        e.currentTarget.src = DEFAULT_AVATAR_URL;
                       }}
                     />
                   </div>
@@ -320,7 +338,7 @@ export default function AuthNavbar() {
                             height={48}
                             className="object-cover w-full h-full"
                             onError={(e) => {
-                              e.currentTarget.style.display = "none";
+                              e.currentTarget.src = DEFAULT_AVATAR_URL;
                             }}
                           />
                         </div>
@@ -348,8 +366,6 @@ export default function AuthNavbar() {
                   </div>
                 )}
               </div>
-
-
                 <button
                   onClick={handleSellClick}
                   className="ml-2 px-4 py-1.5 bg-orange-500 text-white text-sm font-medium rounded-full hover:bg-orange-600 transition-colors"
@@ -360,17 +376,25 @@ export default function AuthNavbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile Menu & Search Buttons */}
+          <div className="md:hidden flex items-center space-x-2">
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                setMobileSearchOpen(prev => !prev);
+                setMobileMenuOpen(false);
+              }}
+              className="search-toggle-button p-2 rounded-md text-gray-700 hover:text-orange-500 focus:outline-none"
+            >
+              <Search className="h-6 w-6" />
+            </button>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(prev => !prev);
+                setMobileSearchOpen(false);
+              }}
               className="p-2 rounded-md text-gray-700 hover:text-orange-500 focus:outline-none"
             >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
@@ -385,13 +409,20 @@ export default function AuthNavbar() {
           <div className="px-4 py-3 space-y-4">
             {user ? (
               <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-                <Image
-                  src={user.avatar}
-                  alt="User Avatar"
-                  width={48}
-                  height={48}
-                  className="rounded-full object-cover border border-gray-200"
-                />
+                {/* ✨ FIX IS HERE ✨ */}
+                <div className="w-12 h-12 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
+                  <Image
+                    src={user.avatar}
+                    alt="User Avatar"
+                    width={48}
+                    height={48}
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      e.currentTarget.src = DEFAULT_AVATAR_URL;
+                    }}
+                  />
+                </div>
+                {/* ✨ END OF FIX ✨ */}
                 <div>
                   <p className="text-sm font-medium text-gray-900">{user.name}</p>
                   <Link 
@@ -482,28 +513,34 @@ export default function AuthNavbar() {
 
       {/* Search and Location Row */}
       <div className="px-4 sm:px-6 lg:px-8 py-3">
-        <div className="flex flex-col lg:flex-row gap-3 w-full">
-          {/* Mobile Search and Location */}
-          <div className="block lg:hidden w-full space-y-3">
-            <div className="flex gap-2 mt-3">
-              <div className="flex-1 mb-8">
-                <SearchBar />
-              </div>
-            </div>
+        {/* Desktop Search and Location */}
+        <div className="hidden md:flex gap-3 w-full">
+          <div className="w-[70%]">
+            <SearchBar />
+          </div>
+          <div className="w-[30%]">
             <LocationDropdown />
           </div>
-
-          {/* Desktop Search and Location */}
-          <div className="hidden lg:flex gap-3 w-full">
-            <div className="w-[70%]">
+        </div>
+      </div>
+      
+      {/* Mobile Search Dropdown */}
+      {mobileSearchOpen && (
+        <div 
+          ref={mobileSearchRef} 
+          className="md:hidden px-4 sm:px-6 pb-4 bg-white border-t border-gray-100 w-full shadow-lg"
+          style={{ position: 'absolute', top: '100%', left: 0, zIndex: 50 }}
+        >
+          <div className="space-y-12 pt-3">
+            <div className="relative z-20">
               <SearchBar />
             </div>
-            <div className="w-[30%]">
+            <div className="relative z-10">
               <LocationDropdown />
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Mobile Category Dropdown */}
       {categoryOpen && (

@@ -1,25 +1,22 @@
-'use client';
+"use client";
 
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Move } from "lucide-react";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import { toast } from "react-hot-toast";
 
-const MapPicker = dynamic(
-  () => import('./MapPicker'),
-  { ssr: false }
-);
+const MapPicker = dynamic(() => import("./MapPicker"), { ssr: false });
+
+const CAMBODIA_BOUNDS = {
+  minLat: 9.5,
+  maxLat: 15.0,
+  minLng: 102.0,
+  maxLng: 108.0,
+};
 
 const DealMethod = forwardRef(
   (
-    {
-      location,
-      setLocation,
-      telegram,
-      setTelegram,
-      setLatitude,
-      setLongitude,
-    },
+    { location, setLocation, telegram, setTelegram, setLatitude, setLongitude },
     ref
   ) => {
     const [mapVisible, setMapVisible] = useState(false);
@@ -27,25 +24,40 @@ const DealMethod = forwardRef(
     const [telegramError, setTelegramError] = useState("");
 
     const handleLocationPick = async ({ lat, lng }) => {
+      if (
+        lat < CAMBODIA_BOUNDS.minLat ||
+        lat > CAMBODIA_BOUNDS.maxLat ||
+        lng < CAMBODIA_BOUNDS.minLng ||
+        lng > CAMBODIA_BOUNDS.maxLng
+      ) {
+        toast.error("Please select a location within Cambodia.");
+        setMapVisible(false);
+        return;
+      }
+
       setLatitude(lat);
       setLongitude(lng);
 
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         const reverseGeocodeUrl = `/api/reverse-geocode?lat=${lat}&lon=${lng}`;
-        
+
         const res = await fetch(reverseGeocodeUrl, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         });
 
         if (!res.ok) {
           const errorText = await res.text();
-          console.error(`Backend Reverse Geocoding Error: ${res.status} ${res.statusText} - ${errorText}`);
+          console.error(
+            `Backend Reverse Geocoding Error: ${res.status} ${res.statusText} - ${errorText}`
+          );
           if (res.status === 401) {
-            toast.error("Unauthorized: Please log in to use location services.");
+            toast.error(
+              "Unauthorized: Please log in to use location services."
+            );
           } else {
             toast.error("Failed to get address for selected location.");
           }
@@ -53,7 +65,9 @@ const DealMethod = forwardRef(
         }
 
         const data = await res.json();
-        setLocation(data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`);  
+        setLocation(
+          data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+        );
       } catch (error) {
         console.error("Error fetching address:", error);
         setLocation(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
@@ -71,7 +85,7 @@ const DealMethod = forwardRef(
     useImperativeHandle(ref, () => ({
       validateTelegram: () => {
         let username = telegramInput.trim();
-        
+
         // Remove @ if present
         if (username.startsWith("@")) {
           username = username.substring(1);
@@ -88,11 +102,10 @@ const DealMethod = forwardRef(
         const isValid = /^[a-zA-Z0-9_]{5,32}$/.test(username);
 
         if (!isValid) {
-      
-          toast.error('Invalid Telegram username.');
+          toast.error("Invalid Telegram username.");
           return null;
         }
-        
+
         // Format as full URL and update state
         const telegramUrl = `https://t.me/${username}`;
         setTelegram(telegramUrl);
@@ -150,26 +163,33 @@ const DealMethod = forwardRef(
               </button>
             )
           )}
-          {mapVisible && (
-            <MapPicker onLocationSelect={handleLocationPick} />
-          )}
+          {mapVisible && <MapPicker onLocationSelect={handleLocationPick} />}
         </div>
 
         <div>
-          <label htmlFor="telegramInput" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="telegramInput"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Telegram (username only)
           </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black">@</span>
+            <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black">
+              @
+            </span>
             <input
               type="text"
               id="telegramInput"
               placeholder="username"
               value={telegramInput}
               onChange={handleTelegramChange}
-              className={`w-full pl-8 rounded-2xl bg-[#f1edef] px-5 py-3 placeholder-gray-500 text-gray-800 focus:outline-none ${telegramError ? 'border-red-500 border' : ''}`}
+              className={`w-full pl-8 rounded-2xl bg-[#f1edef] px-5 py-3 placeholder-gray-500 text-gray-800 focus:outline-none ${
+                telegramError ? "border-red-500 border" : ""
+              }`}
             />
-            {telegramError && <p className="text-red-500 text-xs mt-1">{telegramError}</p>}
+            {telegramError && (
+              <p className="text-red-500 text-xs mt-1">{telegramError}</p>
+            )}
           </div>
         </div>
       </div>
@@ -177,5 +197,5 @@ const DealMethod = forwardRef(
   }
 );
 
-DealMethod.displayName = 'DealMethod';
+DealMethod.displayName = "DealMethod";
 export default DealMethod;

@@ -19,7 +19,7 @@ export default function ListingsWithFilter({ userId }) {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilter, setShowFilter] = useState(false);
-  const [sortBy, setSortBy] = useState("");
+  const [sortBy, setSortBy] = useState("recent"); // Default sort is now 'recent'
   const [condition, setCondition] = useState("");
   const [status, setStatus] = useState("");
 
@@ -65,6 +65,7 @@ export default function ListingsWithFilter({ userId }) {
     fetchProducts();
   }, [userId]);
 
+  // Combined filtering and sorting logic
   let filteredProducts = products.filter((p) => {
     const matchesSearch =
       (p.productName &&
@@ -87,23 +88,25 @@ export default function ListingsWithFilter({ userId }) {
     filteredProducts.sort((a, b) => b.productPrice - a.productPrice);
   } else if (sortBy === "price-low") {
     filteredProducts.sort((a, b) => a.productPrice - b.productPrice);
+  } else if (sortBy === "recent") {
+    // Sort by creation date, newest first. Assumes a 'createdAt' field exists.
+    filteredProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
+
 
   if (loading) {
     return (
-      <div className="p-1 md:p-6">
-        <div className="p-1 rounded-[24px] border border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-            <div className="h-6 w-32 bg-gray-200 rounded-full animate-pulse" />
+      <div className="p-2 md:p-6">
+        <div className="p-4 rounded-2xl border border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="h-8 w-40 bg-gray-200 rounded-full animate-pulse" />
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <div className="relative w-full sm:max-w-xs">
-                <div className="h-10 bg-gray-200 rounded-full animate-pulse" />
-              </div>
+              <div className="h-10 bg-gray-200 rounded-full animate-pulse w-full sm:w-64" />
               <div className="h-10 w-24 bg-gray-200 rounded-full animate-pulse" />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {[...Array(10)].map((_, index) => (
               <SkeletonCard key={index} />
             ))}
@@ -120,17 +123,17 @@ export default function ListingsWithFilter({ userId }) {
   }
 
   return (
-    <div className="p-1 md:p-6">
-      <div className="p-3 rounded-[24px] border border-gray-200">
+    <div className="p-2 md:p-6">
+      <div className="p-4 rounded-2xl border border-gray-200">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">Listings</h2>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <h2 className="text-xl font-semibold text-gray-800">Listings</h2>
 
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             {/* Search Bar */}
             <div className="relative w-full sm:max-w-xs">
               <svg
-                className="absolute top-[9px] left-3 w-5 h-5 text-gray-400"
+                className="absolute top-1/2 left-3 transform -translate-y-1/2 w-5 h-5 text-gray-400"
                 fill="currentColor"
                 viewBox="0 0 24 25"
               >
@@ -141,14 +144,14 @@ export default function ListingsWithFilter({ userId }) {
                 placeholder="Search Listings..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
 
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilter(!showFilter)}
-              className="flex items-center justify-center gap-1 px-3 py-2 border border-gray-300 rounded-full text-sm text-gray-800 hover:bg-gray-100"
+              className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-sm text-gray-800 hover:bg-gray-100 transition-colors"
             >
               Filters
             </button>
@@ -157,23 +160,23 @@ export default function ListingsWithFilter({ userId }) {
 
         {/* Filter Panel */}
         {showFilter && (
-          <div className="w-full lg:w-[310px] bg-white border rounded-2xl shadow p-4 mb-4 space-y-4">
+          <div className="bg-white border rounded-2xl shadow-lg p-4 mb-4 space-y-4 md:w-full md:max-w-sm">
             <div>
-              <div className="text-sm font-medium text-gray-700 mb-2">Sort</div>
-              <div className="space-y-1">
+              <p className="text-sm font-medium text-gray-700 mb-2">Sort</p>
+              <div className="space-y-1 text-sm">
                 {[
-                  { label: "Recent", value: "" },
+                  { label: "Recent", value: "recent" }, // Explicit value for 'recent'
                   { label: "Price - High to Low", value: "price-high" },
                   { label: "Price - Low to High", value: "price-low" },
                 ].map(({ label, value }) => (
-                  <label key={value} className="block">
+                  <label key={value} className="flex items-center">
                     <input
                       type="radio"
                       name="sort"
                       value={value}
                       checked={sortBy === value}
                       onChange={() => setSortBy(value)}
-                      className="mr-2"
+                      className="mr-2 h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300"
                     />
                     {label}
                   </label>
@@ -182,40 +185,40 @@ export default function ListingsWithFilter({ userId }) {
             </div>
 
             <div>
-              <div className="text-sm font-medium text-gray-700 mb-2">
+              <p className="text-sm font-medium text-gray-700 mb-2">
                 Item Condition
-              </div>
-              <div className="space-y-1">
+              </p>
+              <div className="space-y-1 text-sm">
                 {["Brand New", "Like New", "Lightly Used", "Well Used", "Heavily Used"].map((c) => (
-                  <label key={c} className="block">
+                  <label key={c} className="flex items-center">
                     <input
                       type="radio"
                       name="condition"
                       value={c}
                       checked={condition === c}
                       onChange={() => setCondition(c)}
-                      className="mr-2"
+                      className="mr-2 h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300"
                     />
                     {c}
                   </label>
                 ))}
               </div>
             </div>
-
+            
             <div>
-              <div className="text-sm font-medium text-gray-700 mb-2">
+              <p className="text-sm font-medium text-gray-700 mb-2">
                 Listings status
-              </div>
-              <div className="space-y-1">
+              </p>
+              <div className="space-y-1 text-sm">
                 {["draft", "sold out", "on sale"].map((s) => (
-                  <label key={s} className="block">
+                  <label key={s} className="flex items-center">
                     <input
                       type="radio"
                       name="status"
                       value={s}
                       checked={status === s}
                       onChange={() => setStatus(s)}
-                      className="mr-2"
+                      className="mr-2 h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300"
                     />
                     {s}
                   </label>
@@ -223,10 +226,11 @@ export default function ListingsWithFilter({ userId }) {
               </div>
             </div>
 
-            <div className="flex justify-between pt-2">
+
+            <div className="flex justify-between items-center pt-2">
               <button
                 onClick={() => {
-                  setSortBy("");
+                  setSortBy("recent"); // Reset to default sort
                   setCondition("");
                   setStatus("");
                 }}
@@ -236,7 +240,7 @@ export default function ListingsWithFilter({ userId }) {
               </button>
               <button
                 onClick={() => setShowFilter(false)}
-                className="bg-orange-500 text-white text-sm px-4 py-[6px] rounded-full hover:bg-orange-600"
+                className="bg-orange-500 text-white text-sm px-4 py-2 rounded-full hover:bg-orange-600 transition-colors"
               >
                 Apply
               </button>
@@ -244,20 +248,20 @@ export default function ListingsWithFilter({ userId }) {
           </div>
         )}
 
-        {/* Product Grid or Empty */}
+        {/* Product Grid or Empty State */}
         {filteredProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <img
               src="/images/story set/no listings.jpg"
               alt="No Listings"
-              className="w-[250px] sm:w-[300px] md:w-[350px] h-auto mb-6"
+              className="w-48 sm:w-64 md:w-80 h-auto mb-6"
             />
             <p className="text-sm text-gray-600">
-              <span className="font-semibold">@user</span> doesn&apos;t have any listings yet
+                No listings match your current filters.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {filteredProducts.map((item) => {
               const price =
                 typeof item.productPrice === "number"
@@ -278,7 +282,7 @@ export default function ListingsWithFilter({ userId }) {
                   description={item.description}
                   price={price.toFixed(2)}
                   originalPrice={
-                    item.discountPercent ? item.productPrice : null
+                    item.discountPercent ? item.productPrice.toFixed(2) : null
                   }
                   discountText={
                     item.discountPercent ? `${item.discountPercent}% OFF` : null

@@ -7,6 +7,7 @@ import { useBookmark } from "@/context/BookmarkContext";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { encryptId } from "@/utils/encryption";
+
 export default function Cart({
   id,
   imageUrl,
@@ -30,16 +31,18 @@ export default function Cart({
     }
     return null;
   };
-const getEncrypted= (id) => {
+
+  const getEncrypted = (id) => {
     try {
       if (!id) return "";
       const encrypted = encryptId(id.toString());
       return encodeURIComponent(encrypted);
     } catch (error) {
       console.error("Profile ID encryption failed:", error);
-      return "";
+      return id; // Fallback to unencrypted ID on error
     }
   };
+
   const handleToggle = (e) => {
     e.stopPropagation();
 
@@ -55,7 +58,6 @@ const getEncrypted= (id) => {
 
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 300);
-
   };
 
   const handleCardClick = () => {
@@ -63,7 +65,7 @@ const getEncrypted= (id) => {
   };
 
   const handleEditClick = (e) => {
-    e.stopPropagation(); // Prevent card navigation
+    e.stopPropagation();
     if (onEdit) {
       onEdit(id);
     } else {
@@ -73,18 +75,16 @@ const getEncrypted= (id) => {
 
   return (
     <div
-      className="flex flex-col bg-white rounded-2xl shadow-md overflow-hidden transition-transform w-full sm:w-[220px] max-w-sm relative"
+      className="flex flex-col bg-white rounded-2xl shadow-md overflow-hidden transition-transform w-full max-w-sm relative cursor-pointer"
       onClick={handleCardClick}
     >
-      {/* Image Section */}
-      <div className="relative w-full aspect-[4/3] sm:h-[220px]">
+      <div className="relative w-full aspect-square">
         {discountText && (
           <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-semibold px-2 py-[2px] rounded-full z-10 shadow">
             {discountText}
           </div>
         )}
 
-        {/* ✏️ Edit Icon */}
         {showEditButton && (
           <button
             onClick={handleEditClick}
@@ -106,28 +106,26 @@ const getEncrypted= (id) => {
           src={imageUrl}
           alt={title}
           fill
-          sizes="(max-width: 640px) 100vw, 240px"
+          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
           style={{ objectFit: "cover" }}
           className="rounded-t-2xl"
         />
       </div>
-
-      {/* Content Section */}
-      <div className="flex flex-col justify-between px-4 py-3 flex-grow">
+      <div className="flex flex-col justify-between px-3 py-2 flex-grow">
         <div>
           <h3 className="text-sm font-semibold text-gray-800 line-clamp-1">
             {title}
           </h3>
-          <p className="mt-1 text-[13px] text-gray-600 leading-snug line-clamp-1">
+          <p className="mt-1 text-xs text-gray-600 leading-snug line-clamp-2 h-[30px]">
             {description}
           </p>
         </div>
 
         <div className="mt-2 flex items-center justify-between">
           <div className="flex items-baseline space-x-1">
-            <span className="text-[#F97316] font-bold text-sm">${price}</span>
+            <span className="text-orange-500 font-bold text-sm">${price}</span>
             {originalPrice && (
-              <span className="text-gray-400 line-through text-[13px]">
+              <span className="text-gray-400 line-through text-xs">
                 ${originalPrice}
               </span>
             )}
@@ -136,12 +134,12 @@ const getEncrypted= (id) => {
             className={`cursor-pointer transition-transform duration-300 ${
               isAnimating ? "scale-125" : "scale-100"
             } ${bookmarked ? "text-orange-500" : "text-gray-400"}`}
-            onClick={(e) => handleToggle(e)}
+            onClick={handleToggle}
           >
             {bookmarked ? (
-              <FaBookmark size={18} />
+              <FaBookmark size={16} />
             ) : (
-              <FaRegBookmark size={18} />
+              <FaRegBookmark size={16} />
             )}
           </div>
         </div>
