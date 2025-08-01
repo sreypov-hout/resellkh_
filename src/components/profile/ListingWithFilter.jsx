@@ -257,7 +257,7 @@ export default function ListingsWithFilter({ userId }) {
               className="w-48 sm:w-64 md:w-80 h-auto mb-6"
             />
             <p className="text-sm text-gray-600">
-                No listings match your current filters.
+              No listings match your current filters.
             </p>
           </div>
         ) : (
@@ -277,6 +277,7 @@ export default function ListingsWithFilter({ userId }) {
                 <Cart
                   key={item.productId}
                   id={item.productId}
+                  userId={item.userId} 
                   imageUrl={firstImageUrl}
                   title={item.productName}
                   description={item.description}

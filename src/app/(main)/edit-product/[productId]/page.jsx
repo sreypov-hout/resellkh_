@@ -125,8 +125,17 @@ export default function EditProductPage({ params }) {
 
                     const data = await response.json();
                     const product = data.payload?.find((p) => p.productId === parseInt(productId));
-                    if (!product) throw new Error("Product not found");
-                    if (product.userId !== session.user.id) throw new Error("Unauthorized");
+                    
+                    if (!product) {
+                        toast.error("Product not found.");
+                        router.push("/");
+                        return;
+                    }
+                    if (product.userId !== session.user.id) {
+                        toast.error("You are not authorized to edit this product.");
+                        router.push("/");
+                        return;
+                    }
 
                     setOriginalProduct(product);
                     setTitle(product.productName || "");
@@ -153,7 +162,7 @@ export default function EditProductPage({ params }) {
             };
             fetchProductData();
         }
-    }, [productId, status, session]);
+    }, [productId, status, session, router]);
 
     const initialFiles = useMemo(() => {
         if (originalProduct?.fileUrls?.length > 0) {

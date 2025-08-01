@@ -7,75 +7,117 @@ import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Input from "@/components/ui/Input";
 import { signIn, useSession, getSession } from "next-auth/react";
 import TokenStorage from "@/components/TokenStorage";
+import toast from "react-hot-toast"; // Import toast for better notifications
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [apiError, setApiError] = useState(""); // For server-side errors
+  const [fieldErrors, setFieldErrors] = useState({}); // For client-side validation errors
   const router = useRouter();
   const { status } = useSession();
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
- const handleLogin = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  try {
-    // Step 1: Call your backend to validate credentials
-    const response = await fetch(
-      `${API_BASE_URL}/auths/login`,
-      {
+  // --- Validation Logic ---
+  const validateEmail = (email) => {
+    if (!email) {
+      return "Email is required.";
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      return "Please enter a valid email address.";
+    }
+    return "";
+  };
+
+  const validatePassword = (password) => {
+    if (!password) {
+      return "Password is required.";
+    }
+    return "";
+  };
+
+  const handleEmailChange = (e) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    setFieldErrors((prev) => ({
+      ...prev,
+      email: validateEmail(newEmail),
+    }));
+  };
+
+  const handlePasswordChange = (e) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setFieldErrors((prev) => ({
+      ...prev,
+      password: validatePassword(newPassword),
+    }));
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setApiError("");
+
+    // --- Run validation before submitting ---
+    const emailError = validateEmail(email);
+    const passwordError = validatePassword(password);
+
+    if (emailError || passwordError) {
+      setFieldErrors({ email: emailError, password: passwordError });
+      return; // Stop the submission if there are errors
+    }
+
+    setLoading(true);
+    const toastId = toast.loading("Logging in...");
+
+    try {
+      // Step 1: Call your backend to validate credentials
+      const response = await fetch(`${API_BASE_URL}/auths/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed. Please check your credentials.");
       }
-    );
 
-    const text = await response.text();
-    let data;
-    try {
-      data = text ? JSON.parse(text) : {};
-    } catch {
-      data = { message: text };
+      // Save token and userId in localStorage
+      if (data.token && data.userId) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("userId", data.userId.toString());
+      } else {
+        throw new Error("Invalid login response from the server.");
+      }
+
+      // Step 2: Trigger NextAuth sign-in to sync the session
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (result?.error) {
+        // This error is usually from the NextAuth authorize function
+        throw new Error(result.error);
+      }
+
+      // Step 3: Refresh session to ensure it's up to date
+      await getSession();
+
+      toast.success("Login successful!", { id: toastId });
+      router.push("/");
+    } catch (err) {
+      toast.error(err.message || "Something went wrong.", { id: toastId });
+      setApiError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
     }
-
-    if (!response.ok) {
-      throw new Error(data.message || "Login failed");
-    }
-
-    // ✅ Save token and userId in localStorage
-    if (data.token && data.userId) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userId", data.userId.toString());
-    } else {
-      throw new Error("Invalid login response: token or userId missing");
-    }
-
-    // Step 2: Trigger NextAuth sign-in to sync with session
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
-
-    if (result?.error) {
-      throw new Error(result.error);
-    }
-
-    // Step 3: Refresh session to trigger TokenStorage
-    await getSession();
-
-    // ✅ Redirect after successful login
-    router.push("/");
-  } catch (err) {
-    setError(err.message || "Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleGoogleLogin = () => {
     signIn("google", { callbackUrl: "/" });
@@ -98,18 +140,19 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
             <img src="/images/auth/logo.jpg" alt="logo" className="w-[130px]" />
           </div>
 
-          {error && (
-            <p className="text-red-500 text-center mb-4 font-semibold">{error}</p>
+          {apiError && (
+            <p className="text-red-500 text-center mb-4 font-semibold">{apiError}</p>
           )}
 
-          <form className="space-y-5" onSubmit={handleLogin}>
+          <form className="space-y-5" onSubmit={handleLogin} noValidate>
             <Input
               label="Email"
               name="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               placeholder="Enter your email"
+              error={fieldErrors.email} // Pass error to Input component
               required
             />
 
@@ -119,8 +162,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
                 name="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 placeholder="Enter your password"
+                error={fieldErrors.password} // Pass error to Input component
                 required
               />
               <button
@@ -129,7 +173,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
                 className="absolute right-4 top-[38px] text-gray-500 text-xl"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+                {showPassword ? <HiOutlineEye /> : <HiOutlineEyeOff />}
               </button>
               <div className="text-right mt-1">
                 <a

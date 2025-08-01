@@ -1,24 +1,32 @@
-// ✅ This is correct
-import './globals.css';
-import { Poppins } from 'next/font/google';
-import Providers from '@/components/Providers';
+import "./globals.css";
+import { Poppins } from "next/font/google"; // Assuming you are using Poppins font
+import Providers from "@/components/Providers";
+import AuthNavbar from "@/components/layout/AuthNavbar";
 
 const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-poppins',
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins", // It's good practice to name the variable
 });
 
 export const metadata = {
-  title: 'Your App Title',
-  description: 'Your App Description',
+  title: "ResellKH",
+  description: "Your one-stop marketplace.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${poppins.variable} font-sans`}>
-        <Providers>{children}</Providers>
+    <html lang="en">
+      {/*
+        THIS IS THE FIX:
+        Adding suppressHydrationWarning to the body tag tells Next.js to
+        ignore attribute mismatches caused by browser extensions.
+      */}
+      <body className={`${poppins.variable} font-sans`} suppressHydrationWarning>
+        <Providers>
+          <AuthNavbar />
+          <main>{children}</main>
+        </Providers>
       </body>
     </html>
   );

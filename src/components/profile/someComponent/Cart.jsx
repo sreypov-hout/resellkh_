@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa";
 import { useBookmark } from "@/context/BookmarkContext";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { encryptId } from "@/utils/encryption";
 
 export default function Cart({
   id,
+  userId, // <-- This is the prop that was receiving 'undefined'
   imageUrl,
   title,
   description,
@@ -23,6 +25,18 @@ export default function Cart({
   const bookmarked = isBookmarked(id);
   const [isAnimating, setIsAnimating] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
+
+  // --- THIS IS THE FIX ---
+  // We ensure both IDs are converted to strings before comparing.
+  // This prevents issues if one is a number and the other is a string (e.g., 24 !== "24").
+  const isOwner = session?.user?.id?.toString() === userId?.toString();
+
+  // --- Debugging Logs ---
+  // These will help you see exactly what values are being compared.
+  useEffect(() => {
+    console.log(`Product ID: ${id}, Product Owner ID: ${userId} (type: ${typeof userId}), Logged-in User ID: ${session?.user?.id} (type: ${typeof session?.user?.id}), Is Owner: ${isOwner}`);
+  }, [id, userId, session, isOwner]);
 
   const getDiscountPercent = () => {
     if (discountText) {
@@ -39,13 +53,12 @@ export default function Cart({
       return encodeURIComponent(encrypted);
     } catch (error) {
       console.error("Profile ID encryption failed:", error);
-      return id; // Fallback to unencrypted ID on error
+      return id;
     }
   };
 
   const handleToggle = (e) => {
     e.stopPropagation();
-
     toggleBookmark({
       id,
       imageUrl,
@@ -55,7 +68,6 @@ export default function Cart({
       originalPrice,
       discountPercent: getDiscountPercent(),
     });
-
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 300);
   };
@@ -85,7 +97,7 @@ export default function Cart({
           </div>
         )}
 
-        {showEditButton && (
+        {showEditButton && isOwner && (
           <button
             onClick={handleEditClick}
             className="absolute top-2 right-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-md transition-all duration-200 hover:scale-105 z-10"

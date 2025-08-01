@@ -60,6 +60,7 @@ export default function AuthNavbar() {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   useEffect(() => {
     const loadUser = async () => {
+      // FIX: Only fetch the user profile if the session is authenticated and we have the necessary data.
       if (status === "authenticated" && session?.user?.id && session?.accessToken) {
         try {
           const userId = session.user.id;
@@ -76,9 +77,8 @@ export default function AuthNavbar() {
           localStorage.setItem("userId", String(session.user.id));
         } catch (err) {
           console.error("Failed to load user profile:", err);
-          setUser(null);
-          localStorage.removeItem("token");
-          localStorage.removeItem("userId");
+          // If fetching fails (e.g., token expired), sign the user out.
+          signOut();
         }
       } else if (status === "unauthenticated") {
         setUser(null);

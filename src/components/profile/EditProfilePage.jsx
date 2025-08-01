@@ -249,7 +249,7 @@ export default function EditProfilePage({ sellerId }) {
         processedValue = value.slice(0, 25);
         break;
       case "bio":
-        processedValue = value.slice(0, 50);
+        processedValue = value.slice(0, 60);
         break;
       case "mobile":
         processedValue = value.slice(0, 20);
@@ -559,7 +559,7 @@ export default function EditProfilePage({ sellerId }) {
                 placeholder="Bio"
                 value={formData.bio}
                 onChange={handleChange("bio")}
-                maxLength={50}
+                maxLength={60}
               />
             </Section>
 

@@ -2,52 +2,37 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react"; // Import useSession
 import ProfileBanner from "@/components/profile/ProfileBanner";
 import ProfileTabs from "@/components/profile/ProfileTabs";
 import { decryptId } from "@/utils/encryption";
 
 // --- Skeleton Components for Loading State ---
-
-/**
- * @description Renders a skeleton placeholder for the profile banner.
- */
 const ProfileBannerSkeleton = () => (
   <div className="relative mb-6">
-    {/* Cover Image Placeholder */}
     <div className="h-48 w-full animate-pulse rounded-lg bg-gray-300 sm:h-64" />
     <div className="absolute bottom-0 left-6 flex -translate-y-1/2 transform items-end">
-      {/* Avatar Placeholder */}
       <div className="mr-4 h-24 w-24 animate-pulse rounded-full border-4 border-white bg-gray-300 sm:h-32 sm:w-32" />
       <div className="flex flex-col gap-2">
-        {/* Name Placeholder */}
         <div className="h-6 w-40 animate-pulse rounded bg-gray-300" />
-        {/* Rating Placeholder */}
         <div className="h-4 w-32 animate-pulse rounded bg-gray-300" />
       </div>
     </div>
   </div>
 );
 
-/**
- * @description Renders a skeleton placeholder for the profile tabs and content.
- */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const ProfileTabsSkeleton = () => (
   <div className="mt-8">
     <div className="flex border-b border-gray-200">
-      {/* Tab Placeholders */}
       <div className="mr-8 h-10 w-24 animate-pulse rounded-t-lg bg-gray-300" />
       <div className="mr-8 h-10 w-24 animate-pulse rounded-t-lg bg-gray-300" />
       <div className="h-10 w-24 animate-pulse rounded-t-lg bg-gray-300" />
     </div>
-    {/* Tab Content Placeholder */}
     <div className="mt-6 h-64 w-full animate-pulse rounded-lg bg-gray-300" />
   </div>
 );
 
-/**
- * @description A wrapper component that combines all skeleton elements for the page.
- */
 const SellerProfileSkeleton = () => (
   <div className="mx-auto max-w-full px-[7%] py-4">
     <ProfileBannerSkeleton />
@@ -56,8 +41,8 @@ const SellerProfileSkeleton = () => (
 );
 
 // --- Main Profile Client Component ---
-
 export default function SellerProfileClient({ sellerId }) {
+  const { data: session } = useSession(); // Get the current user's session
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get("tab") || "listings";
   const [activeTab, setActiveTab] = useState(defaultTab);
@@ -80,9 +65,11 @@ export default function SellerProfileClient({ sellerId }) {
     }
   }, [sellerId]);
 
+  // --- THIS IS THE FIX ---
+  // Check if the logged-in user's ID matches the profile ID being viewed.
+  const isOwner = session?.user?.id?.toString() === numericSellerId?.toString();
+
   useEffect(() => {
-    // We set loading to true initially, and only set it to false
-    // after the first data fetch attempt completes (successfully or not).
     setLoading(true);
     const token = localStorage.getItem("token");
 
@@ -141,16 +128,14 @@ export default function SellerProfileClient({ sellerId }) {
     fetchData();
   }, [numericSellerId]);
 
-  // Render skeleton UI while loading
   if (loading) return <SellerProfileSkeleton />;
-  
   if (error) return <div className="p-6 text-center text-red-500 sm:p-8">{error}</div>;
   if (!userData) return <div className="p-6 text-center sm:p-8">Profile not found</div>;
 
   return (
     <div className="mx-auto max-w-full px-[7%] py-4">
       <ProfileBanner
-        isOwner={true} // Note: This is hardcoded as per your original code
+        isOwner={isOwner} // Pass the ownership status to the banner
         user={{ ...userData }}
         rating={ratingSummary.rating}
         reviewsCount={ratingSummary.reviewsCount}

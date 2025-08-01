@@ -196,7 +196,7 @@ export default function Register() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute top-[38px] right-4 text-xl text-gray-500"
             >
-              {showPassword ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+              {showPassword ? <HiOutlineEye /> : <HiOutlineEyeOff />}
             </button>
             {errors.password && (
               <p className="text-[12px] text-red-500 mt-[-14px]">{errors.password}</p>
@@ -218,7 +218,7 @@ export default function Register() {
               onClick={() => setShowConfirm(!showConfirm)}
               className="absolute top-[38px] right-4 text-xl text-gray-500"
             >
-              {showConfirm ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+              {showConfirm ? <HiOutlineEye /> : <HiOutlineEyeOff />}
             </button>
             {errors.confirmPassword && (
               <p className="text-[12px] text-red-500 mt-[-14px]">{errors.confirmPassword}</p>

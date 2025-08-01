@@ -61,7 +61,7 @@ export const ReviewFormModal = ({ isOpen, onClose, onSubmit, userId, token }) =>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div className="fixed inset-0 z-50 mt-14 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-auto relative p-6 sm:p-8">
         {/* Close button */}
         <button
