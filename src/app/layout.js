@@ -24,7 +24,6 @@ export default function RootLayout({ children }) {
       */}
       <body className={`${poppins.variable} font-sans`} suppressHydrationWarning>
         <Providers>
-          <AuthNavbar />
           <main>{children}</main>
         </Providers>
       </body>
