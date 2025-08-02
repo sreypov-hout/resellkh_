@@ -1,6 +1,6 @@
 import CryptoJS from 'crypto-js';
 
-const SECRET_KEY = "c2VhbmdseWNob3UxMmU0ZA==";
+const SECRET_KEY =process.env.NEXT_PUBLIC_CRYPTO_SECRET_KEY
 
 export function encryptId(id) {
   try {
@@ -50,7 +50,6 @@ export function decryptId(cipherText) {
     
     return decrypted;
   } catch (error) {
-    console.error("Decryption failed:", error);
     throw error;
   }
 }

@@ -155,7 +155,7 @@ export default function Footer() {
             </li>
             <li>
               <Link 
-                href="/faq" 
+                href="/fqa" 
                 className="hover:underline hover:text-orange-500 rounded px-1"
               >
                 FAQ
@@ -163,7 +163,7 @@ export default function Footer() {
             </li>
             <li>
               <Link 
-                href="/terms" 
+                href="/term-conditions" 
                 className="hover:underline hover:text-orange-500 rounded px-1"
               >
                 Terms & Conditions
