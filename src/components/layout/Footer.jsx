@@ -23,9 +23,9 @@ export default function Footer() {
         {/* Logo + Description */}
         <div className="col-span-2 md:col-span-1">
           <div className="flex items-center gap-2 mb-3 sm:mb-4">
-            <Link href="/" className="focus:outline-none focus:ring-2 focus:ring-orange-500 rounded">
+            <Link href="/" className="focus:outline-none rounded">
               <img 
-                src="/images/auth/logo.jpg" 
+                src="/images/auth/logo1.png" 
                 alt="ResellKH Logo" 
                 width={120}
                 height={60}
