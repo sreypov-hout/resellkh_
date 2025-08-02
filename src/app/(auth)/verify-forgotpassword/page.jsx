@@ -68,7 +68,7 @@ export default function OTPVerification() {
 
       if (!res.ok) throw new Error(text || "Verification failed");
 
-      toast.success(text, { position: "top-center" });
+      toast.success(text, { position: "bottom-right" });
 
       router.push(`/reset-password?email=${encodeURIComponent(email)}`);
     } catch (error) {
@@ -96,7 +96,7 @@ export default function OTPVerification() {
       const text = await res.text();
       if (!res.ok) throw new Error(text || "Failed to resend OTP.");
 
-      toast.success("OTP resent successfully!", { position: "top-center" });
+      toast.success("OTP resent successfully!", { position: "bottom-right" });
       setTimer(60);
     } catch (err) {
       toast.error(err.message || "Error resending OTP.");

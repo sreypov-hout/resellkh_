@@ -56,7 +56,7 @@ export const authOptions = {
               lastName: data.lastName,
               role: data.role || "USER",
               token: data.token,
-              image: data.profileImage || null, 
+              image: data.profileImage || "https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm", 
             };
           }
           return null;

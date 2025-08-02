@@ -1,30 +1,30 @@
 'use client';
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast, Toaster } from "react-hot-toast";
 import { FiMail } from "react-icons/fi";
 import Input from "@/components/ui/Input";
-import { useRouter } from "next/navigation"; // ✅ For navigation
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const router = useRouter(); // ✅ Use this instead of window.location.href
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email) {
-      setMessage("Email is required.");
+      toast.error("Email is required.");
       return;
     }
 
     setLoading(true);
-    setMessage("");
 
     try {
       const url = `${API_BASE_URL}/auths/forgot-password?email=${encodeURIComponent(email)}`;
-
       const res = await fetch(url, {
         method: "POST",
       });
@@ -32,15 +32,16 @@ export default function ForgotPassword() {
       const text = await res.text();
 
       if (!res.ok) {
+        // Use the error message from the backend if available
         throw new Error(text || "Failed to send reset email.");
       }
-
-      setMessage("✅ " + text);
-
-      // ✅ Redirect to OTP verify page and pass email via query param
+      
+      // Show success toast and redirect
+      toast.success(text || "Password reset email sent successfully!");
       router.push(`/verify-forgotpassword?email=${encodeURIComponent(email)}`);
+
     } catch (error) {
-      setMessage(error.message || "Something went wrong. Please try again.");
+      toast.error(error.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -48,10 +49,13 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row items-center justify-center px-4 md:px-12 lg:px-[170px] py-10">
+      {/* Add the Toaster component here to render notifications */}
+      <Toaster position="bottom-right" reverseOrder={false} />
+
       {/* Left Illustration */}
       <div className="hidden lg:flex w-1/2 justify-between">
         <img
-          src="/images/auth/forgotpassword.jpg" 
+          src="/images/auth/forgotpassword.jpg"
           alt="Forgot password illustration"
           className="max-w-[430px] h-auto"
         />
@@ -92,12 +96,6 @@ export default function ForgotPassword() {
             {loading ? "Sending..." : "Continue"}
           </button>
         </form>
-
-        {message && (
-          <p className={`text-sm text-center mt-2 ${message.startsWith("✅") ? "text-green-600" : "text-red-500"}`}>
-            {message}
-          </p>
-        )}
 
         <p className="text-sm text-center text-gray-600">
           Already remember your password?{" "}

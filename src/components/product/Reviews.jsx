@@ -124,7 +124,7 @@ export default function Reviews({ sellerId }) {
         }),
         rating: result.payload.score || 0,
         comment: result.payload.comment || "",
-        userAvatar: result.payload.reviewerAvatar || "/default-avatar.png",
+        userAvatar: result.payload.reviewerAvatar || "https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm",
       };
 
       setReviews((prev) => [newReview, ...prev]);

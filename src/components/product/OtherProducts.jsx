@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ProductCart from '../domain/ProductCart';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const PRODUCTS_PER_LOAD = 20;
 
@@ -9,13 +10,12 @@ const OtherProducts = () => {
   const [products, setProducts] = useState([]);
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_LOAD);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/products`
-        );
+        const res = await fetch(`${API_BASE_URL}/products`);
         if (!res.ok) throw new Error('Failed to fetch products');
 
         const data = await res.json();
@@ -30,8 +30,13 @@ const OtherProducts = () => {
     fetchProducts();
   }, []);
 
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + PRODUCTS_PER_LOAD);
+  const handleLoadMore = async () => {
+    setLoadingMore(true);
+    // Simulate loading time for UX
+    setTimeout(() => {
+      setVisibleCount((prev) => prev + PRODUCTS_PER_LOAD);
+      setLoadingMore(false);
+    }, 600); // Adjust this delay if needed
   };
 
   const visibleProducts = products.slice(0, visibleCount);
@@ -85,9 +90,17 @@ const OtherProducts = () => {
             <div className="text-center mt-8">
               <button
                 onClick={handleLoadMore}
-                className="px-6 py-2 mt-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition"
+                disabled={loadingMore}
+                className={`px-6 py-2 md:px-8 md:py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-colors flex items-center justify-center mx-auto disabled:opacity-75 disabled:cursor-not-allowed`}
               >
-                View more
+                {loadingMore ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
+                    Loading...
+                  </>
+                ) : (
+                  'View more'
+                )}
               </button>
             </div>
           )}

@@ -77,7 +77,7 @@ const ProductGallery = ({ product }) => {
   return (
     <div className="flex flex-row gap-3 w-full max-w-full overflow-hidden">
       {/* Thumbnails - vertical layout with hidden scrollbar */}
-      <div className="flex flex-col gap-2 max-h-[300px] sm:max-h-[400px] overflow-y-auto no-scrollbar">
+      <div className="flex flex-col gap-2 max-h-[300px] sm:max-h-[400px]  no-scrollbar">
         {mediaItems.map((src, index) => {
           const isVideo = mediaTypes[index] === 'video';
 

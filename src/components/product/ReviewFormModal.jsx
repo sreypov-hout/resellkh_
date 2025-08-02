@@ -30,16 +30,16 @@ export const ReviewFormModal = ({ isOpen, onClose, onSubmit, userId, token }) =>
         if (res.ok && data?.payload) {
           const { firstName, lastName, profileImage } = data.payload;
           const fullName = `${firstName} ${lastName}`;
-          const avatar = profileImage || '/default-avatar.png';
+          const avatar = profileImage || 'https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm';
 
           setUserProfile({ name: fullName, avatar });
         } else {
           console.error('Failed to fetch profile:', data.message);
-          setUserProfile({ name: 'User', avatar: '/default-avatar.png' });
+          setUserProfile({ name: 'User', avatar: 'https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm' });
         }
       } catch (err) {
         console.error('Error fetching profile:', err);
-        setUserProfile({ name: 'User', avatar: '/default-avatar.png' });
+        setUserProfile({ name: 'User', avatar: 'https://gateway.pinata.cloud/ipfs/QmYkedcDzkvyCZbPtzmztQZ7uANVYFiqBXTJbERsJyfcQm' });
       }
     };
 

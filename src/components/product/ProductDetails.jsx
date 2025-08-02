@@ -42,7 +42,7 @@ const ProductDetails = ({ product }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
-  const maxDescriptionLength = 50;
+  const maxDescriptionLength = 70;
 
   if (!product) return <ProductDetailsSkeleton />;
 
@@ -186,7 +186,7 @@ const ProductDetails = ({ product }) => {
 
       <div>
         <h3 className="font-medium text-gray-900 mb-3">Description</h3>
-        <p className="text-gray-600 leading-relaxed line-clamp-1">
+        <p className="text-gray-600 leading-relaxed ">
           {displayedDescription}
           {isTruncated && (
             <span
