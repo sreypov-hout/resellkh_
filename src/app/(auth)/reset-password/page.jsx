@@ -138,7 +138,7 @@ export default function ResetPassword() {
                 onClick={() => setShowConfirm(!showConfirm)}
                 className="absolute right-4 top-[46px] transform -translate-y-1/2 cursor-pointer text-gray-500 text-xl"
               >
-                {showConfirm ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+                {showConfirm ? <HiOutlineEye /> : <HiOutlineEyeOff />}
               </span>
             </div>
 

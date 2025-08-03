@@ -54,7 +54,7 @@ export default function ResultScanPage() {
           description: product.description,
           productPrice: product.productPrice,
           discountPercent: product.discountPercent,
-          imageUrl: product.fileUrls?.[0] || '/images/placeholder-product.jpg',
+          imageUrl: product.fileUrls?.[0] || 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fadaptcommunitynetwork.org%2Fgala22%2Fef3-placeholder-image%2F&psig=AOvVaw3wfBbNH7r1DurqtncXujGn&ust=1754318350591000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCOD2iqTv7o4DFQAAAAAdAAAAABAE',
           condition: product.condition,
           location: product.location,
         }));

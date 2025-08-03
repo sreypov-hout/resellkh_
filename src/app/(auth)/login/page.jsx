@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Input from "@/components/ui/Input";
 import { signIn, useSession, getSession } from "next-auth/react";
-import TokenStorage from "@/components/TokenStorage";
 import toast from "react-hot-toast"; // Import toast for better notifications
 
 export default function LoginForm() {
@@ -224,7 +223,6 @@ export default function LoginForm() {
           </form>
         </div>
       </div>
-      <TokenStorage />
     </div>
   );
 }

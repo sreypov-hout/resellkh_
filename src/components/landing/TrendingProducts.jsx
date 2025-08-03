@@ -52,7 +52,7 @@ export default function TrendingNow() {
                 
                 // Your existing logic for filtering trending products
                 const filtered = products
-                    .filter((item) => item.productId >= 20 && item.productId <= 30)
+                    .filter((item) => item.productId >= 1 && item.productId <= 30)
                     .slice(0, 10);
 
                 setTrendingItems(filtered);

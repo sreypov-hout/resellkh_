@@ -1,10 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-   images: {
-    domains: [
-      'cloudflare-ipfs.com',
-      'gateway.pinata.cloud', // if still using this
-      'lh3.googleusercontent.com' // for Google avatars
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'apricot-worthy-kiwi-289.mypinata.cloud',
+      },
+      {
+        protocol: 'https',
+        hostname: 'gateway.pinata.cloud',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cloudflare-ipfs.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
     ],
   },
 };

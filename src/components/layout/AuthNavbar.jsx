@@ -58,9 +58,14 @@ export default function AuthNavbar() {
     { name: "Other", key: "other" },
   ];
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+ // sreypov-hout/resellkh_/resellkh_-Seangly/src/components/layout/AuthNavbar.jsx
+
+  // ... (imports and other state variables remain the same)
+
   useEffect(() => {
     const loadUser = async () => {
-      // FIX: Only fetch the user profile if the session is authenticated and we have the necessary data.
+      // FIX: Only fetch the user profile if the session is authenticated 
+      // and we have the necessary data.
       if (status === "authenticated" && session?.user?.id && session?.accessToken) {
         try {
           const userId = session.user.id;
@@ -73,6 +78,8 @@ export default function AuthNavbar() {
             avatar: profileData.profileImage || DEFAULT_AVATAR_URL,
           });
           
+          // These are good for keeping localStorage in sync, but TokenStorage.js handles this.
+          // You can keep them or remove them for cleanliness.
           localStorage.setItem("token", token);
           localStorage.setItem("userId", String(session.user.id));
         } catch (err) {
@@ -81,6 +88,8 @@ export default function AuthNavbar() {
           signOut();
         }
       } else if (status === "unauthenticated") {
+        // FIX: If unauthenticated, ensure user state is cleared, and local storage is clean.
+        // This prevents using stale data.
         setUser(null);
         localStorage.removeItem("token");
         localStorage.removeItem("userId");
@@ -88,7 +97,9 @@ export default function AuthNavbar() {
     };
 
     loadUser();
-  }, [session, status]);
+  }, [session, status]); // The dependencies correctly re-run this logic when session changes.
+
+  // ... (the rest of your component remains the same)
   
   useEffect(() => {
     const handleProfileUpdate = (event) => {
@@ -119,52 +130,9 @@ export default function AuthNavbar() {
       localStorage.clear();
       signOut({ callbackUrl: "/login?session_expired=true" });
     };
+  }
+  )
 
-    const fetchCartCount = async () => {
-      try {
-        const res = await fetch(
-          `${API_BASE_URL}/cart/count?userId=${user.id}`,
-          { headers: { Authorization: `Bearer ${session.accessToken}` } }
-        );
-
-        if (res.status === 401) {
-          handleAuthError();
-          return;
-        }
-
-        if (res.ok) {
-          const data = await res.json();
-          setCartItemCount(data.payload?.count || 0);
-        } else {
-          console.error("Failed to fetch cart count:", res.status);
-        }
-      } catch (err) {
-        console.error("Error fetching cart count:", err);
-      }
-    };
-
-    const checkUnread = async () => {
-      try {
-        const allNotifications = await fetchAllNotifications(session.accessToken, user.id);
-        if (allNotifications) {
-          const unreadExists = allNotifications.some(n => !n.isRead);
-          setHasUnread(unreadExists);
-        }
-      } catch (err) {
-        console.error('Error checking unread notifications:', err);
-        if (err.status === 401) {
-          handleAuthError();
-        }
-      }
-    };
-
-    fetchCartCount();
-    checkUnread();
-
-    const handleCartUpdate = () => fetchCartCount();
-    window.addEventListener("cart-updated", handleCartUpdate);
-    return () => window.removeEventListener("cart-updated", handleCartUpdate);
-  }, [user, session]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

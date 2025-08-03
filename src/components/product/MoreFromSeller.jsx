@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ProductCart from '../domain/ProductCart';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 // A skeleton loader component that matches the responsive card layout
 const SkeletonCard = () => (
     <div className="flex-shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 p-2 snap-start">
@@ -40,7 +40,7 @@ const MoreFromSeller = ({ sellerId }) => {
       setError(null);
       try {
         const response = await fetch(
-          `https://trivia-worlds-wichita-stan.trycloudflare.com/api/v1/products/getproductbyuserid/${sellerId}`
+          `${API_BASE_URL}/products/getproductbyuserid/${sellerId}`
         );
 
         if (!response.ok) {
